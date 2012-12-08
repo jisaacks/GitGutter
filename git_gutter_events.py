@@ -1,6 +1,6 @@
 import sublime, sublime_plugin
 
-class GitGutterEventsComments(sublime_plugin.EventListener):
+class GitGutterEvents(sublime_plugin.EventListener):
   def on_new(self, view):
     view.run_command('git_gutter')
 
