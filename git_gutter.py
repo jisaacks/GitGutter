@@ -7,7 +7,6 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     self.lines_added([5,6,7,8,25,26,27,28,29,30,31,33,34,35,36,37,38])
     self.lines_modified([39,40,41,46,47,52,53])
 
-
   def clear_all(self):
     self.view.add_regions('git_gutter_deleted_top', [], '')
     self.view.add_regions('git_gutter_deleted_bottom', [], '')
