@@ -1,0 +1,5 @@
+[
+    {   "caption": "Git Gutter: Run",
+        "command": "git_gutter"
+    }
+]
