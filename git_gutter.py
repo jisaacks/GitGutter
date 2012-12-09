@@ -1,4 +1,5 @@
 import sublime, sublime_plugin
+import git_helper
 
 class GitGutterCommand(sublime_plugin.TextCommand):
   def run(self, edit):
@@ -6,6 +7,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     self.lines_removed([10])
     self.lines_added([5,6,7,8,25,26,27,28,29,30,31,33,34,35,36,37,38])
     self.lines_modified([39,40,41,46,47,52,53])
+
+    # print git_helper.git_file_path(self.view)
+    # view_collection.ViewCollection.add(self.view)
 
   def clear_all(self):
     self.view.add_regions('git_gutter_deleted_top', [], '')
@@ -30,13 +34,13 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
   def lines_removed_top(self, lines):
     regions = self.lines_to_regions(lines)
-    scope = "markup.deleted"
+    scope   = "markup.deleted"
     icon    = '../GitGutter/icons/deleted_top'
     self.view.add_regions('git_gutter_deleted_top', regions, scope, icon)
 
   def lines_removed_bottom(self, lines):
     regions = self.lines_to_regions(lines)
-    scope = "markup.deleted"
+    scope   = "markup.deleted"
     icon    = '../GitGutter/icons/deleted_bottom'
     self.view.add_regions('git_gutter_deleted_bottom', regions, scope, icon)
 

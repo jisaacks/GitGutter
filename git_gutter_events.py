@@ -1,14 +1,15 @@
 import sublime, sublime_plugin
+import view_collection
 
 class GitGutterEvents(sublime_plugin.EventListener):
   def on_new(self, view):
-    view.run_command('git_gutter')
+    view_collection.ViewCollection.add(view)
 
   def on_load(self, view):
-    view.run_command('git_gutter')
+    view_collection.ViewCollection.add(view)
 
   def on_modified(self, view):
-    view.run_command('git_gutter')
+    view_collection.ViewCollection.add(view)
 
   def on_clone(self, view):
-    view.run_command('git_gutter')
+    view_collection.ViewCollection.add(view)
