@@ -1,5 +1,5 @@
 import sublime, sublime_plugin
-import git_helper
+import view_collection
 
 class GitGutterCommand(sublime_plugin.TextCommand):
   def run(self, edit):
@@ -10,12 +10,16 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
     # print git_helper.git_file_path(self.view)
     # view_collection.ViewCollection.add(self.view)
+    # gp = view_collection.ViewCollection.git_path(self.view)
+    # if gp:
+    #   print "git_path: "+gp
+    print view_collection.ViewCollection.diff(self.view)
 
   def clear_all(self):
-    self.view.add_regions('git_gutter_deleted_top', [], '')
+    self.view.add_regions('git_gutter_deleted_top',    [], '')
     self.view.add_regions('git_gutter_deleted_bottom', [], '')
-    self.view.add_regions('git_gutter_inserted', [], '')
-    self.view.add_regions('git_gutter_changed', [], '')
+    self.view.add_regions('git_gutter_inserted',       [], '')
+    self.view.add_regions('git_gutter_changed',        [], '')
 
   def lines_to_regions(self, lines):
     regions = []
