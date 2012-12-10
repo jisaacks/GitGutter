@@ -10,6 +10,7 @@ class GitGutterHandler:
     self.git_temp_file = tempfile.NamedTemporaryFile()
     self.buf_temp_file = tempfile.NamedTemporaryFile()
     self.git_tree = git_helper.git_tree(self.view)
+    self.git_dir  = git_helper.git_dir(self.git_tree)
     self.git_path = git_helper.git_file_path(self.view, self.git_tree)
 
   def reset(self):
@@ -29,7 +30,7 @@ class GitGutterHandler:
 
   def update_git_file(self):
     self.git_temp_file.truncate()
-    args = ['git','--git-dir='+self.git_tree+'/.git','--work-tree='+self.git_tree,'show','head:'+self.git_path]
+    args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','head:'+self.git_path]
     subprocess.call(args, stdout=self.git_temp_file, stderr=subprocess.STDOUT)
 
   def process_diff(self,diff_str):

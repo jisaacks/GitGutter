@@ -26,3 +26,6 @@ def git_tree(view):
   full_file_path  = view.file_name()
   file_parent_dir = os.path.realpath(os.path.dirname(full_file_path))
   return git_root(file_parent_dir)
+
+def git_dir(directory):
+  return os.path.join(directory, '.git')
