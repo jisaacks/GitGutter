@@ -1,25 +1,13 @@
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 import view_collection
 
 class GitGutterCommand(sublime_plugin.TextCommand):
   def run(self, edit):
-    print 'gutter running'
     self.clear_all()
-    # self.lines_removed([10])
-    # self.lines_added([5,6,7,8,25,26,27,28,29,30,31,33,34,35,36,37,38])
-    # self.lines_modified([39,40,41,46,47,52,53])
 
-    # print git_helper.git_file_path(self.view)
-    # view_collection.ViewCollection.add(self.view)
-    # gp = view_collection.ViewCollection.git_path(self.view)
-    # if gp:
-    #   print "git_path: "+gp
     (inserted, modified, deleted) = view_collection.ViewCollection.diff(self.view)
-    # if diff:
-    #   print "yes diff: "+view_collection.ViewCollection.diff(self.view)
-    #   print 'diff end'
-    # else:
-    #   print 'no diff'
+
     self.lines_removed(deleted)
     self.lines_added(inserted)
     self.lines_modified(modified)

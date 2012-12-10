@@ -1,4 +1,5 @@
-import sublime, sublime_plugin
+import sublime
+import sublime_plugin
 import view_collection
 
 class GitGutterEvents(sublime_plugin.EventListener):
