@@ -5,8 +5,7 @@ class ViewCollection:
   @staticmethod
   def add(view):
     key = ViewCollection.get_key(view)
-    if not key in ViewCollection.views:
-      ViewCollection.views[key] = git_gutter_handler.GitGutterHandler(view)
+    ViewCollection.views[key] = git_gutter_handler.GitGutterHandler(view)
     ViewCollection.views[key].reset()
 
   @staticmethod
