@@ -60,9 +60,9 @@ class GitGutterHandler:
       print 'kind: '+kind
 
       if kind == 'c':
-        modified += range(line_start,line_end+1) + [line_start]
+        modified += range(line_start,line_end+1)
       elif kind == 'a':
-        inserted += range(line_start,line_end+1) + [line_start]
+        inserted += range(line_start,line_end+1)
       elif kind == 'd':
         deleted.append(line_start+1)
 
