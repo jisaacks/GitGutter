@@ -2,6 +2,7 @@ import git_helper
 import sublime
 import subprocess
 import tempfile
+import re
 
 class GitGutterHandler:
   def __init__(self, view):
@@ -33,10 +34,41 @@ class GitGutterHandler:
 
   def process_diff(self,diff_str):
     print diff_str
-    # TODO: actually parse diff_str to get values below
-    inserted = [4,5,6]
-    modified = [1,2,3]
-    deleted  = [10,12]
+
+    inserted = []
+    modified = []
+    deleted  = []
+
+    lines = diff_str.splitlines()
+    for line in lines:
+      m = re.match("(\d+),?(\d*)(.)(\d+),?(\d*)", line)
+      if not m:
+        continue
+      kind = m.group(3)
+      original_line_start = int(m.group(1))
+      if len(m.group(2)) > 0:
+        original_line_end = int(m.group(2))
+      else:
+        original_line_end = original_line_start
+      line_start = int(m.group(4))
+      if len(m.group(5)) > 0:
+        line_end = int(m.group(5))
+      else:
+        line_end = line_start
+
+      print 'kind: '+kind
+
+      if kind == 'c':
+        modified += range(line_start,line_end)
+      elif kind == 'a':
+        inserted += range(line_start,line_end)
+      elif kind == 'd':
+        deleted.append(line_start+1)
+
+    print inserted
+    print modified
+    print deleted
+
     return (inserted, modified, deleted)
 
   def diff(self):
