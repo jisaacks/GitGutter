@@ -4,13 +4,15 @@ class ViewCollection:
   views = {}
   @staticmethod
   def add(view):
+    print 'start---------------------------------------'
     f = ViewCollection.get_key(view)
     if f in ViewCollection.views:
+      print 'about to reset: ' + f
       ViewCollection.views[f].reset()
-      print 'reset: ' + f
     else:
+      print 'about to add: ' + f
       ViewCollection.views[f] = git_gutter_handler.GitGutterHandler(view)
-      print 'added: ' + f
+      ViewCollection.views[f].reset()
     for k in ViewCollection.views:
       print 'file: '+k
 
@@ -28,8 +30,5 @@ class ViewCollection:
 
   @staticmethod
   def diff(view):
-    if ViewCollection.git_path(view):
-      f = ViewCollection.get_key(view)
-      return ViewCollection.views[f].diff()
-    else:
-      return False
+    f = ViewCollection.get_key(view)
+    return ViewCollection.views[f].diff()
