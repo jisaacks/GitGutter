@@ -1,11 +1,9 @@
 import os
 
-def git_file_path(view):
-  full_file_path   = view.file_name()
-  file_parent_dir  = os.path.realpath(os.path.dirname(full_file_path))
-  git_path         = git_root(file_parent_dir)
+def git_file_path(view, git_path):
   if not git_path:
     return False
+  full_file_path   = view.file_name()
   git_path_to_file = full_file_path.replace(git_path,'')
   
   if git_path_to_file[0] == "/":
