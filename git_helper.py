@@ -28,4 +28,6 @@ def git_tree(view):
   return git_root(file_parent_dir)
 
 def git_dir(directory):
+  if not directory:
+    return False
   return os.path.join(directory, '.git')
