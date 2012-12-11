@@ -13,10 +13,10 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     self.lines_modified(modified)
 
   def clear_all(self):
-    self.view.add_regions('git_gutter_deleted_top',    [], '')
-    self.view.add_regions('git_gutter_deleted_bottom', [], '')
-    self.view.add_regions('git_gutter_inserted',       [], '')
-    self.view.add_regions('git_gutter_changed',        [], '')
+    self.view.erase_regions('git_gutter_deleted_top')
+    self.view.erase_regions('git_gutter_deleted_bottom')
+    self.view.erase_regions('git_gutter_inserted')
+    self.view.erase_regions('git_gutter_changed')
 
   def lines_to_regions(self, lines):
     regions = []
