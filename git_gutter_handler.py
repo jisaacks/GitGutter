@@ -9,12 +9,17 @@ class GitGutterHandler:
     self.view = view
     self.git_temp_file = tempfile.NamedTemporaryFile()
     self.buf_temp_file = tempfile.NamedTemporaryFile()
-    self.git_tree = git_helper.git_tree(self.view)
-    self.git_dir  = git_helper.git_dir(self.git_tree)
-    self.git_path = git_helper.git_file_path(self.view, self.git_tree)
+    if self.on_disk():
+      self.git_tree = git_helper.git_tree(self.view)
+      self.git_dir  = git_helper.git_dir(self.git_tree)
+      self.git_path = git_helper.git_file_path(self.view, self.git_tree)
+
+  def on_disk(self):
+    # if the view is saved to disk
+    return self.view.file_name() != None
 
   def reset(self):
-    if self.git_path:
+    if self.on_disk() and self.git_path:
       self.view.run_command('git_gutter')
 
   def get_git_path(self):
@@ -76,7 +81,7 @@ class GitGutterHandler:
     return (inserted, modified, deleted)
 
   def diff(self):
-    if self.git_path:
+    if self.on_disk() and self.git_path:
       self.update_git_file()
       self.update_buf_file()
 
