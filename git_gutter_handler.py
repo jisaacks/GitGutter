@@ -42,8 +42,6 @@ class GitGutterHandler:
       pass
 
   def process_diff(self,diff_str):
-    print diff_str
-
     inserted = []
     modified = []
     deleted  = []
@@ -65,18 +63,12 @@ class GitGutterHandler:
       else:
         line_end = line_start
 
-      print 'kind: '+kind
-
       if kind == 'c':
         modified += range(line_start,line_end+1)
       elif kind == 'a':
         inserted += range(line_start,line_end+1)
       elif kind == 'd':
         deleted.append(line_start+1)
-
-    print inserted
-    print modified
-    print deleted
 
     return (inserted, modified, deleted)
 
