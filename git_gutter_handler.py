@@ -31,7 +31,10 @@ class GitGutterHandler:
   def update_git_file(self):
     self.git_temp_file.truncate()
     args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','head:'+self.git_path]
-    subprocess.call(args, stdout=self.git_temp_file, stderr=subprocess.STDOUT)
+    try:
+      subprocess.call(args, stdout=self.git_temp_file)
+    except Exception:
+      pass
 
   def process_diff(self,diff_str):
     print diff_str
