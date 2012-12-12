@@ -1,14 +1,14 @@
 import git_helper
 import sublime
 import subprocess
-import tempfile
 import re
+import view_collection
 
 class GitGutterHandler:
   def __init__(self, view):
     self.view = view
-    self.git_temp_file = tempfile.NamedTemporaryFile()
-    self.buf_temp_file = tempfile.NamedTemporaryFile()
+    self.git_temp_file = view_collection.ViewCollection.git_tmp_file(self.view)
+    self.buf_temp_file = view_collection.ViewCollection.buf_tmp_file(self.view)
     if self.on_disk():
       self.git_tree = git_helper.git_tree(self.view)
       self.git_dir  = git_helper.git_dir(self.git_tree)
@@ -34,12 +34,17 @@ class GitGutterHandler:
     f.close()
 
   def update_git_file(self):
-    self.git_temp_file.truncate()
-    args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','head:'+self.git_path]
-    try:
-      subprocess.call(args, stdout=self.git_temp_file)
-    except Exception:
-      pass
+    # the git repo won't change that often
+    # so we can easily wait 5 seconds
+    # between updates for performance
+    if view_collection.ViewCollection.git_time(self.view) > 5:
+      self.git_temp_file.truncate()
+      args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','head:'+self.git_path]
+      try:
+        subprocess.call(args, stdout=self.git_temp_file)
+        view_collection.ViewCollection.update_git_time(self.view)
+      except Exception:
+        pass
 
   def process_diff(self,diff_str):
     inserted = []

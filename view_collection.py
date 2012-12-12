@@ -1,7 +1,13 @@
 import git_gutter_handler
+import tempfile
+import time
 
 class ViewCollection:
   views = {}
+  git_times = {}
+  git_files = {}
+  buf_files = {}
+  
   @staticmethod
   def add(view):
     key = ViewCollection.get_key(view)
@@ -24,3 +30,29 @@ class ViewCollection:
   def diff(view):
     key = ViewCollection.get_key(view)
     return ViewCollection.views[key].diff()
+
+  @staticmethod
+  def git_time(view):
+    key = ViewCollection.get_key(view)
+    if not key in ViewCollection.git_times:
+      ViewCollection.git_times[key] = 0
+    return time.time() - ViewCollection.git_times[key]
+
+  @staticmethod
+  def update_git_time(view):
+    key = ViewCollection.get_key(view)
+    ViewCollection.git_times[key] = time.time()
+
+  @staticmethod
+  def git_tmp_file(view):
+    key = ViewCollection.get_key(view)
+    if not key in ViewCollection.git_files:
+      ViewCollection.git_files[key] = tempfile.NamedTemporaryFile()
+    return ViewCollection.git_files[key]
+
+  @staticmethod 
+  def buf_tmp_file(view):
+    key = ViewCollection.get_key(view)
+    if not key in ViewCollection.buf_files:
+      ViewCollection.buf_files[key] = tempfile.NamedTemporaryFile()
+    return ViewCollection.buf_files[key]
