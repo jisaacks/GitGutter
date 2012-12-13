@@ -73,7 +73,10 @@ class GitGutterHandler:
       elif kind == 'a':
         inserted += range(line_start,line_end+1)
       elif kind == 'd':
-        deleted.append(line_start+1)
+        if line == 1:
+          deleted.append(line_start)
+        else:
+          deleted.append(line_start+1)
 
     return (inserted, modified, deleted)
 

@@ -29,7 +29,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
   def lines_removed(self, lines):
     bottom_lines = []
     for line in lines:
-      bottom_lines.append(line-1)
+      if not line == 1:
+        bottom_lines.append(line-1)
     self.lines_removed_top(lines)
     self.lines_removed_bottom(bottom_lines)
 
