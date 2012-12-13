@@ -39,7 +39,7 @@ class GitGutterHandler:
     # between updates for performance
     if view_collection.ViewCollection.git_time(self.view) > 5:
       self.git_temp_file.truncate()
-      args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','head:'+self.git_path]
+      args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','HEAD:'+self.git_path]
       try:
         subprocess.call(args, stdout=self.git_temp_file)
         view_collection.ViewCollection.update_git_time(self.view)
@@ -82,7 +82,7 @@ class GitGutterHandler:
       self.update_git_file()
       self.update_buf_file()
 
-      args = ['diff',self.git_temp_file.name,self.buf_temp_file.name]
+      args = ['diff',self.git_temp_file.name,self.buf_temp_file.name,'-b']
       proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       results = proc.stdout.read()
 
