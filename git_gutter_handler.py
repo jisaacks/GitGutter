@@ -82,7 +82,7 @@ class GitGutterHandler:
       self.update_git_file()
       self.update_buf_file()
 
-      args = ['diff',self.git_temp_file.name,self.buf_temp_file.name,'-b']
+      args = ['diff',self.git_temp_file.name,self.buf_temp_file.name]
       proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
       results = proc.stdout.read()
 
