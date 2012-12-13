@@ -26,7 +26,7 @@ class GitGutterHandler:
     return self.git_path
 
   def update_buf_file(self):
-    chars = self.view.size() 
+    chars = self.view.size()
     region = sublime.Region(0,chars)
     contents = self.view.substr(region).encode("utf-8")
     f = open(self.buf_temp_file.name,'w')
