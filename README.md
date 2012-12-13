@@ -6,6 +6,16 @@ A sublime text 2 plugin to show an icon in the gutter area indicating whether a 
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
 
+### Installation
+
+You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)  
+Or you can clone this repo into your *Sublime Text 2/Packages*
+
+```shell
+cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
+git clone git@github.com:jisaacks/GitGutter.git
+```
+
 ### Settings
 
 By default it is set to live mode, which runs everytime the file is modified. If you experience performance issues you can set it to only run on save by adding an entry to your **Preferences.sublime-text** file, just set:
