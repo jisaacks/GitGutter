@@ -1,4 +1,3 @@
-import git_gutter_handler
 import tempfile
 import time
 
@@ -11,7 +10,8 @@ class ViewCollection:
   @staticmethod
   def add(view):
     key = ViewCollection.get_key(view)
-    ViewCollection.views[key] = git_gutter_handler.GitGutterHandler(view)
+    from git_gutter_handler import GitGutterHandler
+    ViewCollection.views[key] = GitGutterHandler(view)
     ViewCollection.views[key].reset()
 
   @staticmethod

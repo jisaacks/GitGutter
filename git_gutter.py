@@ -1,12 +1,12 @@
 import sublime
 import sublime_plugin
-import view_collection
+from view_collection import ViewCollection
 
 class GitGutterCommand(sublime_plugin.TextCommand):
   def run(self, edit):
     self.clear_all()
 
-    (inserted, modified, deleted) = view_collection.ViewCollection.diff(self.view)
+    (inserted, modified, deleted) = ViewCollection.diff(self.view)
 
     self.lines_removed(deleted)
     self.lines_added(inserted)
