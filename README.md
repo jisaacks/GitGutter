@@ -24,7 +24,7 @@ By default it is set to live mode, which runs everytime the file is modified. If
 "git_gutter_live_mode": false
 ```
 
-The colors come from your theme file. If your theme file does not define the appropriate colors (or you want to edit them) add an entry to your theme file that looks like this:
+The colors come from your *color scheme* (**.tmTheme**) file. If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
 
 ```xml
 <dict>
