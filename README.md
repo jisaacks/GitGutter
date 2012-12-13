@@ -11,8 +11,15 @@ A sublime text 2 plugin to show an icon in the gutter area indicating whether a 
 You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)  
 Or you can clone this repo into your *Sublime Text 2/Packages*
 
+*OSX*
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
+git clone git@github.com:jisaacks/GitGutter.git
+```
+
+*Ubuntu*
+```shell
+cd ~/.config/sublime-text-2/Packages
 git clone git@github.com:jisaacks/GitGutter.git
 ```
 
