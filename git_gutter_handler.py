@@ -49,7 +49,8 @@ class GitGutterHandler:
                 'HEAD:' + self.git_path
             ]
             try:
-                proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT)
                 contents = proc.stdout.read()
                 contents = contents.replace('\r\n', '\n')
                 contents = contents.replace('\r', '\n')
@@ -100,7 +101,8 @@ class GitGutterHandler:
                 self.git_temp_file.name,
                 self.buf_temp_file.name
             ]
-            proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT)
             results = proc.stdout.read()
             return self.process_diff(results)
         else:
