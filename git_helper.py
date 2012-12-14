@@ -4,11 +4,9 @@ def git_file_path(view, git_path):
     if not git_path:
         return False
     full_file_path = os.path.realpath(view.file_name())
-    git_path_to_file = full_file_path.replace(git_path,'')
-
+    git_path_to_file = full_file_path.replace(git_path, '')
     if git_path_to_file[0] == '/':
         git_path_to_file = git_path_to_file[1:]
-
     return git_path_to_file
 
 def git_root(directory):

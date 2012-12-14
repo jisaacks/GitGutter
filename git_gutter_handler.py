@@ -16,7 +16,7 @@ class GitGutterHandler:
 
     def on_disk(self):
         # if the view is saved to disk
-        return self.view.file_name() != None
+        return self.view.file_name() is not None
 
     def reset(self):
         if self.on_disk() and self.git_path:
@@ -27,11 +27,11 @@ class GitGutterHandler:
 
     def update_buf_file(self):
         chars = self.view.size() 
-        region = sublime.Region(0,chars)
+        region = sublime.Region(0, chars)
         contents = self.view.substr(region).encode('utf-8')
         contents = contents.replace('\r\n', '\n')
         contents = contents.replace('\r', '\n')
-        f = open(self.buf_temp_file.name,'w')
+        f = open(self.buf_temp_file.name, 'w')
         f.write(contents)
         f.close()
 
@@ -41,24 +41,29 @@ class GitGutterHandler:
         # between updates for performance
         if ViewCollection.git_time(self.view) > 5:
             self.git_temp_file.truncate()
-            args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','HEAD:'+self.git_path]
+            args = [
+                'git',
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'show',
+                'HEAD:' + self.git_path
+            ]
             try:
                 proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 contents = proc.stdout.read()
                 contents = contents.replace('\r\n', '\n')
                 contents = contents.replace('\r', '\n')
-                f = open(self.git_temp_file.name,'w')
+                f = open(self.git_temp_file.name, 'w')
                 f.write(contents)
                 f.close()
                 ViewCollection.update_git_time(self.view)
             except Exception:
                 pass
 
-    def process_diff(self,diff_str):
+    def process_diff(self, diff_str):
         inserted = []
         modified = []
         deleted = []
-
         lines = diff_str.splitlines()
         for line in lines:
             m = re.match('(\d+),?(\d*)(.)(\d+),?(\d*)', line)
@@ -75,28 +80,28 @@ class GitGutterHandler:
                 line_end = int(m.group(5))
             else:
                 line_end = line_start
-
             if kind == 'c':
-                modified += range(line_start,line_end+1)
+                modified += range(line_start,line_end + 1)
             elif kind == 'a':
-                inserted += range(line_start,line_end+1)
+                inserted += range(line_start,line_end + 1)
             elif kind == 'd':
                 if line == 1:
                     deleted.append(line_start)
                 else:
-                    deleted.append(line_start+1)
-
+                    deleted.append(line_start + 1)
         return (inserted, modified, deleted)
 
     def diff(self):
         if self.on_disk() and self.git_path:
             self.update_git_file()
             self.update_buf_file()
-
-            args = ['diff',self.git_temp_file.name,self.buf_temp_file.name]
+            args = [
+                'diff',
+                self.git_temp_file.name,
+                self.buf_temp_file.name
+            ]
             proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             results = proc.stdout.read()
-
             return self.process_diff(results)
         else:
-            return ([],[],[])
+            return ([], [], [])

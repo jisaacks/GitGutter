@@ -3,7 +3,6 @@ import sublime_plugin
 from view_collection import ViewCollection
 
 class GitGutterEvents(sublime_plugin.EventListener):
-
     def on_load(self, view):
         ViewCollection.add(view)
 

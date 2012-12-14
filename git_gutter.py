@@ -5,9 +5,7 @@ from view_collection import ViewCollection
 class GitGutterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.clear_all()
-
-        (inserted, modified, deleted) = ViewCollection.diff(self.view)
-
+        inserted, modified, deleted = ViewCollection.diff(self.view)
         self.lines_removed(deleted)
         self.lines_added(inserted)
         self.lines_modified(modified)
@@ -21,7 +19,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     def lines_to_regions(self, lines):
         regions = []
         for line in lines:
-            position = self.view.text_point(line-1, 0)
+            position = self.view.text_point(line - 1, 0)
             region = sublime.Region(position,position)
             regions.append(region)
         return regions
@@ -29,8 +27,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     def lines_removed(self, lines):
         bottom_lines = []
         for line in lines:
-            if not line == 1:
-                bottom_lines.append(line-1)
+            if line != 1:
+                bottom_lines.append(line - 1)
         self.lines_removed_top(lines)
         self.lines_removed_bottom(bottom_lines)
 
