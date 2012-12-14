@@ -41,7 +41,7 @@ class GitGutterHandler:
         # so we can easily wait 5 seconds
         # between updates for performance
         if ViewCollection.git_time(self.view) > 5:
-            self.git_temp_file.truncate()
+            open(self.git_temp_file.name, 'w').close()
             args = [
                 'git',
                 '--git-dir=' + self.git_dir,
