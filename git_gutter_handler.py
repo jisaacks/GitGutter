@@ -46,7 +46,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                'HEAD:' + self.git_path
+                'HEAD:' + self.git_path,
             ]
             try:
                 proc = subprocess.Popen(args, stdout=subprocess.PIPE,
@@ -83,9 +83,9 @@ class GitGutterHandler:
             else:
                 line_end = line_start
             if kind == 'c':
-                modified += range(line_start,line_end + 1)
+                modified += range(line_start, line_end + 1)
             elif kind == 'a':
-                inserted += range(line_start,line_end + 1)
+                inserted += range(line_start, line_end + 1)
             elif kind == 'd':
                 if line == 1:
                     deleted.append(line_start)
@@ -100,7 +100,7 @@ class GitGutterHandler:
             args = [
                 'diff',
                 self.git_temp_file.name,
-                self.buf_temp_file.name
+                self.buf_temp_file.name,
             ]
             proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)

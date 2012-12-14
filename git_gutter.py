@@ -20,7 +20,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         regions = []
         for line in lines:
             position = self.view.text_point(line - 1, 0)
-            region = sublime.Region(position,position)
+            region = sublime.Region(position, position)
             regions.append(region)
         return regions
 
