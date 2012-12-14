@@ -29,6 +29,8 @@ class GitGutterHandler:
     chars = self.view.size() 
     region = sublime.Region(0,chars)
     contents = self.view.substr(region).encode("utf-8")
+    contents = contents.replace('\r\n', '\n')
+    contents = contents.replace('\r', '\n')
     f = open(self.buf_temp_file.name,'w')
     f.write(contents)
     f.close()
@@ -41,7 +43,13 @@ class GitGutterHandler:
       self.git_temp_file.truncate()
       args = ['git','--git-dir='+self.git_dir,'--work-tree='+self.git_tree,'show','HEAD:'+self.git_path]
       try:
-        subprocess.call(args, stdout=self.git_temp_file)
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        contents = proc.stdout.read()
+        contents = contents.replace('\r\n', '\n')
+        contents = contents.replace('\r', '\n')
+        f = open(self.git_temp_file.name,'w')
+        f.write(contents)
+        f.close()
         ViewCollection.update_git_time(self.view)
       except Exception:
         pass
