@@ -65,9 +65,10 @@ class GitGutterHandler:
         inserted = []
         modified = []
         deleted = []
+        pattern = re.compile(r'(\d+),?(\d*)(.)(\d+),?(\d*)')
         lines = diff_str.splitlines()
         for line in lines:
-            m = re.match('(\d+),?(\d*)(.)(\d+),?(\d*)', line)
+            m = pattern.match(line)
             if not m:
                 continue
             kind = m.group(3)
