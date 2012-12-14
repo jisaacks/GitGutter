@@ -1,4 +1,5 @@
 import git_helper
+import os
 import sublime
 import subprocess
 import re
@@ -40,7 +41,7 @@ class GitGutterHandler:
         # so we can easily wait 5 seconds
         # between updates for performance
         if ViewCollection.git_time(self.view) > 5:
-            self.git_temp_file.truncate()
+            open(self.git_temp_file.name, 'w').close()
             args = [
                 'git',
                 '--git-dir=' + self.git_dir,
@@ -49,9 +50,7 @@ class GitGutterHandler:
                 'HEAD:' + self.git_path,
             ]
             try:
-                proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT)
-                contents = proc.stdout.read()
+                contents = self.run_command(args)
                 contents = contents.replace('\r\n', '\n')
                 contents = contents.replace('\r', '\n')
                 f = open(self.git_temp_file.name, 'w')
@@ -102,9 +101,16 @@ class GitGutterHandler:
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
-            proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT)
-            results = proc.stdout.read()
+            results = self.run_command(args)
             return self.process_diff(results)
         else:
             return ([], [], [])
+
+    def run_command(self, args):
+        startupinfo = None
+        if os.name == 'nt':
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, startupinfo=startupinfo)
+        return proc.stdout.read()

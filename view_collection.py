@@ -48,6 +48,7 @@ class ViewCollection:
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.git_files:
             ViewCollection.git_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.git_files[key].close()
         return ViewCollection.git_files[key]
 
     @staticmethod 
@@ -55,4 +56,5 @@ class ViewCollection:
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.buf_files:
             ViewCollection.buf_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.buf_files[key].close()
         return ViewCollection.buf_files[key]
