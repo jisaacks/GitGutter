@@ -15,3 +15,6 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
     def on_post_save(self, view):
         ViewCollection.add(view)
+
+    def on_activated(self, view):
+        ViewCollection.add(view)
