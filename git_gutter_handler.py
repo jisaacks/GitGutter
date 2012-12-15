@@ -60,6 +60,13 @@ class GitGutterHandler:
             except Exception:
                 pass
 
+    def total_lines(self):
+        chars = self.view.size()
+        region = sublime.Region(0, chars)
+        lines = self.view.lines(region)
+        lines_count = len(lines)
+        return range(1,lines_count+1)
+
     def process_diff(self, diff_str):
         inserted = []
         modified = []
@@ -90,7 +97,14 @@ class GitGutterHandler:
                     deleted.append(line_start)
                 else:
                     deleted.append(line_start + 1)
-        return (inserted, modified, deleted)
+        if inserted == self.total_lines():
+            # All lines are "inserted"
+            # this means this file is either:
+            # - New and not being tracked *yet*
+            # - Or it is a *gitignored* file
+            return ([],[],[])
+        else:
+            return (inserted, modified, deleted)
 
     def diff(self):
         if self.on_disk() and self.git_path:
