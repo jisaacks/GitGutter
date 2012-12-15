@@ -2,6 +2,7 @@ import sublime
 import sublime_plugin
 from view_collection import ViewCollection
 
+
 class GitGutterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.clear_all()

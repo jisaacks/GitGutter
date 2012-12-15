@@ -5,6 +5,7 @@ import subprocess
 import re
 from view_collection import ViewCollection
 
+
 class GitGutterHandler:
     def __init__(self, view):
         self.view = view
@@ -65,7 +66,7 @@ class GitGutterHandler:
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
         lines_count = len(lines)
-        return range(1,lines_count+1)
+        return range(1, lines_count + 1)
 
     def process_diff(self, diff_str):
         inserted = []
@@ -78,11 +79,6 @@ class GitGutterHandler:
             if not m:
                 continue
             kind = m.group(3)
-            original_line_start = int(m.group(1))
-            if len(m.group(2)) > 0:
-                original_line_end = int(m.group(2))
-            else:
-                original_line_end = original_line_start
             line_start = int(m.group(4))
             if len(m.group(5)) > 0:
                 line_end = int(m.group(5))
@@ -102,7 +98,7 @@ class GitGutterHandler:
             # this means this file is either:
             # - New and not being tracked *yet*
             # - Or it is a *gitignored* file
-            return ([],[],[])
+            return ([], [], [])
         else:
             return (inserted, modified, deleted)
 
