@@ -27,7 +27,7 @@ class GitGutterHandler:
         return self.git_path
 
     def update_buf_file(self):
-        chars = self.view.size() 
+        chars = self.view.size()
         region = sublime.Region(0, chars)
         contents = self.view.substr(region).encode('utf-8')
         contents = contents.replace('\r\n', '\n')
@@ -112,5 +112,5 @@ class GitGutterHandler:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT, startupinfo=startupinfo)
+            startupinfo=startupinfo)
         return proc.stdout.read()
