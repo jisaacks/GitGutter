@@ -1,12 +1,13 @@
 import tempfile
 import time
 
+
 class ViewCollection:
     views = {}
     git_times = {}
     git_files = {}
     buf_files = {}
-    
+
     @staticmethod
     def add(view):
         key = ViewCollection.get_key(view)
@@ -23,7 +24,7 @@ class ViewCollection:
             return False
 
     @staticmethod
-    def get_key(view): 
+    def get_key(view):
         return view.file_name()
 
     @staticmethod
@@ -51,7 +52,7 @@ class ViewCollection:
             ViewCollection.git_files[key].close()
         return ViewCollection.git_files[key]
 
-    @staticmethod 
+    @staticmethod
     def buf_tmp_file(view):
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.buf_files:
