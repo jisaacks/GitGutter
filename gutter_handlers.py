@@ -6,28 +6,24 @@ import vcs_helpers
 from view_collection import ViewCollection
 
 
-class HgGutterHandler:
+class VcsGutterHandler(object):
     def __init__(self, view):
         self.view = view
-        self.hg_temp_file = ViewCollection.git_tmp_file(self.view)
+        self.vcs_temp_file = ViewCollection.vcs_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
 
-        vcs_helper = vcs_helpers.HgHelper()
+        vcs_helper = self.get_vcs_helper()
         if self.on_disk():
-            self.hg_tree = vcs_helper.vcs_tree(self.view)
-            self.hg_dir = vcs_helper.vcs_dir(self.hg_tree)
-            self.hg_path = vcs_helper.vcs_file_path(self.view, self.hg_tree)
+            self.vcs_tree = vcs_helper.vcs_tree(self.view)
+            self.vcs_dir = vcs_helper.vcs_dir(self.vcs_tree)
+            self.vcs_path = vcs_helper.vcs_file_path(self.view, self.vcs_tree)
 
     def on_disk(self):
         # if the view is saved to disk
         return self.view.file_name() is not None
 
-    def reset(self):
-        if self.on_disk() and self.hg_path:
-            self.view.run_command('git_gutter')
-
-    def get_hg_path(self):
-        return self.hg_path
+    def get_vcs_path(self):
+        return self.vcs_path
 
     def update_buf_file(self):
         chars = self.view.size()
@@ -39,36 +35,30 @@ class HgGutterHandler:
         f.write(contents)
         f.close()
 
-    def update_hg_file(self):
-        # the hg repo won't change that often
-        # so we can easily wait 5 seconds
-        # between updates for performance
-        if ViewCollection.git_time(self.view) > 5:
-            open(self.hg_temp_file.name, 'w').close()
-            args = [
-                'hg',
-                '--repository',
-                self.hg_tree,
-                'cat',
-                os.path.join(self.hg_tree, self.hg_path),
-            ]
-            try:
-                contents = self.run_command(args)
-                contents = contents.replace('\r\n', '\n')
-                contents = contents.replace('\r', '\n')
-                f = open(self.hg_temp_file.name, 'w')
-                f.write(contents)
-                f.close()
-                ViewCollection.update_hg_time(self.view)
-            except Exception:
-                pass
-
     def total_lines(self):
         chars = self.view.size()
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
         lines_count = len(lines)
         return range(1, lines_count + 1)
+
+    def update_vcs_file(self):
+        # the git repo won't change that often
+        # so we can easily wait 5 seconds
+        # between updates for performance
+        if ViewCollection.vcs_time(self.view) > 5:
+            open(self.vcs_temp_file.name, 'w').close()
+            args = self.get_diff_args()
+            try:
+                contents = self.run_command(args)
+                contents = contents.replace('\r\n', '\n')
+                contents = contents.replace('\r', '\n')
+                f = open(self.vcs_temp_file.name, 'w')
+                f.write(contents)
+                f.close()
+                ViewCollection.update_vcs_time(self.view)
+            except Exception:
+                pass
 
     def process_diff(self, diff_str):
         inserted = []
@@ -99,18 +89,18 @@ class HgGutterHandler:
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
-            # - Or it is a *hgignored* file
+            # - Or it is a *gitignored* file
             return ([], [], [])
         else:
             return (inserted, modified, deleted)
 
     def diff(self):
-        if self.on_disk() and self.hg_path:
-            self.update_hg_file()
+        if self.on_disk() and self.vcs_path:
+            self.update_vcs_file()
             self.update_buf_file()
             args = [
                 'diff',
-                self.hg_temp_file.name,
+                self.vcs_temp_file.name,
                 self.buf_temp_file.name,
             ]
             results = self.run_command(args)
@@ -126,3 +116,41 @@ class HgGutterHandler:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
             startupinfo=startupinfo)
         return proc.stdout.read()
+
+
+class GitGutterHandler(VcsGutterHandler):
+    def get_vcs_helper(self):
+        return vcs_helpers.GitHelper()
+
+    def reset(self):
+        if self.on_disk() and self.vcs_path:
+            self.view.run_command('git_gutter')
+
+    def get_diff_args(self):
+        args = [
+            'git',
+            '--git-dir=' + self.vcs_dir,
+            '--work-tree=' + self.vcs_tree,
+            'show',
+            'HEAD:' + self.vcs_path,
+        ]
+        return args
+
+
+class HgGutterHandler(VcsGutterHandler):
+    def get_vcs_helper(self):
+        return vcs_helpers.HgHelper()
+
+    def reset(self):
+        if self.on_disk() and self.vcs_path:
+            self.view.run_command('git_gutter')
+
+    def get_diff_args(self):
+        args = [
+            'hg',
+            '--repository',
+            self.vcs_tree,
+            'cat',
+            os.path.join(self.vcs_tree, self.vcs_path),
+        ]
+        return args
