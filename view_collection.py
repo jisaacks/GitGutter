@@ -21,9 +21,13 @@ class ViewCollection:
         elif HgHelper.is_hg_repository(view):
             handler = HgGutterHandler(view)
 
-        key = ViewCollection.get_key(view)
-        ViewCollection.views[key] = handler
-        ViewCollection.views[key].reset()
+        # If no handler found then either the view does not represent a
+        # file on disk (e.g. not yet saved) or the file is not in a supported
+        # VCS repository.
+        if handler is not None:
+            key = ViewCollection.get_key(view)
+            ViewCollection.views[key] = handler
+            ViewCollection.views[key].reset()
 
     @staticmethod
     def vcs_path(view):
