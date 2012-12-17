@@ -45,14 +45,30 @@ class VcsHelper(object):
         file_parent_dir = os.path.realpath(os.path.dirname(full_file_path))
         return cls.vcs_root(file_parent_dir)
 
+    @classmethod
+    def is_repository(cls, view):
+        if view is None or view.file_name() is None or \
+            cls.vcs_dir(cls.vcs_tree(view)) == False:
+            return False
+        else:
+            return True
+
 
 class GitHelper(VcsHelper):
     @classmethod
     def meta_data_directory(cls):
         return '.git'
 
+    @classmethod
+    def is_git_repository(cls, view):
+        return cls.is_repository(view)
+
 
 class HgHelper(VcsHelper):
     @classmethod
     def meta_data_directory(cls):
         return '.hg'
+
+    @classmethod
+    def is_hg_repository(cls, view):
+        return cls.is_repository(view)

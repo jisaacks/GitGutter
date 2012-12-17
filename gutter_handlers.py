@@ -27,7 +27,6 @@ class VcsGutterHandler(object):
 
     def reset(self):
         if self.on_disk() and self.vcs_path:
-            # TODO: rename
             self.view.run_command('vcs_gutter')
 
     def update_buf_file(self):

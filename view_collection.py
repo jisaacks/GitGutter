@@ -1,6 +1,9 @@
 import tempfile
 import time
 
+from vcs_helpers import GitHelper
+from vcs_helpers import HgHelper
+
 
 class ViewCollection:
     views = {}
@@ -10,10 +13,16 @@ class ViewCollection:
 
     @staticmethod
     def add(view):
-        key = ViewCollection.get_key(view)
+        from gutter_handlers import GitGutterHandler
         from gutter_handlers import HgGutterHandler
-        # TODO: Make this generic
-        ViewCollection.views[key] = HgGutterHandler(view)
+        handler = None
+        if GitHelper.is_git_repository(view):
+            handler = GitGutterHandler(view)
+        elif HgHelper.is_hg_repository(view):
+            handler = HgGutterHandler(view)
+
+        key = ViewCollection.get_key(view)
+        ViewCollection.views[key] = handler
         ViewCollection.views[key].reset()
 
     @staticmethod
