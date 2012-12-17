@@ -1,10 +1,11 @@
-## Git Gutter
+## VCS Gutter
 
-A sublime text 2 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
+A Sublime Text 2 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted relative to the version of the file in the local source
+code repository. Supports Git and Mercurial.
 
 ### Screenshot:
 
-![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
+![screenshot](https://raw.github.com/bradsokol/GitGutter/master/screenshot.png)
 
 ### Installation
 
@@ -14,13 +15,13 @@ Or you can clone this repo into your *Sublime Text 2/Packages*
 *OSX*
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
-git clone git@github.com:jisaacks/GitGutter.git
+git clone git@github.com:bradsokol/GitGutter.git
 ```
 
 *Ubuntu*
 ```shell
 cd ~/.config/sublime-text-2/Packages
-git clone git@github.com:jisaacks/GitGutter.git
+git clone git@github.com:bradsokol/GitGutter.git
 ```
 
 ### Settings
@@ -28,7 +29,7 @@ git clone git@github.com:jisaacks/GitGutter.git
 By default it is set to live mode, which runs everytime the file is modified. If you experience performance issues you can set it to only run on save by adding an entry to your **Preferences.sublime-text** file, just set:
 
 ```json
-"git_gutter_live_mode": false
+"vcs_gutter_live_mode": false
 ```
 
 The colors come from your *color scheme* **.tmTheme** file. If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
