@@ -25,6 +25,11 @@ class VcsGutterHandler(object):
     def get_vcs_path(self):
         return self.vcs_path
 
+    def reset(self):
+        if self.on_disk() and self.vcs_path:
+            # TODO: rename
+            self.view.run_command('git_gutter')
+
     def update_buf_file(self):
         chars = self.view.size()
         region = sublime.Region(0, chars)
@@ -122,10 +127,6 @@ class GitGutterHandler(VcsGutterHandler):
     def get_vcs_helper(self):
         return vcs_helpers.GitHelper()
 
-    def reset(self):
-        if self.on_disk() and self.vcs_path:
-            self.view.run_command('git_gutter')
-
     def get_diff_args(self):
         args = [
             'git',
@@ -140,10 +141,6 @@ class GitGutterHandler(VcsGutterHandler):
 class HgGutterHandler(VcsGutterHandler):
     def get_vcs_helper(self):
         return vcs_helpers.HgHelper()
-
-    def reset(self):
-        if self.on_disk() and self.vcs_path:
-            self.view.run_command('git_gutter')
 
     def get_diff_args(self):
         args = [
