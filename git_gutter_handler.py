@@ -135,7 +135,6 @@ class AsyncCommand(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        print self.args
         startupinfo = None
         if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()
