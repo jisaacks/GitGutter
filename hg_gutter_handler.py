@@ -1,8 +1,8 @@
-import hg_helper
 import os
 import sublime
 import subprocess
 import re
+import vcs_helpers
 from view_collection import ViewCollection
 
 
@@ -11,15 +11,12 @@ class HgGutterHandler:
         self.view = view
         self.hg_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
+
+        vcs_helper = vcs_helpers.HgHelper()
         if self.on_disk():
-            self.hg_tree = hg_helper.hg_tree(self.view)
-            self.hg_dir = hg_helper.hg_dir(self.hg_tree)
-            self.hg_path = hg_helper.hg_file_path(self.view, self.hg_tree)
-        print '**** hg_temp_file %s' % self.hg_temp_file.name
-        print '**** buf_temp_file %s' % self.buf_temp_file.name
-        print '**** hg_tree %s' % self.hg_tree
-        print '**** hg_dir %s' % self.hg_dir
-        print '**** hg_path %s' % self.hg_path
+            self.hg_tree = vcs_helper.vcs_tree(self.view)
+            self.hg_dir = vcs_helper.vcs_dir(self.hg_tree)
+            self.hg_path = vcs_helper.vcs_file_path(self.view, self.hg_tree)
 
     def on_disk(self):
         # if the view is saved to disk
@@ -55,7 +52,6 @@ class HgGutterHandler:
                 'cat',
                 os.path.join(self.hg_tree, self.hg_path),
             ]
-            print '**** %r' % args
             try:
                 contents = self.run_command(args)
                 contents = contents.replace('\r\n', '\n')
@@ -117,8 +113,6 @@ class HgGutterHandler:
                 self.hg_temp_file.name,
                 self.buf_temp_file.name,
             ]
-            print '**** diff hg %s' % self.hg_temp_file.name
-            print '**** diff buff %s' % self.buf_temp_file.name
             results = self.run_command(args)
             return self.process_diff(results)
         else:
