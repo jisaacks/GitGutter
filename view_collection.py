@@ -28,9 +28,9 @@ class ViewCollection:
         return view.file_name()
 
     @staticmethod
-    def diff(view):
+    def diff(view, callback):
         key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].diff()
+        ViewCollection.views[key].diff(callback)
 
     @staticmethod
     def git_time(view):

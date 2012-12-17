@@ -5,8 +5,11 @@ from view_collection import ViewCollection
 
 class GitGutterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        ViewCollection.diff(self.view, self.diff_finished)
+
+    def diff_finished(self, results):
         self.clear_all()
-        inserted, modified, deleted = ViewCollection.diff(self.view)
+        inserted, modified, deleted = results
         self.lines_removed(deleted)
         self.lines_added(inserted)
         self.lines_modified(modified)
