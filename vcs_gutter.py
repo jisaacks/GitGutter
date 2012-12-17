@@ -3,7 +3,7 @@ import sublime_plugin
 from view_collection import ViewCollection
 
 
-class GitGutterCommand(sublime_plugin.TextCommand):
+class VcsGutterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.clear_all()
         inserted, modified, deleted = ViewCollection.diff(self.view)
@@ -12,10 +12,10 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.lines_modified(modified)
 
     def clear_all(self):
-        self.view.erase_regions('git_gutter_deleted_top')
-        self.view.erase_regions('git_gutter_deleted_bottom')
-        self.view.erase_regions('git_gutter_inserted')
-        self.view.erase_regions('git_gutter_changed')
+        self.view.erase_regions('vcs_gutter_deleted_top')
+        self.view.erase_regions('vcs_gutter_deleted_bottom')
+        self.view.erase_regions('vcs_gutter_inserted')
+        self.view.erase_regions('vcs_gutter_changed')
 
     def lines_to_regions(self, lines):
         regions = []
@@ -37,22 +37,22 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         regions = self.lines_to_regions(lines)
         scope = 'markup.deleted'
         icon = '../GitGutter/icons/deleted_top'
-        self.view.add_regions('git_gutter_deleted_top', regions, scope, icon)
+        self.view.add_regions('vcs_gutter_deleted_top', regions, scope, icon)
 
     def lines_removed_bottom(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.deleted'
         icon = '../GitGutter/icons/deleted_bottom'
-        self.view.add_regions('git_gutter_deleted_bottom', regions, scope, icon)
+        self.view.add_regions('vcs_gutter_deleted_bottom', regions, scope, icon)
 
     def lines_added(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.inserted'
         icon = '../GitGutter/icons/inserted'
-        self.view.add_regions('git_gutter_inserted', regions, scope, icon)
+        self.view.add_regions('vcs_gutter_inserted', regions, scope, icon)
 
     def lines_modified(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.changed'
         icon = '../GitGutter/icons/changed'
-        self.view.add_regions('git_gutter_changed', regions, scope, icon)
+        self.view.add_regions('vcs_gutter_changed', regions, scope, icon)
