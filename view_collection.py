@@ -11,15 +11,15 @@ class ViewCollection:
     @staticmethod
     def add(view):
         key = ViewCollection.get_key(view)
-        from git_gutter_handler import GitGutterHandler
-        ViewCollection.views[key] = GitGutterHandler(view)
+        from hg_gutter_handler import HgGutterHandler
+        ViewCollection.views[key] = HgGutterHandler(view)
         ViewCollection.views[key].reset()
 
     @staticmethod
     def git_path(view):
         key = ViewCollection.get_key(view)
         if key in ViewCollection.views:
-            return ViewCollection.views[key].get_git_path()
+            return ViewCollection.views[key].get_hg_path()
         else:
             return False
 
