@@ -5,6 +5,13 @@ from view_collection import ViewCollection
 
 class GitGutterCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        GitGutter(self.view).run()
+
+class GitGutter(object):
+    def __init__(self, view):
+        self.view = view
+
+    def run(self):
         ViewCollection.diff(self.view, self.diff_finished)
 
     def diff_finished(self, results):
