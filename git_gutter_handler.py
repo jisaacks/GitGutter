@@ -3,6 +3,7 @@ import os
 import sublime
 import subprocess
 import re
+import threading
 from view_collection import ViewCollection
 from git_gutter import GitGutter
 
@@ -38,7 +39,19 @@ class GitGutterHandler:
         f.write(contents)
         f.close()
 
-    def update_git_file(self):
+    def update_git_file(self, callback):
+        def write_git_file(contents):
+            try:
+                contents = contents.replace('\r\n', '\n')
+                contents = contents.replace('\r', '\n')
+                f = open(self.git_temp_file.name, 'w')
+                f.write(contents)
+                f.close()
+                ViewCollection.update_git_time(self.view)
+                callback()
+            except Exception:
+                pass
+
         # the git repo won't change that often
         # so we can easily wait 5 seconds
         # between updates for performance
@@ -51,16 +64,9 @@ class GitGutterHandler:
                 'show',
                 'HEAD:' + self.git_path,
             ]
-            try:
-                contents = self.run_command(args)
-                contents = contents.replace('\r\n', '\n')
-                contents = contents.replace('\r', '\n')
-                f = open(self.git_temp_file.name, 'w')
-                f.write(contents)
-                f.close()
-                ViewCollection.update_git_time(self.view)
-            except Exception:
-                pass
+            self.run_command(args, write_git_file)
+        else:
+            callback()
 
     def total_lines(self):
         chars = self.view.size()
@@ -103,25 +109,38 @@ class GitGutterHandler:
         else:
             return (inserted, modified, deleted)
 
-    def diff(self):
-        if self.on_disk() and self.git_path:
-            self.update_git_file()
-            self.update_buf_file()
+    def diff(self, callback):
+        def exec_diff():
             args = [
                 'diff',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
-            results = self.run_command(args)
-            return self.process_diff(results)
-        else:
-            return ([], [], [])
+            results = self.run_command(args,
+                lambda results: callback(self.process_diff(results)))
 
-    def run_command(self, args):
+        if self.on_disk() and self.git_path:
+            self.update_buf_file()
+            self.update_git_file(exec_diff)
+        else:
+            callback([], [], [])
+
+    def run_command(self, args, callback):
+        AsyncCommand(args, callback).start()
+
+
+class AsyncCommand(threading.Thread):
+    def __init__(self, args, callback):
+        self.args = args
+        self.callback = callback
+        threading.Thread.__init__(self)
+
+    def run(self):
         startupinfo = None
         if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+        proc = subprocess.Popen(self.args, stdout=subprocess.PIPE,
             startupinfo=startupinfo)
-        return proc.stdout.read()
+        stdout = proc.stdout.read()
+        sublime.set_timeout(lambda: self.callback(stdout), 1)
