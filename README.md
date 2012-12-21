@@ -3,6 +3,9 @@
 A Sublime Text 2 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted relative to the version of the file in the local source
 code repository. Supports Git and Mercurial.
 
+VCS Gutter builds on the original work by [jisaacks](https://github.com/jisaacks)
+on [GitGutter](https://github.com/jisaacks/GitGutter).
+
 ### Screenshot:
 
 ![screenshot](https://raw.github.com/bradsokol/GitGutter/master/screenshot.png)
