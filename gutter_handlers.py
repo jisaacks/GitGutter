@@ -4,6 +4,7 @@ import subprocess
 import re
 import vcs_helpers
 from view_collection import ViewCollection
+from vcs_gutter import VcsGutter
 
 
 class VcsGutterHandler(object):
@@ -27,7 +28,7 @@ class VcsGutterHandler(object):
 
     def reset(self):
         if self.on_disk() and self.vcs_path:
-            self.view.run_command('vcs_gutter')
+            VcsGutter(self.view).run()
 
     def update_buf_file(self):
         chars = self.view.size()
