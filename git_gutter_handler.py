@@ -4,7 +4,6 @@ import sublime
 import subprocess
 import re
 from view_collection import ViewCollection
-from git_gutter import GitGutter
 
 
 class GitGutterHandler:
@@ -23,7 +22,7 @@ class GitGutterHandler:
 
     def reset(self):
         if self.on_disk() and self.git_path:
-            GitGutter(self.view).run()
+            self.view.window().run_command('git_gutter')
 
     def get_git_path(self):
         return self.git_path
