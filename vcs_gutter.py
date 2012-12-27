@@ -3,16 +3,9 @@ import sublime_plugin
 from view_collection import ViewCollection
 
 
-class VcsGutterCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        VcsGutter(self.view).run()
-
-
-class VcsGutter(object):
-    def __init__(self, view):
-        self.view = view
-
+class VcsGutterCommand(sublime_plugin.WindowCommand):
     def run(self):
+        self.view = self.window.active_view()
         self.clear_all()
         inserted, modified, deleted = ViewCollection.diff(self.view)
         self.lines_removed(deleted)
