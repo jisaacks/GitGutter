@@ -150,3 +150,16 @@ class HgGutterHandler(VcsGutterHandler):
             os.path.join(self.vcs_tree, self.vcs_path),
         ]
         return args
+
+
+class SvnGutterHandler(VcsGutterHandler):
+    def get_vcs_helper(self):
+        return vcs_helpers.SvnHelper()
+
+    def get_diff_args(self):
+        args = [
+            'svn',
+            'cat',
+            os.path.join(self.vcs_tree, self.vcs_path),
+        ]
+        return args

@@ -3,6 +3,7 @@ import time
 
 from vcs_helpers import GitHelper
 from vcs_helpers import HgHelper
+from vcs_helpers import SvnHelper
 
 
 class ViewCollection:
@@ -15,11 +16,14 @@ class ViewCollection:
     def add(view):
         from gutter_handlers import GitGutterHandler
         from gutter_handlers import HgGutterHandler
+        from gutter_handlers import SvnGutterHandler
         handler = None
         if GitHelper.is_git_repository(view):
             handler = GitGutterHandler(view)
         elif HgHelper.is_hg_repository(view):
             handler = HgGutterHandler(view)
+        elif SvnHelper.is_svn_repository(view):
+            handler = SvnGutterHandler(view)
 
         # If no handler found then either the view does not represent a
         # file on disk (e.g. not yet saved) or the file is not in a supported

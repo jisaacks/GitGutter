@@ -72,3 +72,13 @@ class HgHelper(VcsHelper):
     @classmethod
     def is_hg_repository(cls, view):
         return cls.is_repository(view)
+
+
+class SvnHelper(VcsHelper):
+    @classmethod
+    def meta_data_directory(cls):
+        return '.svn'
+
+    @classmethod
+    def is_svn_repository(cls, view):
+        return cls.is_repository(view)
