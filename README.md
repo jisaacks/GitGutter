@@ -8,7 +8,7 @@ A sublime text 2 plugin to show an icon in the gutter area indicating whether a 
 
 ### Installation
 
-You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)
+You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)  
 Or you can clone this repo into your *Sublime Text 2/Packages*
 
 *OSX*
