@@ -8,28 +8,28 @@ on [GitGutter](https://github.com/jisaacks/GitGutter).
 
 ### Screenshot:
 
-![screenshot](https://raw.github.com/bradsokol/GitGutter/master/screenshot.png)
+![screenshot](https://raw.github.com/bradsokol/VcsGutter/master/screenshot.png)
 
 ### Installation
 
 You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)  
 Or you can clone this repo into your *Sublime Text 2/Packages*
 
-*OSX*
+*Mac OS X*
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
-git clone git@github.com:bradsokol/GitGutter.git
+git clone git@github.com:bradsokol/VcsGutter.git
 ```
 
 *Ubuntu*
 ```shell
 cd ~/.config/sublime-text-2/Packages
-git clone git@github.com:bradsokol/GitGutter.git
+git clone git@github.com:bradsokol/VcsGutter.git
 ```
 
 *Windows*
 
-GitGutter assumes that the `git` and `diff` command is availible on the command line. Since the MSI installer for Git on Windows only adds the `cmd` directory of your Git installation to the `PATH` environment variable by default, GitGutter may not work out of the box. In this case you have to add the `bin` directory of your Git installation to the `PATH` environment variable.
+VcsGutter assumes that the `git`, `hg`, `svn` and `diff` commands are availible on the command line. The installers for these tools may not add the directory containing the executables to the PATH environment variable. If not, you must add the appropriate directory to your PATH variable.
 
 For example:
 ```dos
