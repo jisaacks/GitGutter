@@ -30,7 +30,22 @@ class GitGutterHandler:
     def update_buf_file(self):
         chars = self.view.size()
         region = sublime.Region(0, chars)
-        contents = self.view.substr(region).encode('utf-8')
+
+        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
+        pattern = re.compile(r'.+\((.*)\)')
+        encoding = self.view.encoding()
+
+        if pattern.match(encoding):
+            encoding = pattern.sub(r'\1', self.view.encoding())
+
+        # Try conversion
+        try:
+            contents = self.view.substr(region).encode(encoding.replace(' ', ''))
+            break
+        except UnicodeError:
+            # Fallback to utf8-encoding
+            contents = self.view.substr(region).encode('utf-8')
+    
         contents = contents.replace('\r\n', '\n')
         contents = contents.replace('\r', '\n')
         f = open(self.buf_temp_file.name, 'w')
