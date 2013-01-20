@@ -41,7 +41,6 @@ class GitGutterHandler:
         # Try conversion
         try:
             contents = self.view.substr(region).encode(encoding.replace(' ', ''))
-            break
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
