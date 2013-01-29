@@ -1,6 +1,6 @@
 import sublime
 import sublime_plugin
-from view_collection import ViewCollection
+from GitGutter.view_collection import ViewCollection
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):

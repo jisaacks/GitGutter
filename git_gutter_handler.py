@@ -1,9 +1,9 @@
-import git_helper
+from GitGutter import git_helper
 import os
 import sublime
 import subprocess
 import re
-from view_collection import ViewCollection
+from GitGutter.view_collection import ViewCollection
 
 
 class GitGutterHandler:
@@ -45,9 +45,9 @@ class GitGutterHandler:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
     
-        contents = contents.replace('\r\n', '\n')
-        contents = contents.replace('\r', '\n')
-        f = open(self.buf_temp_file.name, 'w')
+        contents = contents.replace(b'\r\n', b'\n')
+        contents = contents.replace(b'\r', b'\n')
+        f = open(self.buf_temp_file.name, 'wb')
         f.write(contents)
         f.close()
 
@@ -66,9 +66,9 @@ class GitGutterHandler:
             ]
             try:
                 contents = self.run_command(args)
-                contents = contents.replace('\r\n', '\n')
-                contents = contents.replace('\r', '\n')
-                f = open(self.git_temp_file.name, 'w')
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
+                f = open(self.git_temp_file.name, 'wb')
                 f.write(contents)
                 f.close()
                 ViewCollection.update_git_time(self.view)
@@ -80,7 +80,7 @@ class GitGutterHandler:
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
         lines_count = len(lines)
-        return range(1, lines_count + 1)
+        return list(range(1, lines_count + 1))
 
     def process_diff(self, diff_str):
         inserted = []
@@ -99,9 +99,9 @@ class GitGutterHandler:
             else:
                 line_end = line_start
             if kind == 'c':
-                modified += range(line_start, line_end + 1)
+                modified += list(range(line_start, line_end + 1))
             elif kind == 'a':
-                inserted += range(line_start, line_end + 1)
+                inserted += list(range(line_start, line_end + 1))
             elif kind == 'd':
                 if line == 1:
                     deleted.append(line_start)
@@ -126,7 +126,12 @@ class GitGutterHandler:
                 self.buf_temp_file.name,
             ]
             results = self.run_command(args)
-            return self.process_diff(results)
+            encoding = self.view.encoding()
+            try:
+                decoded_results = results.decode(encoding.replace(' ', ''))
+            except UnicodeError:
+                decoded_results = results.decode("utf-8")
+            return self.process_diff(decoded_results)
         else:
             return ([], [], [])
 
