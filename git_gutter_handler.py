@@ -1,9 +1,14 @@
-from GitGutter import git_helper
 import os
 import sublime
 import subprocess
 import re
-from GitGutter.view_collection import ViewCollection
+
+try:
+    from GitGutter import git_helper
+    from GitGutter.view_collection import ViewCollection
+except ImportError:
+    import git_helper
+    from view_collection import ViewCollection
 
 
 class GitGutterHandler:
@@ -44,7 +49,7 @@ class GitGutterHandler:
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
-    
+
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
         f = open(self.buf_temp_file.name, 'wb')
