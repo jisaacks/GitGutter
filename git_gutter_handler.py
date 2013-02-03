@@ -79,35 +79,37 @@ class GitGutterHandler:
         chars = self.view.size()
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
-        lines_count = len(lines)
-        return range(1, lines_count + 1)
+        return len(lines)
 
+    # Parse unified diff with 0 lines of context.
+    # Hunk range info format:
+    #   @@ -3,2 +4,0 @@
+    #     Hunk originally starting at line 3, and occupying 2 lines, now
+    #     starts at line 4, and occupies 0 lines, i.e. it was deleted.
+    #   @@ -9 +10,2 @@
+    #     Hunk size can be omitted, and defaults to one line.
+    # Dealing with ambiguous hunks:
+    #   "A\nB\n" -> "C\n"
+    #   Was 'A' modified, and 'B' deleted? Or 'B' modified, 'A' deleted?
+    #   Or both deleted? To minimize confusion, let's simply mark the
+    #   hunk as modified.
     def process_diff(self, diff_str):
         inserted = []
         modified = []
         deleted = []
-        pattern = re.compile(r'(\d+),?(\d*)(.)(\d+),?(\d*)')
-        lines = diff_str.splitlines()
-        for line in lines:
-            m = pattern.match(line)
-            if not m:
-                continue
-            kind = m.group(3)
-            line_start = int(m.group(4))
-            if len(m.group(5)) > 0:
-                line_end = int(m.group(5))
+        hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
+        hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
+        for hunk in hunks:
+            start = int(hunk.group(3))
+            old_size = int(hunk.group(2) or 1)
+            new_size = int(hunk.group(4) or 1)
+            if not old_size:
+                inserted += range(start, start + new_size)
+            elif not new_size:
+                deleted += [start + 1]
             else:
-                line_end = line_start
-            if kind == 'c':
-                modified += range(line_start, line_end + 1)
-            elif kind == 'a':
-                inserted += range(line_start, line_end + 1)
-            elif kind == 'd':
-                if line == 1:
-                    deleted.append(line_start)
-                else:
-                    deleted.append(line_start + 1)
-        if inserted == self.total_lines():
+                modified += range(start, start + new_size)
+        if len(inserted) == self.total_lines():
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
@@ -121,7 +123,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                'diff',
+                'git', 'diff', '-U0',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
