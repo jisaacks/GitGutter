@@ -6,6 +6,19 @@ except ImportError:
     from view_collection import ViewCollection
 
 
+def plugin_loaded():
+    """
+    Ugly hack for icons in ST3
+    kudos: https://github.com/facelessuser/BracketHighlighter/blob/BH2ST3/bh_core.py#L1380
+    """
+    from os import makedirs
+    from os.path import exists, join
+
+    icon_path = join(sublime.packages_path(), "Theme - Default")
+    if not exists(icon_path):
+        makedirs(icon_path)
+
+
 class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def run(self):
