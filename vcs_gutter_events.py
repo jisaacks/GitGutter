@@ -1,11 +1,10 @@
-import sublime
 import sublime_plugin
 from view_collection import ViewCollection
 
 
-class GitGutterEvents(sublime_plugin.EventListener):
+class VcsGutterEvents(sublime_plugin.EventListener):
     def on_modified(self, view):
-        if view.settings().get('git_gutter_live_mode', True):
+        if view.settings().get('vcs_gutter_live_mode', True):
             ViewCollection.add(view)
 
     def on_clone(self, view):
