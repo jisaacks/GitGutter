@@ -16,6 +16,20 @@ class GitGutterHandler:
             self.git_dir = git_helper.git_dir(self.git_tree)
             self.git_path = git_helper.git_file_path(self.view, self.git_tree)
 
+    def _get_view_encoding(self):
+        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
+        # NOTE(maelnor): are we need regex here?
+        pattern = re.compile(r'.+\((.*)\)')
+        encoding = self.view.encoding()
+        if pattern.match(encoding):
+            encoding = pattern.sub(r'\1', encoding)
+
+        encoding = encoding.replace('with BOM', '')
+        encoding = encoding.replace('Windows','cp')
+        encoding = encoding.replace('-','_')
+        encoding = encoding.replace(' ', '')
+        return encoding
+
     def on_disk(self):
         # if the view is saved to disk
         return self.view.file_name() is not None
@@ -31,20 +45,13 @@ class GitGutterHandler:
         chars = self.view.size()
         region = sublime.Region(0, chars)
 
-        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
-        pattern = re.compile(r'.+\((.*)\)')
-        encoding = self.view.encoding()
-
-        if pattern.match(encoding):
-            encoding = pattern.sub(r'\1', self.view.encoding())
-
         # Try conversion
         try:
-            contents = self.view.substr(region).encode(encoding.replace(' ', ''))
+            contents = self.view.substr(region).encode(self._get_view_encoding())
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
-    
+
         contents = contents.replace('\r\n', '\n')
         contents = contents.replace('\r', '\n')
         f = open(self.buf_temp_file.name, 'w')
