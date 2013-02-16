@@ -52,24 +52,24 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def lines_removed_top(self, lines):
         regions = self.lines_to_regions(lines)
-        scope = 'markup.deleted'
+        scope = 'markup.deleted.git_gutter'
         icon = '../GitGutter/icons/deleted_top'
         self.view.add_regions('git_gutter_deleted_top', regions, scope, icon)
 
     def lines_removed_bottom(self, lines):
         regions = self.lines_to_regions(lines)
-        scope = 'markup.deleted'
+        scope = 'markup.deleted.git_gutter'
         icon = '../GitGutter/icons/deleted_bottom'
         self.view.add_regions('git_gutter_deleted_bottom', regions, scope, icon)
 
     def lines_added(self, lines):
         regions = self.lines_to_regions(lines)
-        scope = 'markup.inserted'
+        scope = 'markup.inserted.git_gutter'
         icon = '../GitGutter/icons/inserted'
         self.view.add_regions('git_gutter_inserted', regions, scope, icon)
 
     def lines_modified(self, lines):
         regions = self.lines_to_regions(lines)
-        scope = 'markup.changed'
+        scope = 'markup.changed.git_gutter'
         icon = '../GitGutter/icons/changed'
         self.view.add_regions('git_gutter_changed', regions, scope, icon)
