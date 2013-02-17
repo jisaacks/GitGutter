@@ -21,6 +21,20 @@ class GitGutterHandler:
             self.git_dir = git_helper.git_dir(self.git_tree)
             self.git_path = git_helper.git_file_path(self.view, self.git_tree)
 
+    def _get_view_encoding(self):
+        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
+        # NOTE(maelnor): are we need regex here?
+        pattern = re.compile(r'.+\((.*)\)')
+        encoding = self.view.encoding()
+        if pattern.match(encoding):
+            encoding = pattern.sub(r'\1', encoding)
+
+        encoding = encoding.replace('with BOM', '')
+        encoding = encoding.replace('Windows','cp')
+        encoding = encoding.replace('-','_')
+        encoding = encoding.replace(' ', '')
+        return encoding
+
     def on_disk(self):
         # if the view is saved to disk
         return self.view.file_name() is not None
@@ -36,16 +50,9 @@ class GitGutterHandler:
         chars = self.view.size()
         region = sublime.Region(0, chars)
 
-        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
-        pattern = re.compile(r'.+\((.*)\)')
-        encoding = self.view.encoding()
-
-        if pattern.match(encoding):
-            encoding = pattern.sub(r'\1', self.view.encoding())
-
         # Try conversion
         try:
-            contents = self.view.substr(region).encode(encoding.replace(' ', ''))
+            contents = self.view.substr(region).encode(self._get_view_encoding())
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
@@ -53,6 +60,7 @@ class GitGutterHandler:
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
         f = open(self.buf_temp_file.name, 'wb')
+
         f.write(contents)
         f.close()
 
@@ -84,35 +92,37 @@ class GitGutterHandler:
         chars = self.view.size()
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
-        lines_count = len(lines)
-        return list(range(1, lines_count + 1))
+        return len(lines)
 
+    # Parse unified diff with 0 lines of context.
+    # Hunk range info format:
+    #   @@ -3,2 +4,0 @@
+    #     Hunk originally starting at line 3, and occupying 2 lines, now
+    #     starts at line 4, and occupies 0 lines, i.e. it was deleted.
+    #   @@ -9 +10,2 @@
+    #     Hunk size can be omitted, and defaults to one line.
+    # Dealing with ambiguous hunks:
+    #   "A\nB\n" -> "C\n"
+    #   Was 'A' modified, and 'B' deleted? Or 'B' modified, 'A' deleted?
+    #   Or both deleted? To minimize confusion, let's simply mark the
+    #   hunk as modified.
     def process_diff(self, diff_str):
         inserted = []
         modified = []
         deleted = []
-        pattern = re.compile(r'(\d+),?(\d*)(.)(\d+),?(\d*)')
-        lines = diff_str.splitlines()
-        for line in lines:
-            m = pattern.match(line)
-            if not m:
-                continue
-            kind = m.group(3)
-            line_start = int(m.group(4))
-            if len(m.group(5)) > 0:
-                line_end = int(m.group(5))
+        hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
+        hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
+        for hunk in hunks:
+            start = int(hunk.group(3))
+            old_size = int(hunk.group(2) or 1)
+            new_size = int(hunk.group(4) or 1)
+            if not old_size:
+                inserted += range(start, start + new_size)
+            elif not new_size:
+                deleted += [start + 1]
             else:
-                line_end = line_start
-            if kind == 'c':
-                modified += list(range(line_start, line_end + 1))
-            elif kind == 'a':
-                inserted += list(range(line_start, line_end + 1))
-            elif kind == 'd':
-                if line == 1:
-                    deleted.append(line_start)
-                else:
-                    deleted.append(line_start + 1)
-        if inserted == self.total_lines():
+                modified += range(start, start + new_size)
+        if len(inserted) == self.total_lines():
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
@@ -126,7 +136,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                'diff',
+                'git', 'diff', '-U0',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
