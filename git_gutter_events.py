@@ -1,6 +1,9 @@
 import sublime
 import sublime_plugin
-from view_collection import ViewCollection
+try:
+    from GitGutter.view_collection import ViewCollection
+except ImportError:
+    from view_collection import ViewCollection
 
 
 class GitGutterEvents(sublime_plugin.EventListener):

@@ -11,7 +11,10 @@ class ViewCollection:
     @staticmethod
     def add(view):
         key = ViewCollection.get_key(view)
-        from git_gutter_handler import GitGutterHandler
+        try:
+            from GitGutter.git_gutter_handler import GitGutterHandler
+        except ImportError:
+            from git_gutter_handler import GitGutterHandler
         ViewCollection.views[key] = GitGutterHandler(view)
         ViewCollection.views[key].reset()
 
