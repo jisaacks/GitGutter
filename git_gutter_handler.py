@@ -56,6 +56,9 @@ class GitGutterHandler:
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
+        except LookupError:
+            # May encounter an encoding we don't have a codec for
+            contents = self.view.substr(region).encode('utf-8')
 
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
