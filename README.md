@@ -25,11 +25,11 @@ git clone git@github.com:jisaacks/GitGutter.git
 
 *Windows*
 
-GitGutter assumes that the `git` and `diff` command is availible on the command line. Since the MSI installer for Git on Windows only adds the `cmd` directory of your Git installation to the `PATH` environment variable by default, GitGutter may not work out of the box. In this case you have to add the `bin` directory of your Git installation to the `PATH` environment variable.
+GitGutter assumes that the `git` command is available on the command line. If it's not, add the directory containing `git.exe` to your `PATH` environment variable. Then clone the repo:
 
-For example:
 ```dos
- %PATH%;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\Git\cmd
+cd "%APPDATA%\Sublime Text 2\Packages"
+git clone git://github.com/jisaacks/GitGutter.git
 ```
 
 ### Settings
