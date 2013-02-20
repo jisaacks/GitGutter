@@ -76,6 +76,18 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
     <string>#967EFB</string>
   </dict>
 </dict>
-```
+```  
 
+<br>
 
+------------
+
+### Alternatives
+
+*Don't use Sublime?*
+ - [Vim GitGutter](https://github.com/airblade/vim-gitgutter)
+ - [Emacs GitGutter](https://github.com/syohex/emacs-git-gutter)
+
+*Don't use Git?*
+ - [VcsGutter](https://github.com/bradsokol/VcsGutter)
+ - [Modific](https://github.com/gornostal/Modific) *Not a port/fork of __GitGutter__ but similar*
