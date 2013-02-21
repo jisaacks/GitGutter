@@ -59,12 +59,19 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         return regions
 
     def lines_removed(self, lines):
-        bottom_lines = []
-        for line in lines:
-            if line != 1:
-                bottom_lines.append(line - 1)
-        self.lines_removed_top(lines)
+        top_lines = lines
+        bottom_lines = [line - 1 for line in lines if line > 0]
+        dual_lines = []
+        for line in top_lines:
+            if line in bottom_lines:
+                dual_lines.append(line)
+        for line in dual_lines:
+            bottom_lines.remove(line)
+            top_lines.remove(line)
+
+        self.lines_removed_top(top_lines)
         self.lines_removed_bottom(bottom_lines)
+        self.lines_removed_dual(dual_lines)
 
     def lines_removed_top(self, lines):
         regions = self.lines_to_regions(lines)
@@ -77,6 +84,12 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         scope = 'markup.deleted.git_gutter'
         icon = '../GitGutter/icons/deleted_bottom'
         self.view.add_regions('git_gutter_deleted_bottom', regions, scope, icon)
+
+    def lines_removed_dual(self, lines):
+        regions = self.lines_to_regions(lines)
+        scope = 'markup.deleted.git_gutter'
+        icon = '../GitGutter/icons/deleted_dual'
+        self.view.add_regions('git_gutter_deleted_dual', regions, scope, icon)
 
     def lines_added(self, lines):
         regions = self.lines_to_regions(lines)
