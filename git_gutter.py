@@ -47,6 +47,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
     def clear_all(self):
         self.view.erase_regions('git_gutter_deleted_top')
         self.view.erase_regions('git_gutter_deleted_bottom')
+        self.view.erase_regions('git_gutter_deleted_dual')
         self.view.erase_regions('git_gutter_inserted')
         self.view.erase_regions('git_gutter_changed')
 
@@ -60,7 +61,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def lines_removed(self, lines):
         top_lines = lines
-        bottom_lines = [line - 1 for line in lines if line > 0]
+        bottom_lines = [line - 1 for line in lines if line > 1]
         dual_lines = []
         for line in top_lines:
             if line in bottom_lines:
