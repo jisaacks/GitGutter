@@ -9,7 +9,8 @@ except ImportError:
 def plugin_loaded():
     """
     Ugly hack for icons in ST3
-    kudos: https://github.com/facelessuser/BracketHighlighter/blob/BH2ST3/bh_core.py#L1380
+    kudos:
+    github.com/facelessuser/BracketHighlighter/blob/BH2ST3/bh_core.py#L1380
     """
     from os import makedirs
     from os.path import exists, join
