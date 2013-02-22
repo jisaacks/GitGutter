@@ -24,19 +24,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
     def run(self):
         self.view = self.window.active_view()
         if not self.view:
-            # Sometimes GitGutter tries to run when there is no active window
-            # and it throws an error because self.view is None.
-            # I have only been able to reproduce this in the following scenario:
-            # you clicked on FileA in the sidebar (FileA is not previously open)
-            # not to open it but to preview it. While previewing it you press
-            # ctrl+` to open a console. With the console selected and the
-            # unopened FileA preview showing in the window you click on another
-            # unopened file, FileB to preview that file. There will be no active
-            # window at this time and GitGutter will throw an error. So we can
-            # just skip running this time because immediately after selecting
-            # FileB, focus will shift from the console to its preview. This will
-            # cause GitGutter to run again on the FileB preview.
-            # Wow that was a really long explanation.
+            # View is not ready yet, try again later.
+            sublime.set_timeout(self.run, 1)
             return
         self.clear_all()
         inserted, modified, deleted = ViewCollection.diff(self.view)
