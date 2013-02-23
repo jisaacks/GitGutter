@@ -1,6 +1,10 @@
 import os
 
 
+def git_command(view):
+    return view.settings().get('git_gutter_git_command', 'git')
+
+
 def git_file_path(view, git_path):
     if not git_path:
         return False

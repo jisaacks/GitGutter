@@ -74,7 +74,7 @@ class GitGutterHandler:
         if ViewCollection.git_time(self.view) > 5:
             open(self.git_temp_file.name, 'w').close()
             args = [
-                'git',
+                git_helper.git_command(self.view),
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
@@ -90,6 +90,8 @@ class GitGutterHandler:
                 ViewCollection.update_git_time(self.view)
             except Exception:
                 pass
+
+
 
     def total_lines(self):
         chars = self.view.size()
@@ -139,7 +141,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                'git', 'diff', '-U0',
+                git_helper.git_command(self.view), 'diff', '-U0',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
