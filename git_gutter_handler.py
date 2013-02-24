@@ -13,6 +13,7 @@ except ImportError:
 
 class GitGutterHandler:
     def __init__(self, view):
+        self.load_settings()
         self.view = view
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
@@ -163,3 +164,6 @@ class GitGutterHandler:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
             startupinfo=startupinfo)
         return proc.stdout.read()
+
+    def load_settings(self):
+        self.settings = sublime.load_settings('GitGutter.sublime-settings')
