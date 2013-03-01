@@ -67,29 +67,29 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
     def lines_removed_top(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.deleted.git_gutter'
-        icon = '../GitGutter/icons/deleted_top' if int(sublime.version()) < 3000 else 'Packages/GitGutter/icons/deleted_top.png'
+        icon = '../GitGutter/icons/deleted_top' if int(sublime.version()) < 3014 else 'Packages/GitGutter/icons/deleted_top.png'
         self.view.add_regions('git_gutter_deleted_top', regions, scope, icon)
 
     def lines_removed_bottom(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.deleted.git_gutter'
-        icon = '../GitGutter/icons/deleted_bottom' if int(sublime.version()) < 3000 else 'Packages/GitGutter/icons/deleted_bottom.png'
+        icon = '../GitGutter/icons/deleted_bottom' if int(sublime.version()) < 3014 else 'Packages/GitGutter/icons/deleted_bottom.png'
         self.view.add_regions('git_gutter_deleted_bottom', regions, scope, icon)
 
     def lines_removed_dual(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.deleted.git_gutter'
-        icon = '../GitGutter/icons/deleted_dual' if int(sublime.version()) < 3000 else 'Packages/GitGutter/icons/deleted_dual.png'
+        icon = '../GitGutter/icons/deleted_dual' if int(sublime.version()) < 3014 else 'Packages/GitGutter/icons/deleted_dual.png'
         self.view.add_regions('git_gutter_deleted_dual', regions, scope, icon)
 
     def lines_added(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.inserted.git_gutter'
-        icon = '../GitGutter/icons/inserted' if int(sublime.version()) < 3000 else 'Packages/GitGutter/icons/inserted.png'
+        icon = '../GitGutter/icons/inserted' if int(sublime.version()) < 3014 else 'Packages/GitGutter/icons/inserted.png'
         self.view.add_regions('git_gutter_inserted', regions, scope, icon)
 
     def lines_modified(self, lines):
         regions = self.lines_to_regions(lines)
         scope = 'markup.changed.git_gutter'
-        icon = '../GitGutter/icons/changed' if int(sublime.version()) < 3000 else 'Packages/GitGutter/icons/changed.png'
+        icon = '../GitGutter/icons/changed' if int(sublime.version()) < 3014 else 'Packages/GitGutter/icons/changed.png'
         self.view.add_regions('git_gutter_changed', regions, scope, icon)
