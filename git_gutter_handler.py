@@ -146,7 +146,7 @@ class GitGutterHandler:
                 self.buf_temp_file.name,
             ]
             results = self.run_command(args)
-            encoding = self.view.encoding()
+            encoding = self._get_view_encoding()
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
             except UnicodeError:
