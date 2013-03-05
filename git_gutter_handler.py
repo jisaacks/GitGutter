@@ -13,6 +13,7 @@ except ImportError:
 
 class GitGutterHandler:
     def __init__(self, view):
+        self.load_settings()
         self.view = view
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
@@ -74,7 +75,7 @@ class GitGutterHandler:
         if ViewCollection.git_time(self.view) > 5:
             open(self.git_temp_file.name, 'w').close()
             args = [
-                git_helper.git_command(self.view),
+                self.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
@@ -90,8 +91,6 @@ class GitGutterHandler:
                 ViewCollection.update_git_time(self.view)
             except Exception:
                 pass
-
-
 
     def total_lines(self):
         chars = self.view.size()
@@ -141,7 +140,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                git_helper.git_command(self.view), 'diff', '-U0',
+                self.git_binary_path, 'diff', '-U0',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
@@ -163,3 +162,10 @@ class GitGutterHandler:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
             startupinfo=startupinfo)
         return proc.stdout.read()
+
+    def load_settings(self):
+        self.settings = sublime.load_settings('GitGutter.sublime-settings')
+        self.git_binary_path = 'git'
+        git_binary = self.settings.get('git_binary')
+        if git_binary:
+            self.git_binary_path = git_binary

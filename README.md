@@ -1,6 +1,6 @@
 ## Git Gutter
 
-A sublime text 2 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
+A sublime text 2/3 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
 
 ### Screenshot:
 
@@ -33,12 +33,40 @@ git clone git://github.com/jisaacks/GitGutter.git
 ```
 
 ### Settings
+Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kbd> > <kbd>GitGutter</kbd> menu.
 
-By default it is set to live mode, which runs everytime the file is modified. If you experience performance issues you can set it to only run on save by adding an entry to your **Preferences.sublime-text** file, just set:
+Default settings should not be modified, as they are overwritten when GitGutter updates. Instead, you should copy the relevant settings into GitGutter's user settings file.
 
-```json
-"git_gutter_live_mode": false
+#### Live Mode
+By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
+
+#### Git path
+If git is not in your PATH, you may need to set the `git_binary_path` setting to the location of the git binary, e.g. in a portable environment;
+```js
+{
+  "git_binary_path": "E:\\Portable\\git\\bin\\git.exe"
+}
 ```
+
+#### Per-project Settings
+Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
+To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
+```json
+{
+    "folders":
+    [
+        {
+            "path": "src"
+        }
+    ],
+    "settings":
+    {
+        "live_mode": false
+    }
+}
+```
+
+#### Icon Coloring
 
 The colors come from your *color scheme* **.tmTheme** file. If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
 
