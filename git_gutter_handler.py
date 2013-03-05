@@ -141,7 +141,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                git_helper.git_command(self.view), 'diff', '-U0',
+                git_helper.git_command(self.view), 'diff', '-U0', '--no-color',
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
