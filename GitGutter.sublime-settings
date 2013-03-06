@@ -1,7 +1,7 @@
 {
-	// Custom path to git binary when not in PATH
-	"git_binary": "",
-	// Live mode evaluates changes every time file is modified,
-	// Set false to only evaluate when file is saved.
-	"live_mode": true
+  // Custom path to git binary when not in PATH
+  "git_binary": "",
+  // Live mode evaluates changes every time file is modified,
+  // Set false to only evaluate when file is saved.
+  "live_mode": true
 }
