@@ -41,10 +41,10 @@ Default settings should not be modified, as they are overwritten when GitGutter 
 By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
 
 #### Git path
-If git is not in your PATH, you may need to set the `git_binary_path` setting to the location of the git binary, e.g. in a portable environment;
+If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
 ```js
 {
-  "git_binary_path": "E:\\Portable\\git\\bin\\git.exe"
+  "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
 ```
 
