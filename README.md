@@ -2,6 +2,8 @@
 
 A sublime text 2/3 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
 
+It also provides keymaps to jump up and down across changes.
+
 ### Screenshot:
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
@@ -47,6 +49,7 @@ If git is not in your PATH, you may need to set the `git_binary` setting to the 
   "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
 ```
+
 
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
@@ -105,6 +108,15 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
   </dict>
 </dict>
 ```  
+### Key Bindings
+Default settings have been provided for Windows.  You can override the default settings for keymaps to jump up and down from next to previous changes.
+#### Defaults
+```js
+[
+    { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
+    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_previous_change" }
+]
+```
 
 <br>
 
