@@ -28,17 +28,15 @@ def move_to_change(window, direction):
 
     row, col = view.rowcol(view.sel()[0].begin())
 
-    try:
-        if direction == "next":
-            line = next(change for change in all_changes
-                        if change > row + 1)
-        else:
-            line = next(change for change in reversed(all_changes)
-                        if change < row + 1)
+    current_row = row + 1
+    if direction == "next":
+        line = next((change for change in all_changes
+                    if change > current_row), current_row)
+    else:
+        line = next((change for change in reversed(all_changes)
+                    if change < current_row), current_row)
 
-        window.active_view().run_command("goto_line", {"line": line})
-    except:
-        pass
+    window.active_view().run_command("goto_line", {"line": line})
 
 
 class GitGutterNextChangeCommand(sublime_plugin.WindowCommand):
