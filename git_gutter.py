@@ -71,7 +71,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         else:
             path = 'Packages'
             extn = '.png'
-        return path + '/GitGutter/icons/' + icon_name + extn
+        return path + '/GitGutter/icons/' + icon_name + '2' + extn
 
     def lines_removed_top(self, lines):
         regions = self.lines_to_regions(lines)
