@@ -160,7 +160,7 @@ class GitGutterHandler:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-            startupinfo=startupinfo)
+            startupinfo=startupinfo, stderr=subprocess.PIPE)
         return proc.stdout.read()
 
     def load_settings(self):
