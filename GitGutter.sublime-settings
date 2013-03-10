@@ -1,7 +1,13 @@
 {
   // Custom path to git binary when not in PATH
   "git_binary": "",
+  
   // Live mode evaluates changes every time file is modified,
   // Set false to only evaluate when file is saved.
-  "live_mode": true
+  "live_mode": true,
+  
+  // When set to true GitGutter runs asynchronously in a seperate thread
+  // This may cause a small delay between a modification and the icon change
+  // but can increase performance greatly if needed.
+  "non_blocking": false
 }
