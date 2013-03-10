@@ -109,12 +109,12 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 </dict>
 ```  
 ### Key Bindings
-Default settings have been provided for Windows.  You can override the default settings for keymaps to jump up and down from next to previous changes.
+Default settings have been provided for Windows and the Mac.  You can override the default settings for keymaps to jump up and down from next to previous changes.
 #### Defaults
 ```js
 [
     { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
-    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_previous_change" }
+    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" }
 ]
 ```
 
