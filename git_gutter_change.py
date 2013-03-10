@@ -34,10 +34,10 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
 class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
     def jump(self, all_changes, current_row):
         return next((change for change in all_changes
-                        if change > current_row), current_row)
+                        if change > current_row), all_changes[0])
 
 
 class GitGutterPrevChangeCommand(GitGutterBaseChangeCommand):
     def jump(self, all_changes, current_row):
         return next((change for change in reversed(all_changes)
-                        if change < current_row), current_row)
+                        if change < current_row), all_changes[-1])
