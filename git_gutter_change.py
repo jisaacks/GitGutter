@@ -6,10 +6,21 @@ except ImportError:
     from view_collection import ViewCollection
 
 class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
+    def lines_to_blocks(self, lines):
+        blocks = []
+        last_line = -2
+        for line in lines:
+            if line > last_line+1:
+                blocks.append(line)
+            last_line = line
+        return blocks
+
     def run(self):
         view = self.window.active_view()
 
         inserted, modified, deleted = ViewCollection.diff(view)
+        inserted = self.lines_to_blocks(inserted)
+        modified = self.lines_to_blocks(modified)
         all_changes = sorted(inserted + modified + deleted)
 
         row, col = view.rowcol(view.sel()[0].begin())
