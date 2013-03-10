@@ -2,8 +2,6 @@
 
 A sublime text 2/3 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
 
-It also provides keymaps to jump up and down across changes.
-
 ### Screenshot:
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
