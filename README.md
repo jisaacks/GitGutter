@@ -108,15 +108,18 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
   </dict>
 </dict>
 ```  
-### Key Bindings
-Default settings have been provided for Windows and the Mac.  You can override the default settings for keymaps to jump up and down from next to previous changes.
-#### Defaults
-```js
-[
-    { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
-    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" }
-]
-```
+### Jumping Between Changes
+There are commands to jump between modifications. The default keybindings for these commands are:  
+
+**OSX**
+
+prev: <kbd>command</kbd>+<kbd>shift</kbd>+<kbd>option</kbd>+<kbd>k</kbd>  
+next: <kbd>command</kbd>+<kbd>shift</kbd>+<kbd>option</kbd>+<kbd>j</kbd>
+
+**Windows**
+
+prev: <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>alt</kbd>+<kbd>k</kbd>  
+next: <kbd>ctrl</kbd>+<kbd>shift</kbd>+<kbd>alt</kbd>+<kbd>j</kbd>
 
 <br>
 
