@@ -25,3 +25,5 @@ class GitGutterEvents(sublime_plugin.EventListener):
     def load_settings(self):
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
         self.live_mode = self.settings.get('live_mode')
+        if self.live_mode is None: 
+            self.live_mode = True
