@@ -20,39 +20,9 @@ def plugin_loaded():
         makedirs(icon_path)
 
 
-def move_to_change(window, direction):
-    view = window.active_view()
-
-    inserted, modified, deleted = ViewCollection.diff(view)
-    all_changes = sorted(inserted + modified + deleted)
-
-    row, col = view.rowcol(view.sel()[0].begin())
-
-    current_row = row + 1
-    if direction == "next":
-        line = next((change for change in all_changes
-                    if change > current_row), current_row)
-    else:
-        line = next((change for change in reversed(all_changes)
-                    if change < current_row), current_row)
-
-    window.active_view().run_command("goto_line", {"line": line})
-
-
-class GitGutterNextChangeCommand(sublime_plugin.WindowCommand):
-
-    def run(self):
-        move_to_change(self.window, "next")
-
-
-class GitGutterPreviousChangeCommand(sublime_plugin.WindowCommand):
-
-    def run(self):
-        move_to_change(self.window, "previous")
-
-
 class GitGutterCommand(sublime_plugin.WindowCommand):
-    region_names = ['deleted_top', 'deleted_bottom', 'deleted_dual', 'inserted', 'changed']
+    region_names = ['deleted_top', 'deleted_bottom',
+                    'deleted_dual', 'inserted', 'changed']
 
     def run(self):
         self.view = self.window.active_view()

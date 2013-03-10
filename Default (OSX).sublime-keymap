@@ -1,0 +1,4 @@
+[
+    { "keys": ["super+shift+option+j"], "command": "git_gutter_next_change" },
+    { "keys": ["super+shift+option+k"], "command": "git_gutter_prev_change" }
+]
