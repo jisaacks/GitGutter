@@ -26,7 +26,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
             ViewCollection.add(view)
 
     def on_load(self, view):
-        if not self.non_blocking:
+        if not self.non_blocking and not self.live_mode:
             ViewCollection.add(view)
 
     def on_activated(self, view):
@@ -51,7 +51,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
             ViewCollection.add(view)
 
     def on_load_async(self, view):
-        if self.non_blocking:
+        if self.non_blocking and not self.live_mode:
             ViewCollection.add(view)
 
     def on_activated_async(self, view):
