@@ -3,8 +3,12 @@
   "git_binary": "",
   
   // Live mode evaluates changes every time file is modified,
-  // Set false to only evaluate when file is saved.
+  // Set false to disable evaluation after each input
   "live_mode": true,
+
+  // Focus Change mode evaluates changes every time a view gets the focus
+  // Set false to disable evaluation when changing views
+  "focus_change_mode": true,
   
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change
