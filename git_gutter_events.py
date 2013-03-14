@@ -25,8 +25,12 @@ class GitGutterEvents(sublime_plugin.EventListener):
         if not self.non_blocking:
             ViewCollection.add(view)
 
+    def on_load(self, view):
+        if not self.non_blocking and not self.live_mode:
+            ViewCollection.add(view)
+
     def on_activated(self, view):
-        if not self.non_blocking:
+        if not self.non_blocking and self.focus_change_mode:
             ViewCollection.add(view)
 
     
@@ -46,8 +50,12 @@ class GitGutterEvents(sublime_plugin.EventListener):
         if self.non_blocking:
             ViewCollection.add(view)
 
+    def on_load_async(self, view):
+        if self.non_blocking and not self.live_mode:
+            ViewCollection.add(view)
+
     def on_activated_async(self, view):
-        if self.non_blocking:
+        if self.non_blocking and self.focus_change_mode:
             ViewCollection.add(view)
 
     # Settings
@@ -58,6 +66,10 @@ class GitGutterEvents(sublime_plugin.EventListener):
         self.live_mode = self.settings.get('live_mode')
         if self.live_mode is None: 
             self.live_mode = True
+
+        self.focus_change_mode = self.settings.get('focus_change_mode')
+        if self.focus_change_mode is None:
+            self.focus_change_mode = True
 
         self.non_blocking = self.settings.get('non_blocking')
         if self.non_blocking is None or int(sublime.version()) < 3014: 
