@@ -22,14 +22,14 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
         inserted = self.lines_to_blocks(inserted)
         modified = self.lines_to_blocks(modified)
         all_changes = sorted(inserted + modified + deleted)
+        if all_changes:
+            row, col = view.rowcol(view.sel()[0].begin())
 
-        row, col = view.rowcol(view.sel()[0].begin())
+            current_row = row + 1
+            
+            line = self.jump(all_changes, current_row)
 
-        current_row = row + 1
-        
-        line = self.jump(all_changes, current_row)
-
-        self.window.active_view().run_command("goto_line", {"line": line})
+            self.window.active_view().run_command("goto_line", {"line": line})
 
 class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
     def jump(self, all_changes, current_row):
