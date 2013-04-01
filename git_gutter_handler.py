@@ -167,6 +167,6 @@ class GitGutterHandler:
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
         self.user_settings = sublime.load_settings('Preferences.sublime-settings')
         self.git_binary_path = 'git'
-        git_binary = self.settings.get('git_binary') or self.user_settings.get('git_binary')
+        git_binary = self.user_settings.get('git_binary') or self.settings.get('git_binary')
         if git_binary:
             self.git_binary_path = git_binary
