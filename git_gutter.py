@@ -77,7 +77,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         event_scope = event
         if event.startswith('deleted'):
             event_scope = 'deleted'
-        scope = 'markup.%s.git_gutter' % event_scope
+        scope = 'gitgutter.%s.git_gutter' % event_scope
         icon = self.icon_path(event)
         self.view.add_regions('git_gutter_%s' % event, regions, scope, icon)
 

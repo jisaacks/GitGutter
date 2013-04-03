@@ -77,9 +77,9 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 ```xml
 <dict>
   <key>name</key>
-  <string>diff.deleted</string>
+  <string>GitGutter deleted</string>
   <key>scope</key>
-  <string>markup.deleted</string>
+  <string>gitgutter.deleted</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
@@ -88,9 +88,9 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 </dict>
 <dict>
   <key>name</key>
-  <string>diff.inserted</string>
+  <string>GitGutter inserted</string>
   <key>scope</key>
-  <string>markup.inserted</string>
+  <string>gitgutter.inserted</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
@@ -99,9 +99,9 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 </dict>
 <dict>
   <key>name</key>
-  <string>diff.changed</string>
+  <string>GitGutter changed</string>
   <key>scope</key>
-  <string>markup.changed</string>
+  <string>gitgutter.changed</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
