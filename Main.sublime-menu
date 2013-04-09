@@ -1,5 +1,19 @@
 [
     {
+        "id": "goto",
+        "children":
+        [
+            { 
+                "caption": "Previous change", 
+                "command": "git_gutter_prev_change"
+            },
+            { 
+                "caption": "Next change",     
+                "command": "git_gutter_next_change"
+            }
+        ]
+    }
+    ,{
         "caption": "Preferences",
         "mnemonic": "n",
         "id": "preferences",
