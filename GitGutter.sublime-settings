@@ -16,14 +16,22 @@
   // Only available in Sublime Text 3.
   "non_blocking": false,
 
-  // Wait this many milliseconds before evaluating input.
+  // Wait this many milliseconds between evaluating input.
+  // In effect this should have similar properties to non_blocking mode but
+  // without using threads, save more resources and work in Sublime Text 2.
   //
-  // For example, if set to 1000 and the user is typing constantly, evaluation
-  // will only take place once per second instead of after every key press.
-  // At lower values it should have similar properties to non_blocking mode but
-  // in addition work in Sublime Text 2.
+  // live_instant_interval dictates the minimum time between (near) instant
+  // evaluations on new input. When the file first receives input the evaluation
+  // is always instant, after which live_instant_interval time must pass before
+  // the next input is evaluated instantly again.
+  //
+  // live_continuous_delay dictates the minimum time between delayed evaluations.
+  // If input is continuous (faster than the live_instant_interval interval) then
+  // GitGutter will wait this long before evaluating.
   //
   // Has no effect with live_mode disabled or non_blocking enabled.
-  // Set to 0 to evaluate after each input with no delay.
-  "live_delay": 200
+  // Set live_delay to false to evaluate after each input with no delay.
+  "live_delay": false,
+  "live_instant_interval": 200,
+  "live_continuous_delay": 400
 }

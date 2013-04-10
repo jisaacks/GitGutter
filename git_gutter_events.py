@@ -8,13 +8,18 @@ except ImportError:
 class GitGutterEvents(sublime_plugin.EventListener):
     def __init__(self):
         self.load_settings()
+
         self.delayed_update_scheduled = False
+        self.allow_instant_update = True
 
     # Synchronous
 
     def delayed_update(self, view):
         ViewCollection.add(view)
         self.delayed_update_scheduled = False
+
+    def enable_instant_update(self):
+            self.allow_instant_update = True
 
     def on_modified(self, view):
         if not self.live_mode:
@@ -23,8 +28,13 @@ class GitGutterEvents(sublime_plugin.EventListener):
             if not self.live_delay:
                 ViewCollection.add(view)
             elif not self.delayed_update_scheduled:
-                self.delayed_update_scheduled = True
-                sublime.set_timeout(lambda: self.delayed_update(view), self.live_delay)
+                if self.allow_instant_update:
+                    self.allow_instant_update = False
+                    sublime.set_timeout(lambda: self.delayed_update(view), 10)
+                    sublime.set_timeout(lambda: self.enable_instant_update(), self.live_instant_interval)
+                else:
+                    self.delayed_update_scheduled = True
+                    sublime.set_timeout(lambda: self.delayed_update(view), self.live_continuous_delay)
 
     def on_clone(self, view):
         if not self.non_blocking:
@@ -76,10 +86,6 @@ class GitGutterEvents(sublime_plugin.EventListener):
         if self.live_mode is None: 
             self.live_mode = True
 
-        self.live_delay = self.settings.get('live_delay')
-        if self.live_delay is None:
-            self.live_delay = 0
-
         self.focus_change_mode = self.settings.get('focus_change_mode')
         if self.focus_change_mode is None:
             self.focus_change_mode = True
@@ -87,3 +93,15 @@ class GitGutterEvents(sublime_plugin.EventListener):
         self.non_blocking = self.settings.get('non_blocking')
         if self.non_blocking is None or int(sublime.version()) < 3014: 
             self.non_blocking = False
+
+        self.live_delay = self.settings.get('live_delay')
+        if self.live_delay is None:
+            self.live_delay = False
+
+        self.live_instant_interval = self.settings.get('live_instant_interval')
+        if self.live_instant_interval is None:
+            self.live_instant_interval = 200
+
+        self.live_continuous_delay = self.settings.get('live_continuous_delay')
+        if self.live_continuous_delay is None:
+            self.live_continuous_delay = 400
