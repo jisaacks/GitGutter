@@ -2,7 +2,7 @@
   // Custom path to git binary when not in PATH
   "git_binary": "",
   
-  // Live mode evaluates changes every time file is modified,
+  // Live mode evaluates changes every time file is modified
   // Set false to disable evaluation after each input
   "live_mode": true,
 
@@ -10,7 +10,7 @@
   // Set false to disable evaluation when changing views
   "focus_change_mode": true,
   
-  // When set to true GitGutter runs asynchronously in a seperate thread
+  // When set to true GitGutter runs asynchronously in a separate thread
   // This may cause a small delay between a modification and the icon change
   // but can increase performance greatly if needed.
   // Only available in Sublime Text 3.
