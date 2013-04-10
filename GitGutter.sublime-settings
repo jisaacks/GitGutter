@@ -13,5 +13,17 @@
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change
   // but can increase performance greatly if needed.
-  "non_blocking": false
+  // Only available in Sublime Text 3.
+  "non_blocking": false,
+
+  // Wait this many milliseconds before evaluating input.
+  //
+  // For example, if set to 1000 and the user is typing constantly, evaluation
+  // will only take place once per second instead of after every key press.
+  // At lower values it should have similar properties to non_blocking mode but
+  // in addition work in Sublime Text 2.
+  //
+  // Has no effect with live_mode disabled or non_blocking enabled.
+  // Set to 0 to evaluate after each input with no delay.
+  "live_delay": 200
 }
