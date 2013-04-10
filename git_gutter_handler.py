@@ -42,7 +42,10 @@ class GitGutterHandler:
 
     def reset(self):
         if self.on_disk() and self.git_path:
-            self.view.window().run_command('git_gutter')
+            try:
+                self.view.window().run_command('git_gutter')
+            except AttributeError:
+                pass
 
     def get_git_path(self):
         return self.git_path
