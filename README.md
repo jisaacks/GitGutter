@@ -14,13 +14,13 @@ Or you can clone this repo into your *Sublime Text 2/Packages*
 *OSX*
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
-git clone git@github.com:jisaacks/GitGutter.git
+git clone git://github.com/jisaacks/GitGutter.git
 ```
 
 *Ubuntu*
 ```shell
 cd ~/.config/sublime-text-2/Packages
-git clone git@github.com:jisaacks/GitGutter.git
+git clone git://github.com/jisaacks/GitGutter.git
 ```
 
 *Windows*
