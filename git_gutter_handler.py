@@ -141,6 +141,7 @@ class GitGutterHandler:
             self.update_buf_file()
             args = [
                 self.git_binary_path, 'diff', '-U0', '--no-color',
+                if self.ignore_whitespace: self.ignore_whitespace,
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
@@ -169,3 +170,11 @@ class GitGutterHandler:
         git_binary = self.settings.get('git_binary')
         if git_binary:
             self.git_binary_path = git_binary
+
+        self.ignore_whitespace = self.settings.get('ignore_whitespace')
+        if self.ignore_whitespace == 'all':
+            self.ignore_whitespace = '-w'
+        elif self.ignore_whitespace == 'eol':
+            self.ignore_whitespace = '--ignore-space-at-eol'
+        else:
+            self.ignore_whitespace = False
