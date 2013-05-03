@@ -13,5 +13,10 @@
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change
   // but can increase performance greatly if needed.
-  "non_blocking": false
+  "non_blocking": false,
+
+  // Add --patience switch to git diff command. See
+  // http://bramcohen.livejournal.com/73318.html for 
+  // an example of why you might need this.
+  "patience": true
 }

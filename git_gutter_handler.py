@@ -141,9 +141,11 @@ class GitGutterHandler:
             self.update_buf_file()
             args = [
                 self.git_binary_path, 'diff', '-U0', '--no-color',
+                self.patience_switch,
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
+            args = list(filter(None, args)) # Remove empty args (self.patience_switch may be empty)
             results = self.run_command(args)
             encoding = self._get_view_encoding()
             try:
@@ -165,7 +167,13 @@ class GitGutterHandler:
 
     def load_settings(self):
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
+
         self.git_binary_path = 'git'
         git_binary = self.settings.get('git_binary')
         if git_binary:
             self.git_binary_path = git_binary
+
+        self.patience_switch = ''
+        patience = self.settings.get('patience')
+        if patience:
+            self.patience_switch = '--patience'
