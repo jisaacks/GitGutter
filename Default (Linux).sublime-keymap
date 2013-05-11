@@ -1,0 +1,4 @@
+[
+    { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
+    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" }
+]
