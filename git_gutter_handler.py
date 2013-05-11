@@ -139,12 +139,11 @@ class GitGutterHandler:
         if self.on_disk() and self.git_path:
             self.update_git_file()
             self.update_buf_file()
-            args = [
-                self.git_binary_path, 'diff', '-U0', '--no-color',
-                if self.ignore_whitespace: self.ignore_whitespace,
-                self.git_temp_file.name,
-                self.buf_temp_file.name,
-            ]
+            args = [self.git_binary_path, 'diff', '-U0', '--no-color']
+            if self.ignore_whitespace:
+                args.append(self.ignore_whitespace)
+            args.append(self.git_temp_file.name)
+            args.append(self.buf_temp_file.name)
             results = self.run_command(args)
             encoding = self._get_view_encoding()
             try:
