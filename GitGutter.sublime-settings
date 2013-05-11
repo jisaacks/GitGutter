@@ -19,5 +19,10 @@
   // Set "none" to ensure whitespace is considered in the diff
   // Set "all" to ignore all white space
   // Set "eol" to only ignore whitespace at the end of lines
-  "ignore_whitespace": "none"
+  "ignore_whitespace": "none",
+
+  // Add --patience switch to git diff command. See
+  // http://bramcohen.livejournal.com/73318.html for 
+  // an example of why you might need this.
+  "patience": true
 }
