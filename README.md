@@ -77,9 +77,9 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 ```xml
 <dict>
   <key>name</key>
-  <string>diff.deleted</string>
+  <string>GitGutter deleted</string>
   <key>scope</key>
-  <string>markup.deleted</string>
+  <string>markup.deleted.git_gutter</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
@@ -88,9 +88,9 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 </dict>
 <dict>
   <key>name</key>
-  <string>diff.inserted</string>
+  <string>GitGutter inserted</string>
   <key>scope</key>
-  <string>markup.inserted</string>
+  <string>markup.inserted.git_gutter</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
@@ -99,27 +99,27 @@ The colors come from your *color scheme* **.tmTheme** file. If your color scheme
 </dict>
 <dict>
   <key>name</key>
-  <string>diff.changed</string>
+  <string>GitGutter changed</string>
   <key>scope</key>
-  <string>markup.changed</string>
+  <string>markup.changed.git_gutter</string>
   <key>settings</key>
   <dict>
     <key>foreground</key>
     <string>#967EFB</string>
   </dict>
 </dict>
-```  
+```
 ### Jumping Between Changes
-There are commands to jump between modifications. The default keybindings for these commands are:  
+There are commands to jump between modifications. The default keybindings for these commands are:
 
 **OSX**
 
-prev: <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>k</kbd>  
+prev: <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>k</kbd>
 next: <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>j</kbd>
 
 **Windows**
 
-prev: <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>k</kbd>  
+prev: <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>k</kbd>
 next: <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>j</kbd>
 
 <br>
