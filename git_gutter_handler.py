@@ -41,7 +41,7 @@ class GitGutterHandler:
         return self.view.file_name() is not None
 
     def reset(self):
-        if self.on_disk() and self.git_path:
+        if self.on_disk() and self.git_path and self.view.window():
             self.view.window().run_command('git_gutter')
 
     def get_git_path(self):
