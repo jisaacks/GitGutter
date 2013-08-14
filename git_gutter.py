@@ -22,7 +22,8 @@ def plugin_loaded():
 
 class GitGutterCommand(sublime_plugin.WindowCommand):
     region_names = ['deleted_top', 'deleted_bottom',
-                    'deleted_dual', 'inserted', 'changed']
+                    'deleted_dual', 'inserted', 'changed',
+                    'untracked', 'ignored']
 
     def run(self):
         self.view = self.window.active_view()
@@ -31,10 +32,16 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             sublime.set_timeout(self.run, 1)
             return
         self.clear_all()
-        inserted, modified, deleted = ViewCollection.diff(self.view)
-        self.lines_removed(deleted)
-        self.bind_icons('inserted', inserted)
-        self.bind_icons('changed', modified)
+        if ViewCollection.untracked(self.view):
+            self.bind_files('untracked')
+        elif ViewCollection.ignored(self.view):
+            self.bind_files('ignored')
+        else:
+            # If the file is untracked there is no need to execute the diff update
+            inserted, modified, deleted = ViewCollection.diff(self.view)
+            self.lines_removed(deleted)
+            self.bind_icons('inserted', inserted)
+            self.bind_icons('changed', modified)
 
     def clear_all(self):
         for region_name in self.region_names:
@@ -81,3 +88,11 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         icon = self.icon_path(event)
         self.view.add_regions('git_gutter_%s' % event, regions, scope, icon)
 
+    def bind_files(self, event):
+        lines = []
+        lineCount = ViewCollection.total_lines(self.view)
+        i = 0
+        while i < lineCount:
+            lines += [i + 1]
+            i = i + 1
+        self.bind_icons(event, lines)
