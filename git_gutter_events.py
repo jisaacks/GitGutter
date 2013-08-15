@@ -74,7 +74,3 @@ class GitGutterEvents(sublime_plugin.EventListener):
         self.non_blocking = self.settings.get('non_blocking')
         if self.non_blocking is None or int(sublime.version()) < 3014: 
             self.non_blocking = False
-
-        self.untracked = self.settings.get('show_markers_on_untracked_file')
-        if self.untracked is None:
-            self.untracked = False
