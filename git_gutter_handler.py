@@ -157,6 +157,33 @@ class GitGutterHandler:
         else:
             return ([], [], [])
 
+    def untracked(self):
+        return self.handle_files([])
+
+    def ignored(self):
+        return self.handle_files(['-i'])
+
+    def handle_files(self, additionnal_args):
+        if self.show_untracked and self.on_disk() and self.git_path:
+            args = [
+                self.git_binary_path,
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'ls-files', '--other', '--exclude-standard',
+            ] + additionnal_args + [
+                os.path.join(self.git_tree, self.git_path),
+            ]
+            args = list(filter(None, args))  # Remove empty args
+            results = self.run_command(args)
+            encoding = self._get_view_encoding()
+            try:
+                decoded_results = results.decode(encoding.replace(' ', ''))
+            except UnicodeError:
+                decoded_results = results.decode("utf-8")
+            return (decoded_results != "")
+        else:
+            return False
+
     def run_command(self, args):
         startupinfo = None
         if os.name == 'nt':
@@ -190,3 +217,6 @@ class GitGutterHandler:
         patience = self.settings.get('patience')
         if patience:
             self.patience_switch = '--patience'
+
+        #Untracked files
+        self.show_untracked = self.settings.get('show_markers_on_untracked_file')
