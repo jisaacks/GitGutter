@@ -36,6 +36,21 @@ class ViewCollection:
         return ViewCollection.views[key].diff()
 
     @staticmethod
+    def untracked(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].untracked()
+
+    @staticmethod
+    def ignored(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].ignored()
+
+    @staticmethod
+    def total_lines(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].total_lines()
+
+    @staticmethod
     def git_time(view):
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.git_times:
