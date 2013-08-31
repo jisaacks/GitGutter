@@ -76,7 +76,15 @@ To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add 
 
 #### Icon Coloring
 
-The colors come from your *color scheme* **.tmTheme** file. I recommend installing the [sublime-monokai-extended](https://github.com/jonschlinkert/sublime-monokai-extended) color scheme which has all the appropriate colors for GitGutter. If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
+The colors come from your *color scheme* **.tmTheme** file.
+
+Color schemes that already have support for GitGutter include:
+
+* [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
+* [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
+* [Perv](https://github.com/jisaacks/Perv-ColorScheme)
+
+If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
 
 ```xml
 <dict>
