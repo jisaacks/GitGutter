@@ -13,6 +13,7 @@ except ImportError:
 
 
 class GitGutterHandler:
+
     def __init__(self, view):
         self.load_settings()
         self.view = view
@@ -32,8 +33,8 @@ class GitGutterHandler:
             encoding = pattern.sub(r'\1', encoding)
 
         encoding = encoding.replace('with BOM', '')
-        encoding = encoding.replace('Windows','cp')
-        encoding = encoding.replace('-','_')
+        encoding = encoding.replace('Windows', 'cp')
+        encoding = encoding.replace('-', '_')
         encoding = encoding.replace(' ', '')
         return encoding
 
@@ -54,7 +55,8 @@ class GitGutterHandler:
 
         # Try conversion
         try:
-            contents = self.view.substr(region).encode(self._get_view_encoding())
+            contents = self.view.substr(
+                region).encode(self._get_view_encoding())
         except UnicodeError:
             # Fallback to utf8-encoding
             contents = self.view.substr(region).encode('utf-8')
@@ -147,7 +149,7 @@ class GitGutterHandler:
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
             ]
-            args = list(filter(None, args)) # Remove empty args
+            args = list(filter(None, args))  # Remove empty args
             results = self.run_command(args)
             encoding = self._get_view_encoding()
             try:
@@ -191,16 +193,18 @@ class GitGutterHandler:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-            startupinfo=startupinfo, stderr=subprocess.PIPE)
+                                startupinfo=startupinfo, stderr=subprocess.PIPE)
         return proc.stdout.read()
 
     def load_settings(self):
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
-        self.user_settings = sublime.load_settings('Preferences.sublime-settings')
+        self.user_settings = sublime.load_settings(
+            'Preferences.sublime-settings')
 
         # Git Binary Setting
         self.git_binary_path = 'git'
-        git_binary = self.user_settings.get('git_binary') or self.settings.get('git_binary')
+        git_binary = self.user_settings.get(
+            'git_binary') or self.settings.get('git_binary')
         if git_binary:
             self.git_binary_path = git_binary
 
@@ -219,5 +223,6 @@ class GitGutterHandler:
         if patience:
             self.patience_switch = '--patience'
 
-        #Untracked files
-        self.show_untracked = self.settings.get('show_markers_on_untracked_file')
+        # Untracked files
+        self.show_untracked = self.settings.get(
+            'show_markers_on_untracked_file')

@@ -37,7 +37,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         elif ViewCollection.ignored(self.view):
             self.bind_files('ignored')
         else:
-            # If the file is untracked there is no need to execute the diff update
+            # If the file is untracked there is no need to execute the diff
+            # update
             inserted, modified, deleted = ViewCollection.diff(self.view)
             self.lines_removed(deleted)
             self.bind_icons('inserted', inserted)

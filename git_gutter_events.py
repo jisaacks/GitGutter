@@ -5,7 +5,9 @@ try:
 except ImportError:
     from view_collection import ViewCollection
 
+
 class GitGutterEvents(sublime_plugin.EventListener):
+
     def __init__(self):
         self.load_settings()
 
@@ -33,9 +35,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         if not self.non_blocking and self.focus_change_mode:
             ViewCollection.add(view)
 
-    
     # Asynchronous
-
     def on_modified_async(self, view):
         if not self.live_mode:
             return None
@@ -62,9 +62,9 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
     def load_settings(self):
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
-        
+
         self.live_mode = self.settings.get('live_mode')
-        if self.live_mode is None: 
+        if self.live_mode is None:
             self.live_mode = True
 
         self.focus_change_mode = self.settings.get('focus_change_mode')
@@ -72,5 +72,5 @@ class GitGutterEvents(sublime_plugin.EventListener):
             self.focus_change_mode = True
 
         self.non_blocking = self.settings.get('non_blocking')
-        if self.non_blocking is None or int(sublime.version()) < 3014: 
+        if self.non_blocking is None or int(sublime.version()) < 3014:
             self.non_blocking = False
