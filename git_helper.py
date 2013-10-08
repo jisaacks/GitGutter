@@ -38,8 +38,10 @@ def git_dir(directory):
         with open(pre_git_dir) as submodule_git_file:
             submodule_path = submodule_git_file.read()
             submodule_path = os.path.join('..', submodule_path.split()[1])
-            submodule_git_dir = os.path.abspath(os.path.join(pre_git_dir,
-                                                             submodule_git_dir)
+
+            submodule_git_dir = os.path.abspath(
+                os.path.join(pre_git_dir, submodule_path))
+
         return submodule_git_dir
     else:
         return pre_git_dir
