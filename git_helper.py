@@ -32,4 +32,16 @@ def git_tree(view):
 def git_dir(directory):
     if not directory:
         return False
-    return os.path.join(directory, '.git')
+    pre_git_dir = os.path.join(directory, '.git')
+    if os.path.isfile(pre_git_dir):
+        submodule_path = ''
+        with open(pre_git_dir) as submodule_git_file:
+            submodule_path = submodule_git_file.read()
+            submodule_path = os.path.join('..', submodule_path.split()[1])
+
+            submodule_git_dir = os.path.abspath(
+                os.path.join(pre_git_dir, submodule_path))
+
+        return submodule_git_dir
+    else:
+        return pre_git_dir
