@@ -6,18 +6,6 @@ except ImportError:
     from view_collection import ViewCollection
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 def plugin_loaded():
     """
     Ugly hack for icons in ST3
