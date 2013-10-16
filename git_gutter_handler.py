@@ -19,6 +19,7 @@ class GitGutterHandler:
         self.view = view
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
+        self.stg_temp_file = ViewCollection.stg_tmp_file(self.view)
         if self.on_disk():
             self.git_tree = git_helper.git_tree(self.view)
             self.git_dir = git_helper.git_dir(self.git_tree)
@@ -70,6 +71,32 @@ class GitGutterHandler:
 
         f.write(contents)
         f.close()
+
+    def update_stg_file(self):
+        # FIXME dry up duplicate in update_stg_file and update_git_file
+
+        # the git repo won't change that often
+        # so we can easily wait 5 seconds
+        # between updates for performance
+        if ViewCollection.stg_time(self.view) > 5:
+            open(self.stg_temp_file.name, 'w').close()
+            args = [
+                self.git_binary_path,
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'show',
+                ':' + self.git_path,
+            ] 
+            try:
+                contents = self.run_command(args)
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
+                f = open(self.stg_temp_file.name, 'wb')
+                f.write(contents)
+                f.close()
+                ViewCollection.update_stg_time(self.view)
+            except Exception:
+                pass
 
     def update_git_file(self):
         # the git repo won't change that often
@@ -148,6 +175,28 @@ class GitGutterHandler:
                 self.patience_switch,
                 self.git_temp_file.name,
                 self.buf_temp_file.name,
+            ]
+            args = list(filter(None, args))  # Remove empty args
+            results = self.run_command(args)
+            encoding = self._get_view_encoding()
+            try:
+                decoded_results = results.decode(encoding.replace(' ', ''))
+            except UnicodeError:
+                decoded_results = results.decode("utf-8")
+            return self.process_diff(decoded_results)
+        else:
+            return ([], [], [])
+
+    # FIXME
+    # Refactor staged/diff methods to dry up duplicated code
+    def staged(self):
+        if self.on_disk() and self.git_path:
+            self.update_git_file()
+            self.update_stg_file()
+            args = [
+                self.git_binary_path, 'diff', '-U0', '--no-color',
+                self.stg_temp_file.name,
+                self.view.file_name()
             ]
             args = list(filter(None, args))  # Remove empty args
             results = self.run_command(args)

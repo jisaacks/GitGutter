@@ -5,8 +5,10 @@ import time
 class ViewCollection:
     views = {}
     git_times = {}
+    stg_times = {}
     git_files = {}
     buf_files = {}
+    stg_files = {}
 
     @staticmethod
     def add(view):
@@ -36,6 +38,11 @@ class ViewCollection:
         return ViewCollection.views[key].diff()
 
     @staticmethod
+    def staged(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].staged()
+
+    @staticmethod
     def untracked(view):
         key = ViewCollection.get_key(view)
         return ViewCollection.views[key].untracked()
@@ -63,6 +70,18 @@ class ViewCollection:
         ViewCollection.git_times[key] = time.time()
 
     @staticmethod
+    def stg_time(view):
+        key = ViewCollection.get_key(view)
+        if not key in ViewCollection.stg_times:
+            ViewCollection.stg_times[key] = 0
+        return time.time() - ViewCollection.stg_times[key]
+
+    @staticmethod
+    def update_stg_time(view):
+        key = ViewCollection.get_key(view)
+        ViewCollection.stg_times[key] = time.time()
+
+    @staticmethod
     def git_tmp_file(view):
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.git_files:
@@ -77,3 +96,11 @@ class ViewCollection:
             ViewCollection.buf_files[key] = tempfile.NamedTemporaryFile()
             ViewCollection.buf_files[key].close()
         return ViewCollection.buf_files[key]
+
+    @staticmethod
+    def stg_tmp_file(view):
+        key = ViewCollection.get_key(view)
+        if not key in ViewCollection.stg_files:
+            ViewCollection.stg_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.stg_files[key].close()
+        return ViewCollection.stg_files[key]

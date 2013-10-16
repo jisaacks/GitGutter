@@ -6,6 +6,18 @@ except ImportError:
     from view_collection import ViewCollection
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 def plugin_loaded():
     """
     Ugly hack for icons in ST3
@@ -25,6 +37,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
+    qualifiers = ['staged','unstaged']
+
     def run(self):
         self.view = self.window.active_view()
         if not self.view:
@@ -39,14 +53,57 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         else:
             # If the file is untracked there is no need to execute the diff
             # update
-            inserted, modified, deleted = ViewCollection.diff(self.view)
-            self.lines_removed(deleted)
-            self.bind_icons('inserted', inserted)
-            self.bind_icons('changed', modified)
+            if self.view.is_dirty():
+                # FIXME
+                # * dry up the 3 blocks of code below that all look the same
+                # * only qualify unstaged changes when there _are_ staged ones
+
+                # Mark changes without a qualifier
+                print("Running GitGutter without qualifiers")
+                inserted, modified, deleted = self.all_changes()
+                self.lines_removed(deleted)
+                self.bind_icons('inserted', inserted)
+                self.bind_icons('changed', modified)
+            else:
+                print("Running GitGutter with qualifiers")
+                # Mark changes qualified with staged/unstaged
+                inserted, modified, deleted = self.unstaged_changes()
+                self.lines_removed(deleted, 'unstaged')
+                self.bind_icons('inserted', inserted, 'unstaged')
+                self.bind_icons('changed', modified, 'unstaged')
+                
+                inserted, modified, deleted = self.staged_changes()
+                self.lines_removed(deleted, 'staged')
+                self.bind_icons('inserted', inserted, 'staged')
+                self.bind_icons('changed', modified, 'staged')
+
+
+    def all_changes(self):
+        return ViewCollection.diff(self.view)
+
+    def unstaged_changes(self):
+        return ViewCollection.staged(self.view)
+
+    def staged_changes(self):
+        all_inserted, all_modified, all_deleted = self.all_changes()
+        uns_inserted, uns_modified, uns_deleted = self.unstaged_changes()
+        
+        stg_inserted = self.list_subtract(all_inserted, uns_inserted)
+        stg_modified = self.list_subtract(all_modified, uns_modified)
+        stg_deleted  = self.list_subtract(all_deleted, uns_deleted)
+
+        return [stg_inserted, stg_modified, stg_deleted]
+
+    def list_subtract(self, a, b):
+        subtracted = [elem for elem in a if elem not in b]
+        return subtracted
 
     def clear_all(self):
         for region_name in self.region_names:
             self.view.erase_regions('git_gutter_%s' % region_name)
+            for qualifier in self.qualifiers:
+                self.view.erase_regions('git_gutter_%s_%s' % (
+                    region_name, qualifier))
 
     def lines_to_regions(self, lines):
         regions = []
@@ -56,7 +113,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             regions.append(region)
         return regions
 
-    def lines_removed(self, lines):
+    def lines_removed(self, lines, qualifier=None):
         top_lines = lines
         bottom_lines = [line - 1 for line in lines if line > 1]
         dual_lines = []
@@ -67,9 +124,9 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             bottom_lines.remove(line)
             top_lines.remove(line)
 
-        self.bind_icons('deleted_top', top_lines)
-        self.bind_icons('deleted_bottom', bottom_lines)
-        self.bind_icons('deleted_dual', dual_lines)
+        self.bind_icons('deleted_top', top_lines, qualifier)
+        self.bind_icons('deleted_bottom', bottom_lines, qualifier)
+        self.bind_icons('deleted_dual', dual_lines, qualifier)
 
     def icon_path(self, icon_name):
         if int(sublime.version()) < 3014:
@@ -80,14 +137,27 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             extn = '.png'
         return path + '/GitGutter/icons/' + icon_name + extn
 
-    def bind_icons(self, event, lines):
+    def icon_scope(self, event_scope, qualifier):
+        scope = 'markup.%s.git_gutter' % event_scope
+        if qualifier:
+            scope += "." + qualifier
+        return scope
+
+    def icon_region(self, event, qualifier):
+        region = 'git_gutter_%s' % event
+        if qualifier:
+            region += "_" + qualifier
+        return region
+
+    def bind_icons(self, event, lines, qualifier=None):
         regions = self.lines_to_regions(lines)
         event_scope = event
         if event.startswith('deleted'):
             event_scope = 'deleted'
-        scope = 'markup.%s.git_gutter' % event_scope
+        scope = self.icon_scope(event_scope,qualifier)
         icon = self.icon_path(event)
-        self.view.add_regions('git_gutter_%s' % event, regions, scope, icon)
+        key = self.icon_region(event,qualifier)
+        self.view.add_regions(key, regions, scope, icon)
 
     def bind_files(self, event):
         lines = []
