@@ -236,6 +236,17 @@ class GitGutterHandler:
         else:
             return False
 
+    def has_stages(self):
+        args = [self.git_binary_path, 
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'diff', '--staged']
+        results = self.run_command(args)
+        if len(results):
+            return True
+        else:
+            return False
+
     def run_command(self, args):
         startupinfo = None
         if os.name == 'nt':

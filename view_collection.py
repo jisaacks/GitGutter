@@ -38,6 +38,11 @@ class ViewCollection:
         return ViewCollection.views[key].diff()
 
     @staticmethod
+    def has_stages(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].has_stages()
+
+    @staticmethod
     def staged(view):
         key = ViewCollection.get_key(view)
         return ViewCollection.views[key].staged()

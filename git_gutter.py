@@ -39,21 +39,13 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         elif ViewCollection.ignored(self.view):
             self.bind_files('ignored')
         else:
-            # If the file is untracked there is no need to execute the diff
-            # update
-            if self.view.is_dirty():
+            dirty  = self.view.is_dirty()
+            staged = ViewCollection.has_stages(self.view)
+            if staged and not dirty:
                 # FIXME
                 # * dry up the 3 blocks of code below that all look the same
                 # * only qualify unstaged changes when there _are_ staged ones
 
-                # Mark changes without a qualifier
-                print("Running GitGutter without qualifiers")
-                inserted, modified, deleted = self.all_changes()
-                self.lines_removed(deleted)
-                self.bind_icons('inserted', inserted)
-                self.bind_icons('changed', modified)
-            else:
-                print("Running GitGutter with qualifiers")
                 # Mark changes qualified with staged/unstaged
                 inserted, modified, deleted = self.unstaged_changes()
                 self.lines_removed(deleted, 'unstaged')
@@ -64,6 +56,12 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                 self.lines_removed(deleted, 'staged')
                 self.bind_icons('inserted', inserted, 'staged')
                 self.bind_icons('changed', modified, 'staged')
+            else:
+                # Mark changes without a qualifier
+                inserted, modified, deleted = self.all_changes()
+                self.lines_removed(deleted)
+                self.bind_icons('inserted', inserted)
+                self.bind_icons('changed', modified)
 
 
     def all_changes(self):
