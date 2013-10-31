@@ -25,6 +25,7 @@ class GitGutterCompareCommit(sublime_plugin.WindowCommand):
         # print(item[1].split(' ')[0])
         commit = item[1].split(' ')[0]
         ViewCollection.set_compare(commit)
+        ViewCollection.add(self.view)
 
 class GitGutterCompareBranch(sublime_plugin.WindowCommand):
     def run(self):
@@ -51,10 +52,13 @@ class GitGutterCompareBranch(sublime_plugin.WindowCommand):
         # print(item[1].split(' ')[0])
         commit = item[1].split(' ')[0]
         ViewCollection.set_compare(commit)
+        ViewCollection.add(self.view)
 
 class GitGutterCompareHead(sublime_plugin.WindowCommand):
     def run(self):
+        self.view = self.window.active_view()
         ViewCollection.set_compare("HEAD")
+        ViewCollection.add(self.view)
 
 class GitGutterShowCompare(sublime_plugin.WindowCommand):
     def run(self):
