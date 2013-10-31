@@ -1,5 +1,39 @@
 [
     {
+        "id": "view",
+        "children":
+        [
+            {
+                "caption": "GitGutter",
+                "children":
+                [
+                    {
+                        "caption": "Compare Against",
+                        "children":
+                        [
+                            { 
+                                "caption": "View Current", 
+                                "command": "git_gutter_show_compare"
+                            },
+                            { 
+                                "caption": "HEAD", 
+                                "command": "git_gutter_compare_head"
+                            },
+                            { 
+                                "caption": "Commit",     
+                                "command": "git_gutter_compare_commit"
+                            },
+                            { 
+                                "caption": "Branch",     
+                                "command": "git_gutter_compare_branch"
+                            }
+                        ]
+                    },
+                ]
+            }
+        ]
+    },
+    {
         "id": "goto",
         "children":
         [
@@ -12,8 +46,8 @@
                 "command": "git_gutter_next_change"
             }
         ]
-    }
-    ,{
+    },
+    {
         "caption": "Preferences",
         "mnemonic": "n",
         "id": "preferences",
