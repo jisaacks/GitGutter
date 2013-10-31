@@ -1,0 +1,18 @@
+[
+    {
+        "caption": "GitGutter: Show Comparing Aginst",
+        "command": "git_gutter_show_compare"
+    },
+    {
+        "caption": "GitGutter: Compare Aginst HEAD",
+        "command": "git_gutter_compare_head"
+    },
+    {
+        "caption": "GitGutter: Compare Aginst Commit",
+        "command": "git_gutter_compare_commit"
+    },
+    {
+        "caption": "GitGutter: Compare Aginst Branch",
+        "command": "git_gutter_compare_branch"
+    }
+]
