@@ -129,7 +129,7 @@ class GitGutterHandler:
                 deleted += [start + 1]
             else:
                 modified += range(start, start + new_size)
-        if len(inserted) == self.total_lines():
+        if len(inserted) == self.total_lines() and not self.show_untracked:
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
