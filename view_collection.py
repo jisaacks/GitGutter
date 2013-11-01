@@ -59,6 +59,11 @@ class ViewCollection:
         return time.time() - ViewCollection.git_times[key]
 
     @staticmethod
+    def clear_git_time(view):
+        key = ViewCollection.get_key(view)
+        ViewCollection.git_times[key] = 0
+
+    @staticmethod
     def update_git_time(view):
         key = ViewCollection.get_key(view)
         ViewCollection.git_times[key] = time.time()
