@@ -11,31 +11,30 @@ class GitGutterCompareCommit(sublime_plugin.WindowCommand):
     def run(self):
         self.view = self.window.active_view()
         key = ViewCollection.get_key(self.view)
-        handler = ViewCollection.views[key]
+        self.handler = ViewCollection.views[key]
 
-        result = handler.git_commits().decode("utf-8")
-        self.results = [r.split('\a', 2) for r in result.strip().split('\n')]
+        self.results = self.commit_list()
         self.window.show_quick_panel(self.results, self.on_select)
+
+    def commit_list(self):
+        result = self.handler.git_commits().decode("utf-8")
+        return [r.split('\a', 2) for r in result.strip().split('\n')]
+
+    def item_to_commit(self, item):
+        return item[1].split(' ')[0]
 
     def on_select(self, selected):
         if 0 > selected < len(self.results):
             return
         item = self.results[selected]
-        # the commit hash is the first thing on the second line
-        # print(item[1].split(' ')[0])
-        commit = item[1].split(' ')[0]
+        commit = self.item_to_commit(item)
         ViewCollection.set_compare(commit)
         ViewCollection.add(self.view)
 
-class GitGutterCompareBranch(sublime_plugin.WindowCommand):
-    def run(self):
-        self.view = self.window.active_view()
-        key = ViewCollection.get_key(self.view)
-        handler = ViewCollection.views[key]
-
-        result = handler.git_branches().decode("utf-8")
-        self.results = [self.parse_result(r) for r in result.strip().split('\n')]
-        self.window.show_quick_panel(self.results, self.on_select)
+class GitGutterCompareBranch(GitGutterCompareCommit):
+    def commit_list(self):
+        result = self.handler.git_branches().decode("utf-8")
+        return [self.parse_result(r) for r in result.strip().split('\n')]
 
     def parse_result(self, result):
         pieces = result.split('\a')
@@ -44,25 +43,10 @@ class GitGutterCompareBranch(sublime_plugin.WindowCommand):
         commit  = pieces[2][0:7]
         return [branch, commit + " " + message]
 
-    def on_select(self, selected):
-        if 0 > selected < len(self.results):
-            return
-        item = self.results[selected]
-        # the commit hash is the first thing on the second line
-        # print(item[1].split(' ')[0])
-        commit = item[1].split(' ')[0]
-        ViewCollection.set_compare(commit)
-        ViewCollection.add(self.view)
-
-class GitGutterCompareTag(sublime_plugin.WindowCommand):
-    def run(self):
-        self.view = self.window.active_view()
-        key = ViewCollection.get_key(self.view)
-        handler = ViewCollection.views[key]
-
-        result = handler.git_tags().decode("utf-8")
-        self.results = [self.parse_result(r) for r in result.strip().split('\n')]
-        self.window.show_quick_panel(self.results, self.on_select)
+class GitGutterCompareTag(GitGutterCompareCommit):
+    def commit_list(self):
+        result = self.handler.git_tags().decode("utf-8")
+        return [self.parse_result(r) for r in result.strip().split('\n')]
 
     def parse_result(self, result):
         if not result:
@@ -73,13 +57,8 @@ class GitGutterCompareTag(sublime_plugin.WindowCommand):
         tag    = pieces[1].replace("refs/tags/", "")
         return [tag, commit]
 
-    def on_select(self, selected):
-        if 0 > selected < len(self.results):
-            return
-        item = self.results[selected]
-        commit = item[1]
-        ViewCollection.set_compare(commit)
-        ViewCollection.add(self.view)
+    def item_to_commit(self, item):
+        return item[1]
 
 class GitGutterCompareHead(sublime_plugin.WindowCommand):
     def run(self):
