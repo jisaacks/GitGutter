@@ -14,5 +14,9 @@
     {
         "caption": "GitGutter: Compare Aginst Branch",
         "command": "git_gutter_compare_branch"
+    },
+    {
+        "caption": "GitGutter: Compare Aginst Tag",
+        "command": "git_gutter_compare_tag"
     }
 ]

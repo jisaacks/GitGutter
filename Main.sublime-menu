@@ -26,6 +26,9 @@
                             { 
                                 "caption": "Branch",     
                                 "command": "git_gutter_compare_branch"
+                            },{ 
+                                "caption": "Tag",     
+                                "command": "git_gutter_compare_tag"
                             }
                         ]
                     },

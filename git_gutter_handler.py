@@ -212,6 +212,18 @@ class GitGutterHandler:
         results = self.run_command(args)
         return results
 
+    def git_tags(self):
+        args = [
+            self.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'show-ref',
+            '--tags',
+            '--abbrev=7'
+        ]
+        results = self.run_command(args)
+        return results
+
     def run_command(self, args):
         startupinfo = None
         if os.name == 'nt':

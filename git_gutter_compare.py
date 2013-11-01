@@ -54,6 +54,33 @@ class GitGutterCompareBranch(sublime_plugin.WindowCommand):
         ViewCollection.set_compare(commit)
         ViewCollection.add(self.view)
 
+class GitGutterCompareTag(sublime_plugin.WindowCommand):
+    def run(self):
+        self.view = self.window.active_view()
+        key = ViewCollection.get_key(self.view)
+        handler = ViewCollection.views[key]
+
+        result = handler.git_tags().decode("utf-8")
+        self.results = [self.parse_result(r) for r in result.strip().split('\n')]
+        self.window.show_quick_panel(self.results, self.on_select)
+
+    def parse_result(self, result):
+        if not result:
+            sublime.message_dialog("No tags found in repository")
+            return
+        pieces = result.split(' ')
+        commit = pieces[0]
+        tag    = pieces[1].replace("refs/tags/", "")
+        return [tag, commit]
+
+    def on_select(self, selected):
+        if 0 > selected < len(self.results):
+            return
+        item = self.results[selected]
+        commit = item[1]
+        ViewCollection.set_compare(commit)
+        ViewCollection.add(self.view)
+
 class GitGutterCompareHead(sublime_plugin.WindowCommand):
     def run(self):
         self.view = self.window.active_view()
