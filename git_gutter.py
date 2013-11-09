@@ -1,6 +1,7 @@
 import os
 import sublime
 import sublime_plugin
+
 try:
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
@@ -77,12 +78,26 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         for region_name in self.region_names:
             self.view.erase_regions('git_gutter_%s' % region_name)
 
+    def is_region_protected(self, region):
+        # Load protected Regions from Settings
+        protected_regions = settings.get('protected_regions',[])
+        # List of Lists of Regions
+        sets = [self.view.get_regions(r) for r in protected_regions]
+        # List of Regions
+        regions = [r for rs in sets for r in rs]
+        for r in regions:
+            if r.contains(region):
+                return True
+
+        return False
+
     def lines_to_regions(self, lines):
         regions = []
         for line in lines:
             position = self.view.text_point(line - 1, 0)
             region = sublime.Region(position, position)
-            regions.append(region)
+            if not self.is_region_protected(region):
+                regions.append(region)
         return regions
 
     def lines_removed(self, lines):
