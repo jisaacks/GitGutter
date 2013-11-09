@@ -50,5 +50,10 @@
 
   // Determines whether the git_gutter_next_change and git_gutter_prev_change
   // commands wrap around on reaching the beginning/ending of the file.
-  "next_prev_change_wrap": true
+  "next_prev_change_wrap": true,
+
+  // Do not set GitGutter icons in these regions
+  // Useful for making sure GitGutter does not override other
+  // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
+  "protected_regions": []
 }
