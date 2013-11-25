@@ -86,6 +86,7 @@ Color schemes that already have support for GitGutter include:
 * [Tomorrow Theme](https://github.com/chriskempson/tomorrow-theme)
 * [Neon Color Scheme](https://github.com/MattDMo/Neon-color-scheme)
 * [Underscore Colour Theme](https://github.com/channingwalton/sublime_underscore)
+* [Solarized Colour Theme](https://github.com/SublimeColors/Solarized)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
