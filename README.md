@@ -17,6 +17,13 @@ cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
+or if you are already Using Sublime Text 3
+
+```shell
+cd ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/
+git clone git://github.com/jisaacks/GitGutter.git
+```
+
 *Ubuntu*
 ```shell
 cd ~/.config/sublime-text-2/Packages
