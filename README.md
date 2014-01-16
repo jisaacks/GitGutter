@@ -81,6 +81,7 @@ The colors come from your *color scheme* **.tmTheme** file.
 Color schemes that already have support for GitGutter include:
 
 * [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
+* [Flatland](https://github.com/thinkpixellab/flatland)
 * [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
 * [Perv](https://github.com/jisaacks/Perv-ColorScheme)
 * [Tomorrow Theme](https://github.com/chriskempson/tomorrow-theme)
