@@ -72,12 +72,17 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         self.bind_icons('deleted_dual', dual_lines)
 
     def icon_path(self, icon_name):
+        if icon_name in ['deleted_top','deleted_bottom','deleted_dual']:
+            if self.view.line_height() > 15:
+                icon_name = icon_name + "_arrow"
+
         if int(sublime.version()) < 3014:
             path = '..'
             extn = ''
         else:
             path = 'Packages'
             extn = '.png'
+        
         return path + '/GitGutter/icons/' + icon_name + extn
 
     def bind_icons(self, event, lines):
