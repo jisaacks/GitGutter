@@ -49,7 +49,7 @@ You can toggle the setting `show_markers_on_untracked_file` to show special icon
 
 #### Git path
 If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
-```js
+```json
 {
   "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
