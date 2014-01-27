@@ -14,7 +14,8 @@ class GitGutterCompareCommit(sublime_plugin.WindowCommand):
         self.handler = ViewCollection.views[key]
 
         self.results = self.commit_list()
-        self.window.show_quick_panel(self.results, self.on_select)
+        if self.results:
+            self.window.show_quick_panel(self.results, self.on_select)
 
     def commit_list(self):
         result = self.handler.git_commits().decode("utf-8")
@@ -47,12 +48,12 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
 class GitGutterCompareTag(GitGutterCompareCommit):
     def commit_list(self):
         result = self.handler.git_tags().decode("utf-8")
-        return [self.parse_result(r) for r in result.strip().split('\n')]
+        if result:
+            return [self.parse_result(r) for r in result.strip().split('\n')]
+        else:
+            sublime.message_dialog("No tags found in repository")
 
     def parse_result(self, result):
-        if not result:
-            sublime.message_dialog("No tags found in repository")
-            return
         pieces = result.split(' ')
         commit = pieces[0]
         tag    = pieces[1].replace("refs/tags/", "")
