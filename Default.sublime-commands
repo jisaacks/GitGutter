@@ -1,22 +1,22 @@
 [
     {
-        "caption": "GitGutter: Show Comparing Aginst",
+        "caption": "GitGutter: Show Comparing Against",
         "command": "git_gutter_show_compare"
     },
     {
-        "caption": "GitGutter: Compare Aginst HEAD",
+        "caption": "GitGutter: Compare Against HEAD",
         "command": "git_gutter_compare_head"
     },
     {
-        "caption": "GitGutter: Compare Aginst Commit",
+        "caption": "GitGutter: Compare Against Commit",
         "command": "git_gutter_compare_commit"
     },
     {
-        "caption": "GitGutter: Compare Aginst Branch",
+        "caption": "GitGutter: Compare Against Branch",
         "command": "git_gutter_compare_branch"
     },
     {
-        "caption": "GitGutter: Compare Aginst Tag",
+        "caption": "GitGutter: Compare Against Tag",
         "command": "git_gutter_compare_tag"
     }
 ]
