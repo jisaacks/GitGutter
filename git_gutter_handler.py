@@ -82,7 +82,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                'HEAD:' + self.git_path,
+                ViewCollection.get_compare() + ':' + self.git_path,
             ]
             try:
                 contents = self.run_command(args)
@@ -129,7 +129,7 @@ class GitGutterHandler:
                 deleted += [start + 1]
             else:
                 modified += range(start, start + new_size)
-        if len(inserted) == self.total_lines():
+        if len(inserted) == self.total_lines() and not self.show_untracked:
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
@@ -186,6 +186,43 @@ class GitGutterHandler:
             return (decoded_results != "")
         else:
             return False
+
+    def git_commits(self):
+        args = [
+            self.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'log', '--all',
+            '--pretty=%s\a%h %an <%aE>\a%ad (%ar)',
+            '--date=local', '--max-count=9000'
+        ]
+        results = self.run_command(args)
+        return results
+
+    def git_branches(self):
+        args = [
+            self.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'for-each-ref',
+            '--sort=-committerdate',
+            '--format=%(subject)\a%(refname)\a%(objectname)',
+            'refs/heads/'
+        ]
+        results = self.run_command(args)
+        return results
+
+    def git_tags(self):
+        args = [
+            self.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'show-ref',
+            '--tags',
+            '--abbrev=7'
+        ]
+        results = self.run_command(args)
+        return results
 
     def run_command(self, args):
         startupinfo = None
