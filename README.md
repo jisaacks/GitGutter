@@ -45,11 +45,11 @@ By default, GitGutter detects changes every time the file is modified. If you ex
 
 
 #### Untracked Files
-You can toggle the setting `show_markers_on_untracked_file` to show special icons for untracked/ignored files. Defaults to false (shows no icons). If set to true you may want to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
+GitGutter shows icons for new files and ignored files. These icons will be on everyline. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
 
 #### Git path
 If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
-```js
+```json
 {
   "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
@@ -81,9 +81,14 @@ The colors come from your *color scheme* **.tmTheme** file.
 Color schemes that already have support for GitGutter include:
 
 * [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
+* [Flatland](https://github.com/thinkpixellab/flatland)
 * [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
 * [Perv](https://github.com/jisaacks/Perv-ColorScheme)
 * [Tomorrow Theme](https://github.com/chriskempson/tomorrow-theme)
+* [Neon Color Scheme](https://github.com/MattDMo/Neon-color-scheme)
+* [Underscore Colour Theme](https://github.com/channingwalton/sublime_underscore)
+* [Solarized Colour Theme](https://github.com/SublimeColors/Solarized)
+* [Baara Dark](https://github.com/jobedom/sublime-baara-dark)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
@@ -120,6 +125,28 @@ If your color scheme file does not define the appropriate colors (or you want to
   <dict>
     <key>foreground</key>
     <string>#967EFB</string>
+  </dict>
+</dict>
+<dict>
+  <key>name</key>
+  <string>GitGutter ignored</string>
+  <key>scope</key>
+  <string>markup.ignored.git_gutter</string>
+  <key>settings</key>
+  <dict>
+    <key>foreground</key>
+    <string>#565656</string>
+  </dict>
+</dict>
+<dict>
+  <key>name</key>
+  <string>GitGutter untracked</string>
+  <key>scope</key>
+  <string>markup.untracked.git_gutter</string>
+  <key>settings</key>
+  <dict>
+    <key>foreground</key>
+    <string>#565656</string>
   </dict>
 </dict>
 ```

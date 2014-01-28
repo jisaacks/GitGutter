@@ -9,6 +9,7 @@ class ViewCollection:
     git_files = {}
     buf_files = {}
     stg_files = {}
+    compare_against = "HEAD"
 
     @staticmethod
     def add(view):
@@ -70,6 +71,11 @@ class ViewCollection:
         return time.time() - ViewCollection.git_times[key]
 
     @staticmethod
+    def clear_git_time(view):
+        key = ViewCollection.get_key(view)
+        ViewCollection.git_times[key] = 0
+
+    @staticmethod
     def update_git_time(view):
         key = ViewCollection.get_key(view)
         ViewCollection.git_times[key] = time.time()
@@ -109,3 +115,13 @@ class ViewCollection:
             ViewCollection.stg_files[key] = tempfile.NamedTemporaryFile()
             ViewCollection.stg_files[key].close()
         return ViewCollection.stg_files[key]
+    def set_compare(commit):
+        print("GitGutter now comparing against:",commit)
+        ViewCollection.compare_against = commit
+
+    @staticmethod
+    def get_compare():
+        if ViewCollection.compare_against:
+            return ViewCollection.compare_against
+        else:
+            return "HEAD"

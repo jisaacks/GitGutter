@@ -1,19 +1,56 @@
 [
     {
+        "id": "view",
+        "children":
+        [
+            {
+                "caption": "GitGutter",
+                "children":
+                [
+                    {
+                        "caption": "Compare Against",
+                        "children":
+                        [
+                            { 
+                                "caption": "View Current", 
+                                "command": "git_gutter_show_compare"
+                            },
+                            { 
+                                "caption": "HEAD", 
+                                "command": "git_gutter_compare_head"
+                            },
+                            { 
+                                "caption": "Commit",     
+                                "command": "git_gutter_compare_commit"
+                            },
+                            { 
+                                "caption": "Branch",     
+                                "command": "git_gutter_compare_branch"
+                            },{ 
+                                "caption": "Tag",     
+                                "command": "git_gutter_compare_tag"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "id": "goto",
         "children":
         [
-            { 
-                "caption": "Previous change", 
+            {
+                "caption": "Previous change",
                 "command": "git_gutter_prev_change"
             },
-            { 
-                "caption": "Next change",     
+            {
+                "caption": "Next change",
                 "command": "git_gutter_next_change"
             }
         ]
-    }
-    ,{
+    },
+    {
         "caption": "Preferences",
         "mnemonic": "n",
         "id": "preferences",
@@ -38,6 +75,55 @@
                                 "command": "open_file",
                                 "args": {"file": "${packages}/User/GitGutter.sublime-settings"},
                                 "caption": "Settings – User"
+                            },
+                            { "caption": "-" },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/GitGutter/Default (OSX).sublime-keymap",
+                                    "platform": "OSX"
+                                },
+                                "caption": "Key Bindings – Default"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/GitGutter/Default (Linux).sublime-keymap",
+                                    "platform": "Linux"
+                                },
+                                "caption": "Key Bindings – Default"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/GitGutter/Default (Windows).sublime-keymap",
+                                    "platform": "Windows"
+                                },
+                                "caption": "Key Bindings – Default"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/User/Default (OSX).sublime-keymap",
+                                    "platform": "OSX"
+                                },
+                                "caption": "Key Bindings – User"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/User/Default (Linux).sublime-keymap",
+                                    "platform": "Linux"
+                                },
+                                "caption": "Key Bindings – User"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {
+                                    "file": "${packages}/User/Default (Windows).sublime-keymap",
+                                    "platform": "Windows"
+                                },
+                                "caption": "Key Bindings – User"
                             }
                         ]
                     }
