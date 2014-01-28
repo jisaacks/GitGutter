@@ -25,7 +25,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
-    qualifiers = ['staged','unstaged']
+    qualifiers = ['staged','unstaged','staged_unstaged']
 
     def run(self):
         self.view = self.window.active_view()
@@ -41,27 +41,48 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         else:
             staged = ViewCollection.has_stages(self.view)
             if staged:
-                # FIXME
-                # * dry up the 3 blocks of code below that all look the same
-                # * only qualify unstaged changes when there _are_ staged ones
-
-                # Mark changes qualified with staged/unstaged
-                inserted, modified, deleted = self.unstaged_changes()
-                self.lines_removed(deleted, 'unstaged')
-                self.bind_icons('inserted', inserted, 'unstaged')
-                self.bind_icons('changed', modified, 'unstaged')
+                # Mark changes qualified with staged/unstaged/staged_unstaged
                 
-                inserted, modified, deleted = self.staged_changes()
-                self.lines_removed(deleted, 'staged')
-                self.bind_icons('inserted', inserted, 'staged')
-                self.bind_icons('changed', modified, 'staged')
+                # Get unstaged changes
+                u_inserted, u_modified, u_deleted = self.unstaged_changes()
+                
+                # Get staged changes
+                s_inserted, s_modified, s_deleted = self.staged_changes()
+                
+                # Find lines with a mix of staged/unstaged
+                # (only necessary for modified)
+                m_modified = self.mixed_mofified(u_modified,
+                    [s_inserted, s_modified, s_deleted])
+
+                # Remove mixed from unstaged
+                u_inserted = self.list_subtract(u_inserted, m_modified)
+                u_modified = self.list_subtract(u_modified, m_modified)
+                u_deleted  = self.list_subtract(u_deleted, m_modified)
+
+                # Remove mixed from staged
+                s_inserted = self.list_subtract(s_inserted, m_modified)
+                s_modified = self.list_subtract(s_modified, m_modified)
+                s_deleted  = self.list_subtract(s_deleted, m_modified) 
+
+                # Unstaged
+                self.lines_removed(u_deleted, 'unstaged')
+                self.bind_icons('inserted', u_inserted, 'unstaged')
+                self.bind_icons('changed', u_modified, 'unstaged')
+
+                # Staged
+                self.lines_removed(s_deleted, 'staged')
+                self.bind_icons('inserted', s_inserted, 'staged')
+                self.bind_icons('changed', s_modified, 'staged')
+
+                # Mixed
+                self.bind_icons('changed', m_modified, 'staged_unstaged') 
             else:
                 # Mark changes without a qualifier
                 inserted, modified, deleted = self.all_changes()
+
                 self.lines_removed(deleted)
                 self.bind_icons('inserted', inserted)
                 self.bind_icons('changed', modified)
-
 
     def all_changes(self):
         return ViewCollection.diff(self.view)
@@ -82,6 +103,20 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
     def list_subtract(self, a, b):
         subtracted = [elem for elem in a if elem not in b]
         return subtracted
+
+    def list_intersection(self, a, b):
+        intersected = [elem for elem in a if elem in b]
+        return intersected
+
+    def mixed_mofified(self, a, lists):
+        # a is a list of modified lines
+        # lists is a list of lists (inserted, modified, deleted)
+        # We want the values in a that are in any of the lists
+        c = []
+        for b in lists:
+            mix = self.list_intersection(a,b)
+            [c.append(elem) for elem in mix]
+        return c
 
     def clear_all(self):
         for region_name in self.region_names:
@@ -139,8 +174,12 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         event_scope = event
         if event.startswith('deleted'):
             event_scope = 'deleted'
+        if qualifier == "staged_unstaged":
+            icon_name = "staged_unstaged"
+        else:
+            icon_name = event
         scope = self.icon_scope(event_scope,qualifier)
-        icon = self.icon_path(event)
+        icon = self.icon_path(icon_name)
         key = self.icon_region(event,qualifier)
         self.view.add_regions(key, regions, scope, icon)
 
