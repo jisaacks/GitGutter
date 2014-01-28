@@ -39,9 +39,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         elif ViewCollection.ignored(self.view):
             self.bind_files('ignored')
         else:
-            dirty  = self.view.is_dirty()
             staged = ViewCollection.has_stages(self.view)
-            if staged and not dirty:
+            if staged:
                 # FIXME
                 # * dry up the 3 blocks of code below that all look the same
                 # * only qualify unstaged changes when there _are_ staged ones

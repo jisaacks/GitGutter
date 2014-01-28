@@ -191,12 +191,12 @@ class GitGutterHandler:
     # Refactor staged/diff methods to dry up duplicated code
     def staged(self):
         if self.on_disk() and self.git_path:
-            self.update_git_file()
             self.update_stg_file()
+            self.update_buf_file()
             args = [
                 self.git_binary_path, 'diff', '-U0', '--no-color',
                 self.stg_temp_file.name,
-                self.view.file_name()
+                self.buf_temp_file.name
             ]
             args = list(filter(None, args))  # Remove empty args
             results = self.run_command(args)
