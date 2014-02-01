@@ -91,17 +91,10 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         return ViewCollection.diff(self.view)
 
     def unstaged_changes(self):
-        return ViewCollection.staged(self.view)
+        return ViewCollection.unstaged(self.view)
 
     def staged_changes(self):
-        all_inserted, all_modified, all_deleted = self.all_changes()
-        uns_inserted, uns_modified, uns_deleted = self.unstaged_changes()
-        
-        stg_inserted = self.list_subtract(all_inserted, uns_inserted)
-        stg_modified = self.list_subtract(all_modified, uns_modified)
-        stg_deleted  = self.list_subtract(all_deleted, uns_deleted)
-
-        return [stg_inserted, stg_modified, stg_deleted]
+        return ViewCollection.staged(self.view)
 
     def list_subtract(self, a, b):
         subtracted = [elem for elem in a if elem not in b]

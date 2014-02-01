@@ -9,6 +9,7 @@ class ViewCollection:
     git_files = {}
     buf_files = {}
     stg_files = {}
+    line_adjustment_map = {}
     compare_against = "HEAD"
 
     @staticmethod
@@ -47,6 +48,11 @@ class ViewCollection:
     def staged(view):
         key = ViewCollection.get_key(view)
         return ViewCollection.views[key].staged()
+
+    @staticmethod
+    def unstaged(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].unstaged()
 
     @staticmethod
     def untracked(view):
@@ -128,3 +134,16 @@ class ViewCollection:
             return ViewCollection.compare_against
         else:
             return "HEAD"
+
+    @staticmethod
+    def set_line_adjustment_map(view, adj_map):
+        key = ViewCollection.get_key(view)
+        ViewCollection.line_adjustment_map[key] = adj_map
+
+    def get_line_adjustment_map(view):
+        key = ViewCollection.get_key(view)
+        if key in ViewCollection.line_adjustment_map:
+            return ViewCollection.line_adjustment_map[key]
+        else:
+            # Zero adjustments
+            return {0:0}
