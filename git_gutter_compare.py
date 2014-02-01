@@ -10,8 +10,7 @@ else:
 class GitGutterCompareCommit(sublime_plugin.WindowCommand):
     def run(self):
         self.view = self.window.active_view()
-        key = ViewCollection.get_key(self.view)
-        self.handler = ViewCollection.views[key]
+        self.handler = ViewCollection.get_handler(self.view)
 
         self.results = self.commit_list()
         if self.results:
