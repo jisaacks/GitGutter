@@ -3,7 +3,7 @@ import time
 
 
 class ViewCollection:
-    views = {}
+    views = {} # Todo: these aren't really views but handlers. Refactor/Rename.
     git_times = {}
     git_files = {}
     buf_files = {}
@@ -16,8 +16,9 @@ class ViewCollection:
             from GitGutter.git_gutter_handler import GitGutterHandler
         except ImportError:
             from git_gutter_handler import GitGutterHandler
-        ViewCollection.views[key] = GitGutterHandler(view)
-        ViewCollection.views[key].reset()
+        handler = ViewCollection.views[key] = GitGutterHandler(view)
+        handler.reset()
+        return handler
 
     @staticmethod
     def git_path(view):
@@ -30,6 +31,19 @@ class ViewCollection:
     @staticmethod
     def get_key(view):
         return view.file_name()
+
+    @staticmethod
+    def has_view(view):
+        key = ViewCollection.get_key(view)
+        return key in ViewCollection.views
+
+    @staticmethod
+    def get_handler(view):
+        if ViewCollection.has_view(view):
+            key = ViewCollection.get_key(view)
+            return ViewCollection.views[key]
+        else:
+            return ViewCollection.add(view)
 
     @staticmethod
     def diff(view):
