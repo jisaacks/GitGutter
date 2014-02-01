@@ -40,7 +40,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             self.bind_files('ignored')
         else:
             if force_refresh:
-                ViewCollection.clear_git_time(self.view)
+                ViewCollection.clear_times(self.view)
             
             staged = ViewCollection.has_stages(self.view)
             if staged:
