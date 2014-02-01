@@ -233,11 +233,12 @@ class GitGutterHandler:
                 decoded_results = results.decode(encoding.replace(' ', ''))
             except UnicodeError:
                 decoded_results = results.decode("utf-8")
-            return self.adjust_diffs(*self.process_diff(decoded_results)[:3])
+            diffs = self.process_diff(decoded_results)[:3]
+            return self.apply_line_adjustments(*diffs)
         else:
             return ([], [], [])
 
-    def adjust_diffs(self, inserted, modified, deleted):
+    def apply_line_adjustments(self, inserted, modified, deleted):
         adj_map = ViewCollection.get_line_adjustment_map(self.view)
         i = inserted
         m = modified
@@ -250,7 +251,7 @@ class GitGutterHandler:
             i = [l + lines_added if l > at_line else l for l in i]
             m = [l + lines_added if l > at_line else l for l in m]
             d = [l + lines_added if l > at_line else l for l in d]
-        return [i,m,d]
+        return (i,m,d)
 
     def untracked(self):
         return self.handle_files([])
