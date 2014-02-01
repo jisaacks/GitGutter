@@ -116,6 +116,8 @@ class ViewCollection:
             ViewCollection.stg_files[key] = tempfile.NamedTemporaryFile()
             ViewCollection.stg_files[key].close()
         return ViewCollection.stg_files[key]
+
+    @staticmethod
     def set_compare(commit):
         print("GitGutter now comparing against:",commit)
         ViewCollection.compare_against = commit
