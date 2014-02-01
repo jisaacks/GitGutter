@@ -53,19 +53,24 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                 s_inserted, s_modified, s_deleted = self.staged_changes()
                 
                 # Find lines with a mix of staged/unstaged
-                # (only necessary for modified)
                 m_modified = self.mixed_mofified(u_modified,
                     [s_inserted, s_modified, s_deleted])
+                m_inserted = self.mixed_mofified(u_inserted,
+                    [s_inserted, s_modified, s_deleted])
+                m_deleted = self.mixed_mofified(u_deleted,
+                    [s_inserted, s_modified, s_deleted])
+
+                m_all = m_inserted + m_modified + m_deleted
 
                 # Remove mixed from unstaged
-                u_inserted = self.list_subtract(u_inserted, m_modified)
-                u_modified = self.list_subtract(u_modified, m_modified)
-                u_deleted  = self.list_subtract(u_deleted, m_modified)
+                u_inserted = self.list_subtract(u_inserted, m_all)
+                u_modified = self.list_subtract(u_modified, m_all)
+                u_deleted  = self.list_subtract(u_deleted, m_all)
 
                 # Remove mixed from staged
-                s_inserted = self.list_subtract(s_inserted, m_modified)
-                s_modified = self.list_subtract(s_modified, m_modified)
-                s_deleted  = self.list_subtract(s_deleted, m_modified) 
+                s_inserted = self.list_subtract(s_inserted, m_all)
+                s_modified = self.list_subtract(s_modified, m_all)
+                s_deleted  = self.list_subtract(s_deleted, m_all)
 
                 # Unstaged
                 self.lines_removed(u_deleted, 'unstaged')
@@ -78,6 +83,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                 self.bind_icons('changed', s_modified, 'staged')
 
                 # Mixed
+                self.lines_removed(m_deleted, 'staged_unstaged') 
+                self.bind_icons('inserted', m_inserted, 'staged_unstaged') 
                 self.bind_icons('changed', m_modified, 'staged_unstaged') 
             else:
                 # Mark changes without a qualifier
