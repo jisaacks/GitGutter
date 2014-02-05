@@ -22,7 +22,7 @@
   "ignore_whitespace": "none",
 
   // Add a special marker on untracked files
-  "show_markers_on_untracked_file": true,
+  "show_markers_on_untracked_file": false,
 
   // Add --patience switch to git diff command. See
   // http://bramcohen.livejournal.com/73318.html for 
