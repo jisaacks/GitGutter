@@ -9,10 +9,10 @@ if ST3:
 else:
     from view_collection import ViewCollection
 
-
 debounce_delay = 1000
 debounce_hash = {}
 latest_keypresses = {}
+
 
 class GitGutterEvents(sublime_plugin.EventListener):
 
