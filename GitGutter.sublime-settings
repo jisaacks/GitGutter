@@ -15,8 +15,8 @@
   // but can increase performance greatly if needed.
   "non_blocking": false,
 
-  // When non_blocking is true, delay updating of gutter by this amount
-  // (in milliseconds).
+  // When using non_blocking mode, delay update of gutter icons by the
+  // following amount (in milliseconds).
   "debounce_delay": 1000,
 
   // Determines whether GitGutter ignores whitespace in modified files.
