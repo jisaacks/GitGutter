@@ -9,15 +9,12 @@ if ST3:
 else:
     from view_collection import ViewCollection
 
-debounce_delay = 1000
-debounce_hash = {}
-latest_keypresses = {}
-
 
 class GitGutterEvents(sublime_plugin.EventListener):
 
     def __init__(self):
         self._settings_loaded = False
+        self.latest_keypresses = {}
 
     # Synchronous
 
@@ -51,14 +48,14 @@ class GitGutterEvents(sublime_plugin.EventListener):
     def debounce(self, view, event_type, func):
         key = (event_type, view.file_name())
         this_keypress = time.time()
-        latest_keypresses[key] = this_keypress
+        self.latest_keypresses[key] = this_keypress
 
         def callback():
-            latest_keypress = latest_keypresses.get(key, None)
+            latest_keypress = self.latest_keypresses.get(key, None)
             if this_keypress == latest_keypress:
                 func(view)
 
-        sublime.set_timeout_async(callback, debounce_delay)
+        sublime.set_timeout_async(callback, settings.get("debounce_delay"))
 
     def on_modified_async(self, view):
         if self.settings_loaded() and self.non_blocking and self.live_mode:
