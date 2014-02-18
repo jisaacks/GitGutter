@@ -90,6 +90,7 @@ Color schemes that already have support for GitGutter include:
 * [Solarized Colour Theme](https://github.com/SublimeColors/Solarized)
 * [Baara Dark](https://github.com/jobedom/sublime-baara-dark)
 * [Specials Board](https://github.com/lamotta/specialsboard)
+* [Oblivion](https://github.com/jbrooksuk/Oblivion)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
