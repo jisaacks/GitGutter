@@ -40,6 +40,9 @@ Default settings should not be modified, as they are overwritten when GitGutter 
 #### Non Blocking Mode
 By default, GitGutter runs in the same thread which can block if it starts to perform slowly. Usually this isn't a problem but depending on the size of your file or repo it can be. If you set `non_blocking` to `true` then GitGutter will run in a seperate thread and will not block. This does cause a slight delay between when you make a modification and when the icons update in the gutter. This is a ***Sublime Text 3 only feature***, ST2 users can turn off live mode if performance is an issue.
 
+#### Debounce Delay
+When using non_blocking mode, delay update of gutter icons by the following amount (in milliseconds). Useful for performance issues. Default 1000 (1 second).
+
 #### Live Mode
 By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
 
