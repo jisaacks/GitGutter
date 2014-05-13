@@ -70,7 +70,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
             self.debounce(view, "save", ViewCollection.add)
 
     def on_load_async(self, view):
-        if self.settings_loaded() and self.non_blocking and self.live_mode:
+        if self.settings_loaded() and self.non_blocking and not self.live_mode:
             self.debounce(view, "load", ViewCollection.add)
 
     def on_activated_async(self, view):
