@@ -19,6 +19,7 @@ class GitGutterHandler:
         self.view = view
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
+        self.stg_temp_file = ViewCollection.stg_tmp_file(self.view)
         if self.on_disk():
             self.git_tree = git_helper.git_tree(self.view)
             self.git_dir = git_helper.git_dir(self.git_tree)
@@ -71,6 +72,32 @@ class GitGutterHandler:
         f.write(contents)
         f.close()
 
+    def update_stg_file(self):
+        # FIXME dry up duplicate in update_stg_file and update_git_file
+
+        # the git repo won't change that often
+        # so we can easily wait 5 seconds
+        # between updates for performance
+        if ViewCollection.stg_time(self.view) > 5:
+            open(self.stg_temp_file.name, 'w').close()
+            args = [
+                self.git_binary_path,
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'show',
+                ':' + self.git_path,
+            ] 
+            try:
+                contents = self.run_command(args)
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
+                f = open(self.stg_temp_file.name, 'wb')
+                f.write(contents)
+                f.close()
+                ViewCollection.update_stg_time(self.view)
+            except Exception:
+                pass
+
     def update_git_file(self):
         # the git repo won't change that often
         # so we can easily wait 5 seconds
@@ -117,26 +144,32 @@ class GitGutterHandler:
         inserted = []
         modified = []
         deleted = []
+        adj_map = {0:0}
         hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
         for hunk in hunks:
-            start = int(hunk.group(3))
+            old_start = int(hunk.group(1))
+            new_start = int(hunk.group(3))
             old_size = int(hunk.group(2) or 1)
             new_size = int(hunk.group(4) or 1)
             if not old_size:
-                inserted += range(start, start + new_size)
+                inserted += range(new_start, new_start + new_size)
             elif not new_size:
-                deleted += [start + 1]
+                deleted += [new_start + 1]
             else:
-                modified += range(start, start + new_size)
+                modified += range(new_start, new_start + new_size)
+            # Add values to adjustment map
+            k = old_start + sum(adj_map.values())
+            v = new_size - old_size
+            adj_map[k] = v
         if len(inserted) == self.total_lines() and not self.show_untracked:
             # All lines are "inserted"
             # this means this file is either:
             # - New and not being tracked *yet*
             # - Or it is a *gitignored* file
-            return ([], [], [])
+            return ([], [], [], {0:0})
         else:
-            return (inserted, modified, deleted)
+            return (inserted, modified, deleted, adj_map)
 
     def diff(self):
         if self.on_disk() and self.git_path:
@@ -156,9 +189,69 @@ class GitGutterHandler:
                 decoded_results = results.decode(encoding.replace(' ', ''))
             except UnicodeError:
                 decoded_results = results.decode("utf-8")
-            return self.process_diff(decoded_results)
+            return self.process_diff(decoded_results)[:3]
         else:
             return ([], [], [])
+
+    # FIXME
+    # Refactor staged/diff methods to dry up duplicated code
+    def unstaged(self):
+        if self.on_disk() and self.git_path:
+            self.update_stg_file()
+            self.update_buf_file()
+            args = [
+                self.git_binary_path, 'diff', '-U0', '--no-color',
+                self.stg_temp_file.name,
+                self.buf_temp_file.name
+            ]
+            args = list(filter(None, args))  # Remove empty args
+            results = self.run_command(args)
+            encoding = self._get_view_encoding()
+            try:
+                decoded_results = results.decode(encoding.replace(' ', ''))
+            except UnicodeError:
+                decoded_results = results.decode("utf-8")
+            processed = self.process_diff(decoded_results)
+            ViewCollection.set_line_adjustment_map(self.view,processed[3])
+            return processed[:3]
+        else:
+            return ([], [], [])
+
+    def staged(self):
+        if self.on_disk() and self.git_path:
+            self.update_stg_file()
+            self.update_buf_file()
+            args = [
+                self.git_binary_path, 'diff', '-U0', '--no-color', '--staged',
+                ViewCollection.get_compare(),
+                self.git_path
+            ]
+            args = list(filter(None, args))  # Remove empty args
+            results = self.run_command(args)
+            encoding = self._get_view_encoding()
+            try:
+                decoded_results = results.decode(encoding.replace(' ', ''))
+            except UnicodeError:
+                decoded_results = results.decode("utf-8")
+            diffs = self.process_diff(decoded_results)[:3]
+            return self.apply_line_adjustments(*diffs)
+        else:
+            return ([], [], [])
+
+    def apply_line_adjustments(self, inserted, modified, deleted):
+        adj_map = ViewCollection.get_line_adjustment_map(self.view)
+        i = inserted
+        m = modified
+        d = deleted
+        for k in sorted(adj_map.keys()):
+            at_line = k
+            lines_added = adj_map[k]
+            # `lines_added` lines were added at line `at_line`
+            # Each line in the diffs that are above `at_line` add `lines_added`
+            i = [l + lines_added if l > at_line else l for l in i]
+            m = [l + lines_added if l > at_line else l for l in m]
+            d = [l + lines_added if l > at_line else l for l in d]
+        return (i,m,d)
 
     def untracked(self):
         return self.handle_files([])
@@ -184,6 +277,17 @@ class GitGutterHandler:
             except UnicodeError:
                 decoded_results = results.decode("utf-8")
             return (decoded_results != "")
+        else:
+            return False
+
+    def has_stages(self):
+        args = [self.git_binary_path, 
+                '--git-dir=' + self.git_dir,
+                '--work-tree=' + self.git_tree,
+                'diff', '--staged']
+        results = self.run_command(args)
+        if len(results):
+            return True
         else:
             return False
 

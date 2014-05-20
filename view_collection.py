@@ -5,8 +5,11 @@ import time
 class ViewCollection:
     views = {} # Todo: these aren't really views but handlers. Refactor/Rename.
     git_times = {}
+    stg_times = {}
     git_files = {}
     buf_files = {}
+    stg_files = {}
+    line_adjustment_map = {}
     compare_against = "HEAD"
 
     @staticmethod
@@ -51,6 +54,21 @@ class ViewCollection:
         return ViewCollection.views[key].diff()
 
     @staticmethod
+    def has_stages(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].has_stages()
+
+    @staticmethod
+    def staged(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].staged()
+
+    @staticmethod
+    def unstaged(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].unstaged()
+
+    @staticmethod
     def untracked(view):
         key = ViewCollection.get_key(view)
         return ViewCollection.views[key].untracked()
@@ -73,14 +91,27 @@ class ViewCollection:
         return time.time() - ViewCollection.git_times[key]
 
     @staticmethod
-    def clear_git_time(view):
+    def clear_times(view):
         key = ViewCollection.get_key(view)
         ViewCollection.git_times[key] = 0
+        ViewCollection.stg_times[key] = 0
 
     @staticmethod
     def update_git_time(view):
         key = ViewCollection.get_key(view)
         ViewCollection.git_times[key] = time.time()
+
+    @staticmethod
+    def stg_time(view):
+        key = ViewCollection.get_key(view)
+        if not key in ViewCollection.stg_times:
+            ViewCollection.stg_times[key] = 0
+        return time.time() - ViewCollection.stg_times[key]
+
+    @staticmethod
+    def update_stg_time(view):
+        key = ViewCollection.get_key(view)
+        ViewCollection.stg_times[key] = time.time()
 
     @staticmethod
     def git_tmp_file(view):
@@ -99,6 +130,14 @@ class ViewCollection:
         return ViewCollection.buf_files[key]
 
     @staticmethod
+    def stg_tmp_file(view):
+        key = ViewCollection.get_key(view)
+        if not key in ViewCollection.stg_files:
+            ViewCollection.stg_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.stg_files[key].close()
+        return ViewCollection.stg_files[key]
+
+    @staticmethod
     def set_compare(commit):
         print("GitGutter now comparing against:",commit)
         ViewCollection.compare_against = commit
@@ -109,3 +148,16 @@ class ViewCollection:
             return ViewCollection.compare_against
         else:
             return "HEAD"
+
+    @staticmethod
+    def set_line_adjustment_map(view, adj_map):
+        key = ViewCollection.get_key(view)
+        ViewCollection.line_adjustment_map[key] = adj_map
+
+    def get_line_adjustment_map(view):
+        key = ViewCollection.get_key(view)
+        if key in ViewCollection.line_adjustment_map:
+            return ViewCollection.line_adjustment_map[key]
+        else:
+            # Zero adjustments
+            return {0:0}
