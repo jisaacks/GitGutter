@@ -96,6 +96,7 @@ Color schemes that already have support for GitGutter include:
 * [Oblivion](https://github.com/jbrooksuk/Oblivion)
 * [Glacier](http://glaciertheme.com)
 * [Neon](https://github.com/farzher/Sublime-Text-Themes)
+* [Afterglow](https://github.com/YabataDesign/afterglow-theme)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
