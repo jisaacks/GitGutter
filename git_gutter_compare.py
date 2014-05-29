@@ -3,7 +3,7 @@ import sublime_plugin
 
 ST3 = int(sublime.version()) >= 3000
 if ST3:
-    from GitGutter.view_collection import ViewCollection
+    from .view_collection import ViewCollection
 else:
     from view_collection import ViewCollection
 

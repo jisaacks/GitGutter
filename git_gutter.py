@@ -1,7 +1,8 @@
+import os
 import sublime
 import sublime_plugin
 try:
-    from GitGutter.view_collection import ViewCollection
+    from .view_collection import ViewCollection
 except ImportError:
     from view_collection import ViewCollection
 
@@ -73,6 +74,9 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         self.bind_icons('deleted_bottom', bottom_lines)
         self.bind_icons('deleted_dual', dual_lines)
 
+    def plugin_dir(self):
+        return os.path.split(os.path.dirname(os.path.realpath(__file__)))[1]
+
     def icon_path(self, icon_name):
         if icon_name in ['deleted_top','deleted_bottom','deleted_dual']:
             if self.view.line_height() > 15:
@@ -84,9 +88,9 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         else:
             path = 'Packages'
             extn = '.png'
-        
-        return path + '/GitGutter/icons/' + icon_name + extn
 
+        return os.path.join(path, self.plugin_dir(), 'icons', icon_name + extn)
+        
     def bind_icons(self, event, lines):
         regions = self.lines_to_regions(lines)
         event_scope = event
