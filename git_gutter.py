@@ -75,7 +75,9 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         self.bind_icons('deleted_dual', dual_lines)
 
     def plugin_dir(self):
-        return os.path.split(os.path.dirname(os.path.realpath(__file__)))[1]
+        path = os.path.realpath(__file__)
+        root = os.path.split(os.path.dirname(path))[1]
+        return os.path.splitext(root)[0]
 
     def icon_path(self, icon_name):
         if icon_name in ['deleted_top','deleted_bottom','deleted_dual']:
@@ -89,7 +91,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             path = 'Packages'
             extn = '.png'
 
-        return os.path.join(path, self.plugin_dir(), 'icons', icon_name + extn)
+        return "/".join([path, self.plugin_dir(), 'icons', icon_name + extn])
         
     def bind_icons(self, event, lines):
         regions = self.lines_to_regions(lines)
