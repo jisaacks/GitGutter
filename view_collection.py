@@ -13,8 +13,8 @@ class ViewCollection:
     def add(view):
         key = ViewCollection.get_key(view)
         try:
-            from GitGutter.git_gutter_handler import GitGutterHandler
-        except ImportError:
+            from .git_gutter_handler import GitGutterHandler
+        except (ImportError, ValueError):
             from git_gutter_handler import GitGutterHandler
         handler = ViewCollection.views[key] = GitGutterHandler(view)
         handler.reset()

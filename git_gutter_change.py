@@ -2,7 +2,7 @@ import sublime
 import sublime_plugin
 try:
     from .view_collection import ViewCollection
-except ImportError:
+except (ImportError, ValueError):
     from view_collection import ViewCollection
 
 

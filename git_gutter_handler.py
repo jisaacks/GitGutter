@@ -7,7 +7,7 @@ import re
 try:
     from . import git_helper
     from .view_collection import ViewCollection
-except ImportError:
+except (ImportError, ValueError):
     import git_helper
     from view_collection import ViewCollection
 
