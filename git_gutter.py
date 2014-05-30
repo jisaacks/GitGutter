@@ -85,13 +85,13 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                 icon_name = icon_name + "_arrow"
 
         if int(sublime.version()) < 3014:
-            path = '..'
+            path = '../GitGutter'
             extn = ''
         else:
-            path = 'Packages'
+            path = 'Packages/' + self.plugin_dir()
             extn = '.png'
 
-        return "/".join([path, self.plugin_dir(), 'icons', icon_name + extn])
+        return "/".join([path, 'icons', icon_name + extn])
         
     def bind_icons(self, event, lines):
         regions = self.lines_to_regions(lines)
