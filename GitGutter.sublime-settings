@@ -31,5 +31,9 @@
   // Add --patience switch to git diff command. See
   // http://bramcohen.livejournal.com/73318.html for 
   // an example of why you might need this.
-  "patience": true
+  "patience": true,
+
+  // Set to true to show in the status bar the current branch,how many lines
+  // have been inserted or modified and how many regions have been deleted.
+  "show_status": true
 }

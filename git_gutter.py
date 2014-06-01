@@ -47,6 +47,30 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             self.bind_icons('inserted', inserted)
             self.bind_icons('changed', modified)
 
+            if(ViewCollection.show_status(self.view)):
+                branch = ViewCollection.current_branch(self.view).decode("utf-8").strip()
+                self.update_status(len(inserted), len(modified), len(deleted), "Branch : %s" % branch)
+            else:
+                self.update_status(0, 0, 0, "")
+
+    def update_status(self, inserted, modified, deleted, branch):
+        if(inserted > 0):
+            self.view.set_status("git_gutter_status_inserted", "Inserted : %d" % inserted)
+        else:
+            self.view.set_status("git_gutter_status_inserted", "")
+
+        if(modified > 0):
+            self.view.set_status("git_gutter_status_modified", "Modified : %d" % modified)
+        else:
+            self.view.set_status("git_gutter_status_modified", "")
+
+        if(deleted > 0):
+            self.view.set_status("git_gutter_status_deleted", "Deleted : %d regions" % deleted)
+        else:
+            self.view.set_status("git_gutter_status_deleted", "")
+
+        self.view.set_status("git_gutter_current_branch", branch)
+
     def clear_all(self):
         for region_name in self.region_names:
             self.view.erase_regions('git_gutter_%s' % region_name)
