@@ -10,6 +10,28 @@ else:
     from view_collection import ViewCollection
 
 
+def async_event_listener(EventListener):
+    if ST3:
+        async_methods = set([
+            'on_new',
+            'on_clone',
+            'on_load',
+            'on_pre_save',
+            'on_post_save',
+            'on_modified',
+            'on_selection_modified',
+            'on_activated',
+            'on_deactivated',
+        ])
+        for attr_name in dir(EventListener):
+            if attr_name in async_methods:
+                attr = getattr(EventListener, attr_name)
+                setattr(EventListener, attr_name + '_async', attr)
+                delattr(EventListener, attr_name)
+    return EventListener
+
+
+@async_event_listener
 class GitGutterEvents(sublime_plugin.EventListener):
 
     def __init__(self):
@@ -59,12 +81,6 @@ class GitGutterEvents(sublime_plugin.EventListener):
             set_timeout(callback, settings.get("debounce_delay"))
         else:
             func(view)
-
-    on_modified_async = on_modified
-    on_clone_async = on_clone
-    on_post_save_async = on_post_save
-    on_load_async = on_load
-    on_activated_async = on_activated
 
     # Settings
 
