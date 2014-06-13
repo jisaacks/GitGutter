@@ -89,6 +89,9 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
         return True
 
+settings = {}
+
+
 def plugin_loaded():
     global settings
     settings = sublime.load_settings('GitGutter.sublime-settings')
