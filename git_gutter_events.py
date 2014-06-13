@@ -60,6 +60,12 @@ class GitGutterEvents(sublime_plugin.EventListener):
         else:
             func(view)
 
+    on_modified_async = on_modified
+    on_clone_async = on_clone
+    on_post_save_async = on_post_save
+    on_load_async = on_load
+    on_activated_async = on_activated
+
     # Settings
 
     def settings_loaded(self):
