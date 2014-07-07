@@ -1,8 +1,8 @@
 import sublime
 import sublime_plugin
 try:
-    from GitGutter.view_collection import ViewCollection
-except ImportError:
+    from .view_collection import ViewCollection
+except (ImportError, ValueError):
     from view_collection import ViewCollection
 
 

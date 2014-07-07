@@ -8,8 +8,11 @@ A sublime text 2/3 plugin to show an icon in the gutter area indicating whether 
 
 ### Installation
 
-You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control)
-Or you can clone this repo into your *Sublime Text 2/Packages*
+You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control):
+  * [GitGutter](https://sublime.wbond.net/packages/GitGutter) - Release based
+  * [GitGutter-Edge](https://sublime.wbond.net/packages/GitGutter-Edge) - Stick with master branch (at your own peril)
+
+Or you can clone this repo into your *Sublime Text x/Packages*:
 
 *OSX*
 ```shell
@@ -96,6 +99,9 @@ Color schemes that already have support for GitGutter include:
 * [Oblivion](https://github.com/jbrooksuk/Oblivion)
 * [Glacier](http://glaciertheme.com)
 * [Neon](https://github.com/farzher/Sublime-Text-Themes)
+* [Afterglow](https://github.com/YabataDesign/afterglow-theme)
+* [Desert Night](https://github.com/fgb/desert_night)
+* [Cobalt2](https://github.com/wesbos/cobalt2)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
