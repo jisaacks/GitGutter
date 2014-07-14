@@ -277,5 +277,6 @@ class GitGutterHandler:
             'show_markers_on_untracked_file')
 
         # Show information in status bar
-        self.show_status = self.user_settings.get(
-            'show_status') or self.settings.get('show_status')
+        self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
+        if self.show_status != 'all' and self.show_status != 'none':
+            self.show_status = 'default'

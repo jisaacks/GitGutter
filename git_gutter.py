@@ -47,29 +47,29 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             self.bind_icons('inserted', inserted)
             self.bind_icons('changed', modified)
 
-            if(ViewCollection.show_status(self.view)):
-                branch = ViewCollection.current_branch(self.view).decode("utf-8").strip()
-                self.update_status(len(inserted), len(modified), len(deleted), "Branch : %s" % branch)
+            if(ViewCollection.show_status(self.view) != "none"):
+                if(ViewCollection.show_status(self.view) == 'all'):
+                    branch = ViewCollection.current_branch(self.view).decode("utf-8").strip()
+                else:
+                    branch = ""
+
+                self.update_status(len(inserted), len(modified), len(deleted), ViewCollection.get_compare(), branch)
             else:
-                self.update_status(0, 0, 0, "")
+                self.update_status(0, 0, 0, "", "")
 
-    def update_status(self, inserted, modified, deleted, branch):
-        if(inserted > 0):
-            self.view.set_status("git_gutter_status_inserted", "Inserted : %d" % inserted)
-        else:
-            self.view.set_status("git_gutter_status_inserted", "")
+    def update_status(self, inserted, modified, deleted, comparison, branch):
 
-        if(modified > 0):
-            self.view.set_status("git_gutter_status_modified", "Modified : %d" % modified)
-        else:
-            self.view.set_status("git_gutter_status_modified", "")
+        def set_status_if(test, key, message):
+            if test:
+                self.view.set_status("git_gutter_status_" + key, message)
+            else:
+                self.view.set_status("git_gutter_status_" + key, "")
 
-        if(deleted > 0):
-            self.view.set_status("git_gutter_status_deleted", "Deleted : %d regions" % deleted)
-        else:
-            self.view.set_status("git_gutter_status_deleted", "")
-
-        self.view.set_status("git_gutter_current_branch", branch)
+        set_status_if(inserted > 0, "inserted", "Inserted : %d" % inserted)
+        set_status_if(modified > 0, "modified", "Modified : %d" % modified)
+        set_status_if(deleted > 0, "deleted", "Deleted : %d regions" % deleted)
+        set_status_if(comparison, "comparison", "Comparing against : %s" % comparison)
+        set_status_if(branch, "branch", "On branch : %s" % branch)
 
     def clear_all(self):
         for region_name in self.region_names:
