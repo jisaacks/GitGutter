@@ -224,6 +224,18 @@ class GitGutterHandler:
         results = self.run_command(args)
         return results
 
+    def git_current_branch(self):
+        args = [
+            self.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'rev-parse',
+            '--abbrev-ref',
+            'HEAD'
+        ]
+        result = self.run_command(args)
+        return result
+
     def run_command(self, args):
         startupinfo = None
         if os.name == 'nt':
@@ -263,3 +275,8 @@ class GitGutterHandler:
         # Untracked files
         self.show_untracked = self.settings.get(
             'show_markers_on_untracked_file')
+
+        # Show information in status bar
+        self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
+        if self.show_status != 'all' and self.show_status != 'none':
+            self.show_status = 'default'

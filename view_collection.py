@@ -109,3 +109,13 @@ class ViewCollection:
             return ViewCollection.compare_against
         else:
             return "HEAD"
+
+    @staticmethod
+    def current_branch(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].git_current_branch()
+
+    @staticmethod
+    def show_status(view):
+        key = ViewCollection.get_key(view)
+        return ViewCollection.views[key].show_status
