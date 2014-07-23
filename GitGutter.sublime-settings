@@ -1,7 +1,7 @@
 {
   // Custom path to git binary when not in PATH
   "git_binary": "",
-  
+
   // Live mode evaluates changes every time file is modified,
   // Set false to disable evaluation after each input
   "live_mode": true,
@@ -9,7 +9,7 @@
   // Focus Change mode evaluates changes every time a view gets the focus
   // Set false to disable evaluation when changing views
   "focus_change_mode": true,
-  
+
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change
   // but can increase performance greatly if needed.
@@ -29,7 +29,7 @@
   "show_markers_on_untracked_file": false,
 
   // Add --patience switch to git diff command. See
-  // http://bramcohen.livejournal.com/73318.html for 
+  // http://bramcohen.livejournal.com/73318.html for
   // an example of why you might need this.
   "patience": true,
 
@@ -39,5 +39,9 @@
   // against, how many lines have been inserted or modified and how many regions
   // have been deleted.
   // Set "all" to also show on what branch you are
-  "show_status": "default"
+  "show_status": "default",
+
+  // Determines whether the git_gutter_next_change and git_gutter_prev_change
+  // commands wrap around on reaching the beginning/ending of the file.
+  "next_prev_change_wrap": true
 }
