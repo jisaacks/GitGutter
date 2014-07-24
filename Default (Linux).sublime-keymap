@@ -1,4 +1,10 @@
 [
     { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
-    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" }
+    { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" },
+    { "keys": ["ctrl+shift+alt+c", "v"], "command": "git_gutter_show_compare" },
+    { "keys": ["ctrl+shift+alt+c", "h"], "command": "git_gutter_compare_head" },
+    { "keys": ["ctrl+shift+alt+c", "o"], "command": "git_gutter_compare_origin" },
+    { "keys": ["ctrl+shift+alt+c", "c"], "command": "git_gutter_compare_commit" },
+    { "keys": ["ctrl+shift+alt+c", "b"], "command": "git_gutter_compare_branch" },
+    { "keys": ["ctrl+shift+alt+c", "t"], "command": "git_gutter_compare_tag" }
 ]

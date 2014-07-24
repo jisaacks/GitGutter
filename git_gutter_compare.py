@@ -68,6 +68,13 @@ class GitGutterCompareHead(sublime_plugin.WindowCommand):
         ViewCollection.clear_git_time(self.view)
         ViewCollection.add(self.view)
 
+class GitGutterCompareOrigin(sublime_plugin.WindowCommand):
+    def run(self):
+        self.view = self.window.active_view()
+        ViewCollection.set_compare("origin")
+        ViewCollection.clear_git_time(self.view)
+        ViewCollection.add(self.view)
+
 class GitGutterShowCompare(sublime_plugin.WindowCommand):
     def run(self):
         comparing = ViewCollection.get_compare()

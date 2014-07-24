@@ -11,23 +11,27 @@
                         "caption": "Compare Against",
                         "children":
                         [
-                            { 
-                                "caption": "View Current", 
+                            {
+                                "caption": "View Current",
                                 "command": "git_gutter_show_compare"
                             },
-                            { 
-                                "caption": "HEAD", 
+                            {
+                                "caption": "HEAD",
                                 "command": "git_gutter_compare_head"
                             },
-                            { 
-                                "caption": "Commit",     
+                            {
+                                "caption": "Origin",
+                                "command": "git_gutter_compare_origin"
+                            },
+                            {
+                                "caption": "Commit",
                                 "command": "git_gutter_compare_commit"
                             },
-                            { 
-                                "caption": "Branch",     
+                            {
+                                "caption": "Branch",
                                 "command": "git_gutter_compare_branch"
-                            },{ 
-                                "caption": "Tag",     
+                            },{
+                                "caption": "Tag",
                                 "command": "git_gutter_compare_tag"
                             }
                         ]

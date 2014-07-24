@@ -8,6 +8,10 @@
         "command": "git_gutter_compare_head"
     },
     {
+        "caption": "GitGutter: Compare Against Origin",
+        "command": "git_gutter_compare_origin"
+    },
+    {
         "caption": "GitGutter: Compare Against Commit",
         "command": "git_gutter_compare_commit"
     },
