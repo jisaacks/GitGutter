@@ -47,23 +47,19 @@ class ViewCollection:
 
     @staticmethod
     def diff(view):
-        key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].diff()
+        return ViewCollection.get_handler(view).diff()
 
     @staticmethod
     def untracked(view):
-        key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].untracked()
+        return ViewCollection.get_handler(view).untracked()
 
     @staticmethod
     def ignored(view):
-        key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].ignored()
+        return ViewCollection.get_handler(view).ignored()
 
     @staticmethod
     def total_lines(view):
-        key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].total_lines()
+        return ViewCollection.get_handler(view).total_lines()
 
     @staticmethod
     def git_time(view):
