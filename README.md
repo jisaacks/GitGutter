@@ -35,6 +35,22 @@ cd "%APPDATA%\Sublime Text 2\Packages"
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
+### Comparing against different commits/branches/tags
+
+By default, Git Gutter compares your working copy against the HEAD. You can change this behaviour through the ST command palette. The following options are available:
+
+- Compare against HEAD
+- Compare against particular branch
+- Compare against particular tag
+- Compare against specific commit
+
+To change the compare option:
+
+- Open the command palette (`Ctrl-Shift-P` for Windows/Linux, `Cmd-Shift-P` for Mac)
+- Start typing `GitGutter`
+- You'll see the 4 options listed above, select one with the keyboard.
+- Choose the branch/tag/commit to compare against.
+
 ### Settings
 Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kbd> > <kbd>GitGutter</kbd> menu.
 
