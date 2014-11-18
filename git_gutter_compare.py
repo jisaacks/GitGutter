@@ -40,7 +40,7 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
     def parse_result(self, result):
         pieces = result.split('\a')
         message = pieces[0]
-        branch  = pieces[1].split("/")[2]
+        branch  = pieces[1].split("/",2)[2]
         commit  = pieces[2][0:7]
         return [branch, commit + " " + message]
 
