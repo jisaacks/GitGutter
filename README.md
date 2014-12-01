@@ -102,8 +102,7 @@ The colors come from your *color scheme* **.tmTheme** file.
 
 Color schemes that already have support for GitGutter include:
 
-* [Dark Room (Normal)](https://github.com/NeilCresswell/themes)
-* [Dark Room (Contrast)](https://github.com/NeilCresswell/themes)
+* [Dark Room](https://github.com/NeilCresswell/themes)
 * [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
 * [Flatland](https://github.com/thinkpixellab/flatland)
 * [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
