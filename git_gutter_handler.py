@@ -257,6 +257,12 @@ class GitGutterHandler:
         if git_binary:
             self.git_binary_path = git_binary
 
+        # Set the branch to compare against
+        self.compare_against = sublime.active_window().active_view().settings().get('git_gutter_compare_against') or self.settings.get("compare_against")
+
+        if self.compare_against:
+            ViewCollection.set_compare(self.compare_against)
+
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')
         if self.ignore_whitespace == 'all':
