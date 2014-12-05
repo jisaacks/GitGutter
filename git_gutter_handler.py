@@ -36,7 +36,10 @@ class GitGutterHandler:
         encoding = encoding.replace('Windows', 'cp')
         encoding = encoding.replace('-', '_')
         encoding = encoding.replace(' ', '')
-        return encoding
+
+        # work around with ConvertToUTF8 plugin
+        origin_encoding = self.view.settings().get('origin_encoding')
+        return origin_encoding or encoding
 
     def on_disk(self):
         # if the view is saved to disk
