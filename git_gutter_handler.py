@@ -257,8 +257,13 @@ class GitGutterHandler:
         if git_binary:
             self.git_binary_path = git_binary
 
+        view_settings = sublime.active_window().active_view().settings()
+
         # Set the branch to compare against
-        self.compare_against = sublime.active_window().active_view().settings().get('git_gutter_compare_against') or self.settings.get("compare_against")
+        self.compare_against = view_settings.get('git_gutter_compare_against')
+
+        if not compare_against:
+            self.compare_against = self.settings.get('compare_against')
 
         if self.compare_against:
             ViewCollection.set_compare(self.compare_against)
