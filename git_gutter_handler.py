@@ -262,7 +262,7 @@ class GitGutterHandler:
         # Set the branch to compare against
         self.compare_against = view_settings.get('git_gutter_compare_against')
 
-        if not compare_against:
+        if not self.compare_against:
             self.compare_against = self.settings.get('compare_against')
 
         if self.compare_against:
