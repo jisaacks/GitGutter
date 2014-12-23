@@ -179,22 +179,15 @@ If your color scheme file does not define the appropriate colors (or you want to
   </dict>
 </dict>
 ```
+
 ### Jumping Between Changes
+
 There are commands to jump between modifications. The default keybindings for these commands are:
 
-**OSX**
-
-prev: <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>k</kbd>
-next: <kbd>command</kbd> + <kbd>shift</kbd> + <kbd>option</kbd> + <kbd>j</kbd>
-
-**Windows**
-
-prev: <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>k</kbd>
-next: <kbd>ctrl</kbd> + <kbd>shift</kbd> + <kbd>alt</kbd> + <kbd>j</kbd>
-
-<br>
-
-------------
+| OS X | Windows / Linux | Description |
+|------|-----------------|-------------|
+| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>k</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>k</kbd> | Previous |
+| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>j</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>j</kbd> | Next |
 
 ### Alternatives
 
