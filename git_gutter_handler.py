@@ -82,7 +82,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                ViewCollection.get_compare() + ':' + self.git_path,
+                ViewCollection.get_compare(self.view) + ':' + self.git_path,
             ]
             try:
                 contents = self.run_command(args)
@@ -256,17 +256,6 @@ class GitGutterHandler:
             'git_binary') or self.settings.get('git_binary')
         if git_binary:
             self.git_binary_path = git_binary
-
-        view_settings = sublime.active_window().active_view().settings()
-
-        # Set the branch to compare against
-        self.compare_against = view_settings.get('git_gutter_compare_against')
-
-        if not self.compare_against:
-            self.compare_against = self.settings.get('compare_against')
-
-        if self.compare_against:
-            ViewCollection.set_compare(self.compare_against)
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')

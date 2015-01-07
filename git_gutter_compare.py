@@ -77,6 +77,7 @@ class GitGutterCompareOrigin(sublime_plugin.WindowCommand):
 
 class GitGutterShowCompare(sublime_plugin.WindowCommand):
     def run(self):
-        comparing = ViewCollection.get_compare()
+        self.view = self.window.active_view()
+        comparing = ViewCollection.get_compare(self.view)
         sublime.message_dialog("GitGutter is comparing against: " + comparing)
 

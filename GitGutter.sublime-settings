@@ -4,7 +4,9 @@
 
   // The commit, branch, tag, or remote to compare against
   // Can be set on a per-project basis by adding a project
-  // setting of "git_gutter_compare_against"
+  // setting of "git_gutter_compare_against".
+  // This setting only changes the default (HEAD), but can
+  // still be overwritten temporarily using one of the commands
   "compare_against": "",
 
   // Live mode evaluates changes every time file is modified,
