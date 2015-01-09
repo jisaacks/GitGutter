@@ -1,3 +1,4 @@
+import sublime
 import tempfile
 import time
 
@@ -100,11 +101,9 @@ class ViewCollection:
         ViewCollection.compare_against = commit
 
     @staticmethod
-    def get_compare():
-        if ViewCollection.compare_against:
-            return ViewCollection.compare_against
-        else:
-            return "HEAD"
+    def get_compare(view):
+        compare = ViewCollection.compare_against
+        return view.settings().get('git_gutter_compare_against', compare)
 
     @staticmethod
     def current_branch(view):
@@ -115,3 +114,8 @@ class ViewCollection:
     def show_status(view):
         key = ViewCollection.get_key(view)
         return ViewCollection.views[key].show_status
+
+
+def plugin_loaded():
+    settings = sublime.load_settings('GitGutter.sublime-settings')
+    ViewCollection.compare_against = settings.get('compare_against', 'HEAD')

@@ -85,7 +85,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                ViewCollection.get_compare() + ':' + self.git_path,
+                ViewCollection.get_compare(self.view) + ':' + self.git_path,
             ]
             try:
                 contents = self.run_command(args)
