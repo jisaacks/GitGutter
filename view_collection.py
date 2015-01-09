@@ -102,7 +102,7 @@ class ViewCollection:
 
     @staticmethod
     def get_compare(view):
-        compare = ViewCollection.compare_against
+        compare = ViewCollection.compare_against or "HEAD"
         return view.settings().get('git_gutter_compare_against', compare)
 
     @staticmethod
