@@ -1,6 +1,7 @@
 import os
 import subprocess
 import re
+import codecs
 
 import sublime
 
@@ -160,7 +161,15 @@ class GitGutterHandler:
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
             except UnicodeError:
-                decoded_results = results.decode("utf-8")
+                try:
+                    decoded_results = results.decode("utf-8")
+                except UnicodeDecodeError:
+                    decoded_results = ""
+            except LookupError:
+                try:
+                    decoded_results = codecs.decode(results)
+                except UnicodeDecodeError:
+                    decoded_results = ""
             return self.process_diff(decoded_results)
         else:
             return ([], [], [])
