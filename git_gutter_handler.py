@@ -29,6 +29,8 @@ class GitGutterHandler:
         # NOTE(maelnor): are we need regex here?
         pattern = re.compile(r'.+\((.*)\)')
         encoding = self.view.encoding()
+        if encoding == "Undefined":
+            encoding = self.view.settings().get('default_encoding')
         if pattern.match(encoding):
             encoding = pattern.sub(r'\1', encoding)
 
