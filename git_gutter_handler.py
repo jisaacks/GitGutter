@@ -1,7 +1,8 @@
 import os
-import sublime
 import subprocess
 import re
+
+import sublime
 
 try:
     from . import git_helper
