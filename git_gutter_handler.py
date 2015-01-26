@@ -1,7 +1,6 @@
 import os
 import sublime
 import subprocess
-import encodings
 import re
 
 try:
