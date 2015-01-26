@@ -74,6 +74,9 @@ class GitGutterHandler:
         contents = contents.replace(b'\r', b'\n')
         f = open(self.buf_temp_file.name, 'wb')
 
+        if self.view.encoding() == "UTF-8 with BOM":
+            f.write(codecs.BOM_UTF8)
+
         f.write(contents)
         f.close()
 
