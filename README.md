@@ -35,6 +35,8 @@ cd "%APPDATA%\Sublime Text 2\Packages"
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
+On OS X you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
+
 ### Comparing against different commits/branches/tags
 
 By default, Git Gutter compares your working copy against the HEAD. You can change this behaviour through the ST command palette. The following options are available:
