@@ -122,6 +122,7 @@ Color schemes that already have support for GitGutter include:
 * [Desert Night](https://github.com/fgb/desert_night)
 * [Cobalt2](https://github.com/wesbos/cobalt2)
 * [Fox](https://github.com/karelvuong/fox)
+* [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
