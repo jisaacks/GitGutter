@@ -45,11 +45,11 @@
         "children":
         [
             {
-                "caption": "Previous change",
+                "caption": "Previous Change",
                 "command": "git_gutter_prev_change"
             },
             {
-                "caption": "Next change",
+                "caption": "Next Change",
                 "command": "git_gutter_next_change"
             }
         ]
