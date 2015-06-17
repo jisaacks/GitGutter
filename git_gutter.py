@@ -6,7 +6,12 @@ try:
 except (ImportError, ValueError):
     from view_collection import ViewCollection
 
+ST3 = int(sublime.version()) >= 3000
 
+
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):
@@ -20,11 +25,16 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             # View is not ready yet, try again later.
             sublime.set_timeout(self.run, 1)
             return
+
         self.clear_all()
+        show_untracked = settings.get('show_markers_on_untracked_file', False)
+
         if ViewCollection.untracked(self.view):
-            self.bind_files('untracked')
+            if show_untracked:
+                self.bind_files('untracked')
         elif ViewCollection.ignored(self.view):
-            self.bind_files('ignored')
+            if show_untracked:
+                self.bind_files('ignored')
         else:
             # If the file is untracked there is no need to execute the diff
             # update
@@ -126,3 +136,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             lines += [i + 1]
             i = i + 1
         self.bind_icons(event, lines)
+
+
+if not ST3:
+    plugin_loaded()

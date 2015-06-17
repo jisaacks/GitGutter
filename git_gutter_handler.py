@@ -132,14 +132,7 @@ class GitGutterHandler:
                 deleted += [start + 1]
             else:
                 modified += range(start, start + new_size)
-        if len(inserted) == self.total_lines() and not self.show_untracked:
-            # All lines are "inserted"
-            # this means this file is either:
-            # - New and not being tracked *yet*
-            # - Or it is a *gitignored* file
-            return ([], [], [])
-        else:
-            return (inserted, modified, deleted)
+        return (inserted, modified, deleted)
 
     def diff(self):
         if self.on_disk() and self.git_path:
@@ -170,7 +163,7 @@ class GitGutterHandler:
         return self.handle_files(['-i'])
 
     def handle_files(self, additionnal_args):
-        if self.show_untracked and self.on_disk() and self.git_path:
+        if self.on_disk() and self.git_path:
             args = [
                 self.git_binary_path,
                 '--git-dir=' + self.git_dir,
