@@ -1,8 +1,9 @@
 import os
-import sublime
 import subprocess
-import encodings
 import re
+import codecs
+
+import sublime
 
 try:
     from . import git_helper
@@ -29,6 +30,8 @@ class GitGutterHandler:
         # NOTE(maelnor): are we need regex here?
         pattern = re.compile(r'.+\((.*)\)')
         encoding = self.view.encoding()
+        if encoding == "Undefined":
+            encoding = self.view.settings().get('default_encoding')
         if pattern.match(encoding):
             encoding = pattern.sub(r'\1', encoding)
 
@@ -70,6 +73,9 @@ class GitGutterHandler:
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
         f = open(self.buf_temp_file.name, 'wb')
+
+        if self.view.encoding() == "UTF-8 with BOM":
+            f.write(codecs.BOM_UTF8)
 
         f.write(contents)
         f.close()
@@ -151,7 +157,15 @@ class GitGutterHandler:
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
             except UnicodeError:
-                decoded_results = results.decode("utf-8")
+                try:
+                    decoded_results = results.decode("utf-8")
+                except UnicodeDecodeError:
+                    decoded_results = ""
+            except LookupError:
+                try:
+                    decoded_results = codecs.decode(results)
+                except UnicodeDecodeError:
+                    decoded_results = ""
             return self.process_diff(decoded_results)
         else:
             return ([], [], [])
