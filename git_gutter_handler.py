@@ -20,10 +20,9 @@ class GitGutterHandler:
         self.view = view
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
-        if self.on_disk():
-            self.git_tree = git_helper.git_tree(self.view)
-            self.git_dir = git_helper.git_dir(self.git_tree)
-            self.git_path = git_helper.git_file_path(self.view, self.git_tree)
+        self.git_tree = None
+        self.git_dir = None
+        self.git_path = None
 
     def _get_view_encoding(self):
         # get encoding and clean it for python ex: "Western (ISO 8859-1)"
@@ -46,7 +45,14 @@ class GitGutterHandler:
 
     def on_disk(self):
         # if the view is saved to disk
-        return self.view.file_name() is not None
+        on_disk = self.view.file_name() is not None
+        if on_disk:
+            self.git_tree = self.git_tree or git_helper.git_tree(self.view)
+            self.git_dir = self.git_dir or git_helper.git_dir(self.git_tree)
+            self.git_path = self.git_path or git_helper.git_file_path(
+                self.view, self.git_tree
+            )
+        return on_disk
 
     def reset(self):
         if self.on_disk() and self.git_path and self.view.window():
