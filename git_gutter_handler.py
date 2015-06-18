@@ -145,7 +145,7 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                self.git_binary_path, 'diff', '-U0', '--no-color',
+                self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
                 self.ignore_whitespace,
                 self.patience_switch,
                 self.git_temp_file.name,
