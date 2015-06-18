@@ -1,0 +1,4 @@
+{
+  "install": "release_messages/dest/install.txt",
+  "1.2.0-pre": "release_messages/dest/1.2.0-pre.txt"
+}
