@@ -20,7 +20,7 @@
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change
   // but can increase performance greatly if needed.
-  "non_blocking": false,
+  "non_blocking": true,
 
   // When using non_blocking mode, delay update of gutter icons by the
   // following amount (in milliseconds).
