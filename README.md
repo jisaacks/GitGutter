@@ -197,10 +197,4 @@ There are commands to jump between modifications. The default keybindings for th
 
 ### Alternatives
 
-*Don't use Sublime?*
- - [Vim GitGutter](https://github.com/airblade/vim-gitgutter)
- - [Emacs GitGutter](https://github.com/syohex/emacs-git-gutter)
-
-*Don't use Git?*
- - [VcsGutter](https://github.com/bradsokol/VcsGutter)
- - [Modific](https://github.com/gornostal/Modific) *Not a port/fork of __GitGutter__ but similar*
+Check out the [collection of GitGutter(ish) packages for various editors](https://github.com/gitgutter)
