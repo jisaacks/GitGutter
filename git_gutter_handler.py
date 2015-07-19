@@ -2,16 +2,18 @@ import os
 import subprocess
 import re
 import codecs
-
+import time
+import threading
 import sublime
 
 try:
     from . import git_helper
     from .view_collection import ViewCollection
+    from .promise import Promise, ConstPromise
 except (ImportError, ValueError):
     import git_helper
     from view_collection import ViewCollection
-
+    from promise import Promise, ConstPromise
 
 class GitGutterHandler:
 
@@ -55,8 +57,8 @@ class GitGutterHandler:
         return on_disk
 
     def reset(self):
-        if self.on_disk() and self.git_path and self.view.window():
-            self.view.window().run_command('git_gutter')
+        if self.on_disk() and self.git_path:
+            self.view.run_command('git_gutter')
 
     def get_git_path(self):
         return self.git_path
@@ -97,18 +99,22 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                ViewCollection.get_compare(self.view) + ':' + self.git_path,
+                self.view.settings().get('git_gutter_compare_against', 'HEAD') + ':' + self.git_path,
             ]
-            try:
-                contents = self.run_command(args)
+            def write_file(contents):
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
                 f = open(self.git_temp_file.name, 'wb')
                 f.write(contents)
                 f.close()
+            try:
                 ViewCollection.update_git_time(self.view)
+                return self.run_command(args).addCallback(write_file)
             except Exception:
+                print('got exception')
                 pass
+        else:
+            return ConstPromise(None)
 
     def total_lines(self):
         chars = self.view.size()
@@ -148,33 +154,36 @@ class GitGutterHandler:
 
     def diff(self):
         if self.on_disk() and self.git_path:
-            self.update_git_file()
-            self.update_buf_file()
-            args = [
-                self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
-                self.ignore_whitespace,
-                self.patience_switch,
-                self.git_temp_file.name,
-                self.buf_temp_file.name,
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
-            except UnicodeError:
+            def decode_and_process_diff(results):
+                encoding = self._get_view_encoding()
                 try:
-                    decoded_results = results.decode("utf-8")
-                except UnicodeDecodeError:
-                    decoded_results = ""
-            except LookupError:
-                try:
-                    decoded_results = codecs.decode(results)
-                except UnicodeDecodeError:
-                    decoded_results = ""
-            return self.process_diff(decoded_results)
+                    decoded_results = results.decode(encoding.replace(' ', ''))
+                except UnicodeError:
+                    try:
+                        decoded_results = results.decode("utf-8")
+                    except UnicodeDecodeError:
+                        decoded_results = ""
+                except LookupError:
+                    try:
+                        decoded_results = codecs.decode(results)
+                    except UnicodeDecodeError:
+                        decoded_results = ""
+                return self.process_diff(decoded_results)
+
+            def run_diff(_unused):
+                self.update_buf_file()
+                args = [
+                    self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
+                    self.ignore_whitespace,
+                    self.patience_switch,
+                    self.git_temp_file.name,
+                    self.buf_temp_file.name,
+                ]
+                args = list(filter(None, args))  # Remove empty args
+                return self.run_command(args).map(decode_and_process_diff)
+            return self.update_git_file().flatMap(run_diff)
         else:
-            return ([], [], [])
+            return ConstPromise(([], [], []))
 
     def untracked(self):
         return self.handle_files([])
@@ -184,6 +193,13 @@ class GitGutterHandler:
 
     def handle_files(self, additionnal_args):
         if self.on_disk() and self.git_path:
+            def is_nonempty(results):
+                encoding = self._get_view_encoding()
+                try:
+                    decoded_results = results.decode(encoding.replace(' ', ''))
+                except UnicodeError:
+                    decoded_results = results.decode("utf-8")
+                return (decoded_results != "")
             args = [
                 self.git_binary_path,
                 '--git-dir=' + self.git_dir,
@@ -193,15 +209,9 @@ class GitGutterHandler:
                 os.path.join(self.git_tree, self.git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
-            except UnicodeError:
-                decoded_results = results.decode("utf-8")
-            return (decoded_results != "")
+            return self.run_command(args).map(is_nonempty)
         else:
-            return False
+            return ConstPromise(False)
 
     def git_commits(self):
         args = [
@@ -253,13 +263,18 @@ class GitGutterHandler:
         return result
 
     def run_command(self, args):
-        startupinfo = None
-        if os.name == 'nt':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                startupinfo=startupinfo, stderr=subprocess.PIPE)
-        return proc.stdout.read()
+        p = Promise()
+        def read_output():
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                    startupinfo=startupinfo, stderr=subprocess.PIPE)
+            p.updateValue(proc.stdout.read())
+
+        sublime.set_timeout_async(read_output, 0)
+        return p
 
     def load_settings(self):
         self.settings = sublime.load_settings('GitGutter.sublime-settings')

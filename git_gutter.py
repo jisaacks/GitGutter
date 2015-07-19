@@ -2,62 +2,86 @@ import os
 import sublime
 import sublime_plugin
 try:
-    from .view_collection import ViewCollection
+    from .git_gutter_handler import GitGutterHandler
+    from .git_gutter_settings import GitGutterSettings
+    from .promise import Promise, ConstPromise
 except (ImportError, ValueError):
-    from view_collection import ViewCollection
+    from git_gutter_handler import GitGutterHandler
+    from git_gutter_settings import GitGutterSettings
+    from promise import Promise, ConstPromise
 
 ST3 = int(sublime.version()) >= 3000
 
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-
-
-class GitGutterCommand(sublime_plugin.WindowCommand):
+class GitGutterCommand(sublime_plugin.TextCommand):
     region_names = ['deleted_top', 'deleted_bottom',
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
-    def run(self, force_refresh=False):
-        self.view = self.window.active_view()
-        if not self.view:
-            # View is not ready yet, try again later.
-            sublime.set_timeout(self.run, 1)
-            return
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
+        self.settings = sublime.load_settings('GitGutter.sublime-settings')
+        self.git_handler = GitGutterHandler(self.view)
+        self.diff_results = None
 
-        self.clear_all()
-        show_untracked = settings.get('show_markers_on_untracked_file', False)
+    def run(self, edit_permit):
+        if (self.git_handler.on_disk()):
+            self.git_handler.diff().flatMap(self.check_ignored_or_untracked)
 
-        if ViewCollection.untracked(self.view):
-            if show_untracked:
-                self.bind_files('untracked')
-        elif ViewCollection.ignored(self.view):
-            if show_untracked:
-                self.bind_files('ignored')
-        else:
-            # If the file is untracked there is no need to execute the diff
-            # update
-            if force_refresh:
-                ViewCollection.clear_git_time(self.view)
-            inserted, modified, deleted = ViewCollection.diff(self.view)
-            self.lines_removed(deleted)
-            self.bind_icons('inserted', inserted)
-            self.bind_icons('changed', modified)
-
-            if(ViewCollection.show_status(self.view) != "none"):
-                if(ViewCollection.show_status(self.view) == 'all'):
-                    branch = ViewCollection.current_branch(
-                        self.view).decode("utf-8").strip()
+    def check_ignored_or_untracked(self, contents):
+        if self.show_untracked() and self.are_all_lines_added(contents):
+            def bind_ignored_or_untracked(is_ignored):
+                if (is_ignored):
+                    return ConstPromise(self.bind_files('ignored'))
                 else:
-                    branch = ""
+                    def bind_untracked(is_untracked):
+                        if (is_untracked):
+                            self.bind_files('untracked')
+                    return self.git_handler.untracked().addCallback(bind_untracked)
 
+            return self.git_handler.ignored().flatMap(bind_ignored_or_untracked)
+        else:
+            return self.lazy_update_ui(contents)
+
+    def are_all_lines_added(self, contents):
+        inserted, modified, deleted = contents
+        if (len(modified) == 0 and len(deleted) == 0):
+            chars = self.view.size()
+            region = sublime.Region(0, chars)
+            return len(self.view.split_by_newlines(region)) == len(inserted)
+        else:
+            return False
+
+    def lazy_update_ui(self, contents):
+        if (self.diff_results is None or self.diff_results != contents):
+            self.diff_results = contents
+            return self.update_ui(contents)
+        else:
+            return ConstPromise(None)
+
+    def update_ui(self, contents):
+        inserted, modified, deleted = contents
+        self.clear_all()
+        self.lines_removed(deleted)
+        self.bind_icons('inserted', inserted)
+        self.bind_icons('changed', modified)
+
+        if(self.show_status() != "none"):
+            if(self.show_status() == 'all'):
+                def decode_and_strip(branch_name):
+                    return branch_name.decode("utf-8").strip()
+                branchPromise = self.git_handler.git_current_branch().map(decode_and_strip)
+            else:
+                branchPromise = ConstPromise("")
+
+            def update_status_ui(branch_name):
                 self.update_status(len(inserted),
                                    len(modified),
                                    len(deleted),
-                                   ViewCollection.get_compare(self.view), branch)
-            else:
-                self.update_status(0, 0, 0, "", "")
+                                   self.compare_against(),
+                                   branch_name)
+            return branchPromise.addCallback(update_status_ui)
+        else:
+            return ConstPromise(self.update_status(0, 0, 0, "", ""))
 
     def update_status(self, inserted, modified, deleted, compare, branch):
 
@@ -130,13 +154,26 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def bind_files(self, event):
         lines = []
-        lineCount = ViewCollection.total_lines(self.view)
+        lineCount = self.total_lines()
         i = 0
         while i < lineCount:
             lines += [i + 1]
             i = i + 1
         self.bind_icons(event, lines)
 
+    def total_lines(self):
+        chars = self.view.size()
+        region = sublime.Region(0, chars)
+        lines = self.view.lines(region)
+        return len(lines)
 
-if not ST3:
-    plugin_loaded()
+    # Settings
+
+    def show_status(self):
+        return GitGutterSettings.get('show_status', 'default')
+
+    def show_untracked(self):
+        return GitGutterSettings.get('show_markers_on_untracked_file', False)
+
+    def compare_against(self):
+        return GitGutterSettings.get('git_gutter_compare_against', 'HEAD')

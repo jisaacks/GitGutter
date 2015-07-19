@@ -25,20 +25,21 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
         return blocks
 
     def run(self):
-        view = self.window.active_view()
+        def goto_line(results):
+            view = self.window.active_view()
+            inserted, modified, deleted = results
+            inserted = self.lines_to_blocks(inserted)
+            modified = self.lines_to_blocks(modified)
+            all_changes = sorted(inserted + modified + deleted)
+            if all_changes:
+                row, col = view.rowcol(view.sel()[0].begin())
 
-        inserted, modified, deleted = ViewCollection.diff(view)
-        inserted = self.lines_to_blocks(inserted)
-        modified = self.lines_to_blocks(modified)
-        all_changes = sorted(inserted + modified + deleted)
-        if all_changes:
-            row, col = view.rowcol(view.sel()[0].begin())
+                current_row = row + 1
 
-            current_row = row + 1
+                line = self.jump(all_changes, current_row)
 
-            line = self.jump(all_changes, current_row)
-
-            self.window.active_view().run_command("goto_line", {"line": line})
+                self.window.active_view().run_command("goto_line", {"line": line})
+        ViewCollection.diff(view).addCallback(goto_line)
 
 
 class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
