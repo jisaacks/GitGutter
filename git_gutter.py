@@ -4,10 +4,12 @@ import sublime_plugin
 try:
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_settings import GitGutterSettings
+    from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .promise import Promise, ConstPromise
 except (ImportError, ValueError):
     from git_gutter_handler import GitGutterHandler
     from git_gutter_settings import GitGutterSettings
+    from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from promise import Promise, ConstPromise
 
 ST3 = int(sublime.version()) >= 3000
@@ -21,10 +23,18 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.settings = sublime.load_settings('GitGutter.sublime-settings')
         self.git_handler = GitGutterHandler(self.view)
+        self.jump_handler = GitGutterJumpToChanges(self.view, self.git_handler)
         self.diff_results = None
 
-    def run(self, edit_permit):
-        if (self.git_handler.on_disk()):
+    def run(self, edit_permit, **kwargs):
+        if kwargs and 'action' in kwargs:
+            action = kwargs['action']
+            if action == 'jump_to_next_change':
+                self.jump_handler.jump_to_next_change()
+            elif action == 'jump_to_prev_change':
+                self.jump_handler.jump_to_prev_change()
+
+        elif (self.git_handler.on_disk()):
             self.git_handler.diff().flatMap(self.check_ignored_or_untracked)
 
     def check_ignored_or_untracked(self, contents):
