@@ -26,7 +26,8 @@
                             },
                             {
                                 "caption": "Commit",
-                                "command": "git_gutter_compare_commit"
+                                "command": "git_gutter",
+                                "args": {"action": "compare_against_commit"}
                             },
                             {
                                 "caption": "Branch",

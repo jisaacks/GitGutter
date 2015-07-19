@@ -4,11 +4,13 @@ import sublime_plugin
 try:
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_settings import GitGutterSettings
+    from .git_gutter_compare import GitGutterCompareCommit
     from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .promise import Promise, ConstPromise
 except (ImportError, ValueError):
     from git_gutter_handler import GitGutterHandler
     from git_gutter_settings import GitGutterSettings
+    from git_gutter_compare import GitGutterCompareCommit
     from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from promise import Promise, ConstPromise
 
@@ -35,6 +37,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
                 self.jump_handler.jump_to_prev_change()
             elif action == 'show_compare':
                 sublime.message_dialog("GitGutter is comparing against: " + self.compare_against())
+            elif action == 'compare_against_commit':
+                GitGutterCompareCommit(self.view, self.git_handler).run()
 
         elif (self.git_handler.on_disk()):
             self.git_handler.diff().flatMap(self.check_ignored_or_untracked)

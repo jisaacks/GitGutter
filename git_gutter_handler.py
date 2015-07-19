@@ -10,10 +10,12 @@ try:
     from . import git_helper
     from .view_collection import ViewCollection
     from .promise import Promise, ConstPromise
+    from .git_gutter_settings import GitGutterSettings
 except (ImportError, ValueError):
     import git_helper
     from view_collection import ViewCollection
     from promise import Promise, ConstPromise
+    from git_gutter_settings import GitGutterSettings
 
 class GitGutterHandler:
 
@@ -99,7 +101,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                self.view.settings().get('git_gutter_compare_against', 'HEAD') + ':' + self.git_path,
+                GitGutterSettings.get('git_gutter_compare_against', 'HEAD') + ':' + self.git_path,
             ]
             def write_file(contents):
                 contents = contents.replace(b'\r\n', b'\n')
@@ -263,6 +265,7 @@ class GitGutterHandler:
         return result
 
     def run_command(self, args):
+        # print('run_command: ' + str(args))
         p = Promise()
         def read_output():
             startupinfo = None
