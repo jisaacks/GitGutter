@@ -1,7 +1,8 @@
 [
     {
         "caption": "GitGutter: Show Comparing Against",
-        "command": "git_gutter_show_compare"
+        "command": "git_gutter",
+        "args": {"action": "show_compare"}
     },
     {
         "caption": "GitGutter: Compare Against HEAD",

@@ -13,7 +13,8 @@
                         [
                             {
                                 "caption": "View Current",
-                                "command": "git_gutter_show_compare"
+                                "command": "git_gutter",
+                                "args": {"action": "show_compare"}
                             },
                             {
                                 "caption": "HEAD",

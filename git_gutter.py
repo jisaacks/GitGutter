@@ -33,6 +33,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
                 self.jump_handler.jump_to_next_change()
             elif action == 'jump_to_prev_change':
                 self.jump_handler.jump_to_prev_change()
+            elif action == 'show_compare':
+                sublime.message_dialog("GitGutter is comparing against: " + self.compare_against())
 
         elif (self.git_handler.on_disk()):
             self.git_handler.diff().flatMap(self.check_ignored_or_untracked)
