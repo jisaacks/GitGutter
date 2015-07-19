@@ -42,6 +42,10 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         else:
             return self.lazy_update_ui(contents)
 
+    # heuristic to determine if the file is either untracked or ignored: all lines show up as "inserted"
+    # in the diff. Relying on the output of the normal diff command to trigger the actual untracked /
+    # ignored check (which is expensive because it's two separate git ls-files calls) allows us to
+    # save the extra git calls
     def are_all_lines_added(self, contents):
         inserted, modified, deleted = contents
         if (len(modified) == 0 and len(deleted) == 0):

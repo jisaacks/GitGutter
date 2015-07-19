@@ -271,7 +271,8 @@ class GitGutterHandler:
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                                     startupinfo=startupinfo, stderr=subprocess.PIPE)
-            p.updateValue(proc.stdout.read())
+            stdout_output = proc.stdout.read()
+            p.updateValue(stdout_output)
 
         sublime.set_timeout_async(read_output, 0)
         return p
