@@ -18,11 +18,13 @@
                             },
                             {
                                 "caption": "HEAD",
-                                "command": "git_gutter_compare_head"
+                                "command": "git_gutter",
+                                "args": {"action": "compare_against_head"}
                             },
                             {
                                 "caption": "Origin",
-                                "command": "git_gutter_compare_origin"
+                                "command": "git_gutter",
+                                "args": {"action": "compare_against_origin"}
                             },
                             {
                                 "caption": "Commit",
@@ -31,10 +33,13 @@
                             },
                             {
                                 "caption": "Branch",
-                                "command": "git_gutter_compare_branch"
-                            },{
+                                "command": "git_gutter",
+                                "args": {"action": "compare_against_branch"}
+                            },
+                            {
                                 "caption": "Tag",
-                                "command": "git_gutter_compare_tag"
+                                "command": "git_gutter",
+                                "args": {"action": "compare_against_tag"}
                             }
                         ]
                     }

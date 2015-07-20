@@ -17,7 +17,6 @@ class GitGutterCompareCommit:
         self.view = view
         self.git_handler = git_handler
 
-
     def run(self):
         def show_quick_panel(results):
             if results:
@@ -44,10 +43,15 @@ class GitGutterCompareCommit:
         ViewCollection.clear_git_time(self.view)
         self.view.run_command('git_gutter') # refresh ui
 
+
 class GitGutterCompareBranch(GitGutterCompareCommit):
     def commit_list(self):
-        result = self.handler.git_branches().decode("utf-8")
-        return [self.parse_result(r) for r in result.strip().split('\n')]
+        def decode_and_parse_branch_list(result):
+            return [self.parse_result(r) for r in result.decode("utf-8").strip().split('\n')]
+        if self.git_handler.on_disk():
+            return self.git_handler.git_branches().map(decode_and_parse_branch_list)
+        else:
+            return ConstPromise([])
 
     def parse_result(self, result):
         pieces = result.split('\a')
@@ -58,11 +62,17 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
 
 class GitGutterCompareTag(GitGutterCompareCommit):
     def commit_list(self):
-        result = self.handler.git_tags().decode("utf-8")
-        if result:
-            return [self.parse_result(r) for r in result.strip().split('\n')]
+        def decode_and_parse_tag_list(result):
+            if result:
+                return [self.parse_result(r) for r in result.decode("utf-8").strip().split('\n')]
+            else:
+                sublime.message_dialog("No tags found in repository")
+                return ConstPromise([])
+
+        if self.git_handler.on_disk():
+            return self.git_handler.git_tags().map(decode_and_parse_tag_list)
         else:
-            sublime.message_dialog("No tags found in repository")
+            return ConstPromise([])
 
     def parse_result(self, result):
         pieces = result.split(' ')
@@ -73,16 +83,14 @@ class GitGutterCompareTag(GitGutterCompareCommit):
     def item_to_commit(self, item):
         return item[1]
 
-class GitGutterCompareHead(sublime_plugin.WindowCommand):
+class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        self.view = self.window.active_view()
-        ViewCollection.set_compare("HEAD")
+        GitGutterSettings.set('git_gutter_compare_against', 'HEAD')
         ViewCollection.clear_git_time(self.view)
-        ViewCollection.add(self.view)
+        self.view.run_command('git_gutter') # refresh ui
 
-class GitGutterCompareOrigin(sublime_plugin.WindowCommand):
+class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
-        self.view = self.window.active_view()
-        ViewCollection.set_compare("origin")
+        GitGutterSettings.set('git_gutter_compare_against', 'origin')
         ViewCollection.clear_git_time(self.view)
-        ViewCollection.add(self.view)
+        self.view.run_command('git_gutter') # refresh ui

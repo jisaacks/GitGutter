@@ -6,11 +6,13 @@
     },
     {
         "caption": "GitGutter: Compare Against HEAD",
-        "command": "git_gutter_compare_head"
+        "command": "git_gutter",
+        "args": {"action": "compare_against_head"}
     },
     {
         "caption": "GitGutter: Compare Against Origin",
-        "command": "git_gutter_compare_origin"
+        "command": "git_gutter",
+        "args": {"action": "compare_against_origin"}
     },
     {
         "caption": "GitGutter: Compare Against Commit",
@@ -19,10 +21,12 @@
     },
     {
         "caption": "GitGutter: Compare Against Branch",
-        "command": "git_gutter_compare_branch"
+        "command": "git_gutter",
+        "args": {"action": "compare_against_branch"}
     },
     {
         "caption": "GitGutter: Compare Against Tag",
-        "command": "git_gutter_compare_tag"
+        "command": "git_gutter",
+        "args": {"action": "compare_against_tag"}
     }
 ]

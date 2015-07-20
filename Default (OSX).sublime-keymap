@@ -2,9 +2,9 @@
     { "keys": ["super+shift+option+j"], "command": "git_gutter", "args": {"action": "jump_to_next_change"} },
     { "keys": ["super+shift+option+k"], "command": "git_gutter", "args": {"action": "jump_to_prev_change"} },
     { "keys": ["super+shift+option+c", "v"], "command": "git_gutter", "args": {"action": "show_compare"} },
-    { "keys": ["super+shift+option+c", "h"], "command": "git_gutter_compare_head" },
-    { "keys": ["super+shift+option+c", "o"], "command": "git_gutter_compare_origin" },
+    { "keys": ["super+shift+option+c", "h"], "command": "git_gutter", "args": {"action": "compare_against_head"} },
+    { "keys": ["super+shift+option+c", "o"], "command": "git_gutter", "args": {"action": "compare_against_origin"} },
     { "keys": ["super+shift+option+c", "c"], "command": "git_gutter", "args": {"action": "compare_against_commit"} },
-    { "keys": ["super+shift+option+c", "b"], "command": "git_gutter_compare_branch" },
-    { "keys": ["super+shift+option+c", "t"], "command": "git_gutter_compare_tag" }
+    { "keys": ["super+shift+option+c", "b"], "command": "git_gutter", "args": {"action": "compare_against_branch"} },
+    { "keys": ["super+shift+option+c", "t"], "command": "git_gutter", "args": {"action": "compare_against_tag"} }
 ]
