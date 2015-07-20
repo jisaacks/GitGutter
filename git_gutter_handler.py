@@ -23,7 +23,6 @@ class GitGutterHandler:
     GitFileUpdateIntervalSecs = 5
 
     def __init__(self, view):
-        self.load_settings()
         self.view = view
 
         self.git_temp_file = tempfile.NamedTemporaryFile()
@@ -113,7 +112,7 @@ class GitGutterHandler:
         if self.git_time() > self.GitFileUpdateIntervalSecs:
             open(self.git_temp_file.name, 'w').close()
             args = [
-                self.git_binary_path,
+                GitGutterSettings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
@@ -191,9 +190,9 @@ class GitGutterHandler:
             def run_diff(_unused):
                 self.update_buf_file()
                 args = [
-                    self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
-                    self.ignore_whitespace,
-                    self.patience_switch,
+                    GitGutterSettings.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
+                    GitGutterSettings.ignore_whitespace,
+                    GitGutterSettings.patience_switch,
                     self.git_temp_file.name,
                     self.buf_temp_file.name,
                 ]
@@ -219,7 +218,7 @@ class GitGutterHandler:
                     decoded_results = results.decode("utf-8")
                 return (decoded_results != "")
             args = [
-                self.git_binary_path,
+                GitGutterSettings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
@@ -233,7 +232,7 @@ class GitGutterHandler:
 
     def git_commits(self):
         args = [
-            self.git_binary_path,
+            GitGutterSettings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
@@ -245,7 +244,7 @@ class GitGutterHandler:
 
     def git_branches(self):
         args = [
-            self.git_binary_path,
+            GitGutterSettings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'for-each-ref',
@@ -258,7 +257,7 @@ class GitGutterHandler:
 
     def git_tags(self):
         args = [
-            self.git_binary_path,
+            GitGutterSettings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'show-ref',
@@ -270,7 +269,7 @@ class GitGutterHandler:
 
     def git_current_branch(self):
         args = [
-            self.git_binary_path,
+            GitGutterSettings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'rev-parse',
@@ -295,39 +294,3 @@ class GitGutterHandler:
 
         sublime.set_timeout_async(read_output, 0)
         return p
-
-    def load_settings(self):
-        self.settings = sublime.load_settings('GitGutter.sublime-settings')
-        self.user_settings = sublime.load_settings(
-            'Preferences.sublime-settings')
-
-        # Git Binary Setting
-        self.git_binary_path = 'git'
-        git_binary = self.user_settings.get(
-            'git_binary') or self.settings.get('git_binary')
-        if git_binary:
-            self.git_binary_path = git_binary
-
-        # Ignore White Space Setting
-        self.ignore_whitespace = self.settings.get('ignore_whitespace')
-        if self.ignore_whitespace == 'all':
-            self.ignore_whitespace = '-w'
-        elif self.ignore_whitespace == 'eol':
-            self.ignore_whitespace = '--ignore-space-at-eol'
-        else:
-            self.ignore_whitespace = ''
-
-        # Patience Setting
-        self.patience_switch = ''
-        patience = self.settings.get('patience')
-        if patience:
-            self.patience_switch = '--patience'
-
-        # Untracked files
-        self.show_untracked = self.settings.get(
-            'show_markers_on_untracked_file')
-
-        # Show information in status bar
-        self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
-        if self.show_status != 'all' and self.show_status != 'none':
-            self.show_status = 'default'

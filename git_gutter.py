@@ -36,7 +36,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             elif action == 'jump_to_prev_change':
                 self.jump_handler.jump_to_prev_change()
             elif action == 'show_compare':
-                sublime.message_dialog("GitGutter is comparing against: " + self.compare_against())
+                sublime.message_dialog("GitGutter is comparing against: " + GitGutterSettings.compare_against())
             elif action == 'compare_against_commit':
                 GitGutterCompareCommit(self.view, self.git_handler).run()
             elif action == 'compare_against_branch':
@@ -52,7 +52,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             self.git_handler.diff().flatMap(self.check_ignored_or_untracked)
 
     def check_ignored_or_untracked(self, contents):
-        if self.show_untracked() and self.are_all_lines_added(contents):
+        if GitGutterSettings.show_untracked and self.are_all_lines_added(contents):
             def bind_ignored_or_untracked(is_ignored):
                 if (is_ignored):
                     return ConstPromise(self.bind_files('ignored'))
@@ -93,8 +93,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.bind_icons('inserted', inserted)
         self.bind_icons('changed', modified)
 
-        if(self.show_status() != "none"):
-            if(self.show_status() == 'all'):
+        if(GitGutterSettings.show_status != "none"):
+            if(GitGutterSettings.show_status == 'all'):
                 def decode_and_strip(branch_name):
                     return branch_name.decode("utf-8").strip()
                 branchPromise = self.git_handler.git_current_branch().map(decode_and_strip)
@@ -105,7 +105,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
                 self.update_status(len(inserted),
                                    len(modified),
                                    len(deleted),
-                                   self.compare_against(),
+                                   GitGutterSettings.compare_against(),
                                    branch_name)
             return branchPromise.addCallback(update_status_ui)
         else:
@@ -194,14 +194,3 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         region = sublime.Region(0, chars)
         lines = self.view.lines(region)
         return len(lines)
-
-    # Settings
-
-    def show_status(self):
-        return GitGutterSettings.get('show_status', 'default')
-
-    def show_untracked(self):
-        return GitGutterSettings.get('show_markers_on_untracked_file', False)
-
-    def compare_against(self):
-        return GitGutterSettings.get('git_gutter_compare_against', 'HEAD')
