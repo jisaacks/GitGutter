@@ -3,12 +3,11 @@ import sublime_plugin
 from functools import partial
 
 ST3 = int(sublime.version()) >= 3000
+
 if ST3:
-    from .view_collection import ViewCollection
     from .git_gutter_settings import GitGutterSettings
     from .promise import Promise, ConstPromise
 else:
-    from view_collection import ViewCollection
     from git_gutter_settings import GitGutterSettings
     from promise import Promise, ConstPromise
 
@@ -40,7 +39,7 @@ class GitGutterCompareCommit:
         item = results[selected]
         commit = self.item_to_commit(item)
         GitGutterSettings.set('git_gutter_compare_against', commit)
-        ViewCollection.clear_git_time(self.view)
+        self.git_handler.clear_git_time()
         self.view.run_command('git_gutter') # refresh ui
 
 
@@ -86,11 +85,11 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
         GitGutterSettings.set('git_gutter_compare_against', 'HEAD')
-        ViewCollection.clear_git_time(self.view)
+        self.git_handler.clear_git_time()
         self.view.run_command('git_gutter') # refresh ui
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
         GitGutterSettings.set('git_gutter_compare_against', 'origin')
-        ViewCollection.clear_git_time(self.view)
+        self.git_handler.clear_git_time()
         self.view.run_command('git_gutter') # refresh ui
