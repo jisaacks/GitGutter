@@ -12,15 +12,15 @@ class GitGutterSettings:
 
   def get(self, key, default):
     if (self.settings is None or self.settings.has(key) == False):
-      self.load_settings('get')
+      self.load_settings()
     return self.settings.get(key, default)
 
   def set(self, key, value):
     if self.settings is None:
-      self.load_settings('set')
+      self.load_settings()
     return self.settings.set(key, value)
 
-  def load_settings(self, msg):
+  def load_settings(self):
       self.settings = sublime.load_settings('GitGutter.sublime-settings')
       self.user_settings = sublime.load_settings('Preferences.sublime-settings')
 
@@ -54,7 +54,7 @@ class GitGutterSettings:
       if self.show_status != 'all' and self.show_status != 'none':
           self.show_status = 'default'
 
-  def compare_against(self, git_dir):
+  def get_compare_against(self, git_dir):
     if git_dir in self.compare_against_mapping:
       return self.compare_against_mapping[git_dir]
     else:

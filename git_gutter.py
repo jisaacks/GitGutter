@@ -22,7 +22,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     def __init__(self, *args, **kwargs):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.settings = GitGutterSettings()
-        self.settings.load_settings('git_gutter __init__')
+        self.settings.load_settings()
         self.git_handler = GitGutterHandler(self.view, self.settings)
         self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler, self.settings)
 
@@ -37,7 +37,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             elif action == 'jump_to_prev_change':
                 GitGutterJumpToChanges(self.view, self.git_handler, self.settings).jump_to_prev_change()
             elif action == 'show_compare':
-                sublime.message_dialog("GitGutter is comparing against: " + self.settings.compare_against(self.git_handler.git_dir))
+                sublime.message_dialog("GitGutter is comparing against: " + self.settings.get_compare_against(self.git_handler.git_dir))
             elif action == 'compare_against_commit':
                 GitGutterCompareCommit(self.view, self.git_handler, self.settings).run()
             elif action == 'compare_against_branch':

@@ -76,7 +76,7 @@ class GitGutterShowDiff:
                 self.update_status(len(inserted),
                                    len(modified),
                                    len(deleted),
-                                   self.settings.compare_against(self.git_handler.git_dir),
+                                   self.settings.get_compare_against(self.git_handler.git_dir),
                                    branch_name)
             return branchPromise.addCallback(update_status_ui)
         else:

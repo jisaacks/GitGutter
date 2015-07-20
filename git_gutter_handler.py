@@ -115,7 +115,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                self.settings.compare_against(self.git_dir) + ':' + self.git_path,
+                self.settings.get_compare_against(self.git_dir) + ':' + self.git_path,
             ]
             def write_file(contents):
                 contents = contents.replace(b'\r\n', b'\n')
