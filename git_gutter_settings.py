@@ -1,65 +1,64 @@
 import sublime
 
-ST3 = int(sublime.version()) >= 3000
-
-def plugin_loaded():
-  GitGutterSettings.load_settings()
-
 class GitGutterSettings:
-  settings = None
 
-  @classmethod
-  def get(cls, key, default):
-    if (cls.settings is None or cls.settings.has(key) == False):
-      cls.load_settings()
+  def __init__(self):
+    self.settings = None
+    # a mapping of git_dir to a string indicating what to compare against.
+    # ex:
+    #   /Users/foo/workspace1/.git -> "origin",
+    #   /Users/foo/workspace2/.git -> "HEAD"
+    self.compare_against_mapping = {}
 
-    return cls.settings.get(key, default)
+  def get(self, key, default):
+    if (self.settings is None or self.settings.has(key) == False):
+      self.load_settings('get')
+    return self.settings.get(key, default)
 
-  @classmethod
-  def set(cls, key, value):
-    if cls.settings is None:
-      return None
-    else:
-      return cls.settings.set(key, value)
+  def set(self, key, value):
+    if self.settings is None:
+      self.load_settings('set')
+    return self.settings.set(key, value)
 
-  @classmethod
-  def load_settings(cls):
-      cls.settings = sublime.load_settings('GitGutter.sublime-settings')
-      cls.user_settings = sublime.load_settings('Preferences.sublime-settings')
+  def load_settings(self, msg):
+      self.settings = sublime.load_settings('GitGutter.sublime-settings')
+      self.user_settings = sublime.load_settings('Preferences.sublime-settings')
 
       # Git Binary Setting
-      cls.git_binary_path = 'git'
-      git_binary = cls.user_settings.get('git_binary') or cls.settings.get('git_binary')
+      self.git_binary_path = 'git'
+      git_binary = self.user_settings.get('git_binary') or self.settings.get('git_binary')
       if git_binary:
-          cls.git_binary_path = git_binary
+          self.git_binary_path = git_binary
 
       # Ignore White Space Setting
-      cls.ignore_whitespace = cls.settings.get('ignore_whitespace')
-      if cls.ignore_whitespace == 'all':
-          cls.ignore_whitespace = '-w'
-      elif cls.ignore_whitespace == 'eol':
-          cls.ignore_whitespace = '--ignore-space-at-eol'
+      self.ignore_whitespace = self.settings.get('ignore_whitespace')
+      if self.ignore_whitespace == 'all':
+          self.ignore_whitespace = '-w'
+      elif self.ignore_whitespace == 'eol':
+          self.ignore_whitespace = '--ignore-space-at-eol'
       else:
-          cls.ignore_whitespace = ''
+          self.ignore_whitespace = ''
 
       # Patience Setting
-      cls.patience_switch = ''
-      patience = cls.settings.get('patience')
+      self.patience_switch = ''
+      patience = self.settings.get('patience')
       if patience:
-          cls.patience_switch = '--patience'
+          self.patience_switch = '--patience'
 
       # Untracked files
-      cls.show_untracked = cls.settings.get(
+      self.show_untracked = self.settings.get(
           'show_markers_on_untracked_file')
 
       # Show information in status bar
-      cls.show_status = cls.user_settings.get('show_status') or cls.settings.get('show_status')
-      if cls.show_status != 'all' and cls.show_status != 'none':
-          cls.show_status = 'default'
+      self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
+      if self.show_status != 'all' and self.show_status != 'none':
+          self.show_status = 'default'
 
-  @classmethod
-  def compare_against(cls):
-      return cls.get('git_gutter_compare_against', 'HEAD')
+  def compare_against(self, git_dir):
+    if git_dir in self.compare_against_mapping:
+      return self.compare_against_mapping[git_dir]
+    else:
+      return self.get('git_gutter_compare_against', 'HEAD')
 
-if not ST3:
-  plugin_loaded()
+  def set_compare_against(self, git_dir, new_compare_against):
+    self.compare_against_mapping[git_dir] = new_compare_against

@@ -21,8 +21,10 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
     def __init__(self, *args, **kwargs):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
-        self.git_handler = GitGutterHandler(self.view)
-        self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler)
+        self.settings = GitGutterSettings()
+        self.settings.load_settings('git_gutter __init__')
+        self.git_handler = GitGutterHandler(self.view, self.settings)
+        self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler, self.settings)
 
     def run(self, edit_permit, **kwargs):
         if self.git_handler.on_disk() is False:
@@ -31,20 +33,20 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         if kwargs and 'action' in kwargs:
             action = kwargs['action']
             if action == 'jump_to_next_change':
-                GitGutterJumpToChanges(self.view, self.git_handler).jump_to_next_change()
+                GitGutterJumpToChanges(self.view, self.git_handler, self.settings).jump_to_next_change()
             elif action == 'jump_to_prev_change':
-                GitGutterJumpToChanges(self.view, self.git_handler).jump_to_prev_change()
+                GitGutterJumpToChanges(self.view, self.git_handler, self.settings).jump_to_prev_change()
             elif action == 'show_compare':
-                sublime.message_dialog("GitGutter is comparing against: " + GitGutterSettings.compare_against())
+                sublime.message_dialog("GitGutter is comparing against: " + self.settings.compare_against(self.git_handler.git_dir))
             elif action == 'compare_against_commit':
-                GitGutterCompareCommit(self.view, self.git_handler).run()
+                GitGutterCompareCommit(self.view, self.git_handler, self.settings).run()
             elif action == 'compare_against_branch':
-                GitGutterCompareBranch(self.view, self.git_handler).run()
+                GitGutterCompareBranch(self.view, self.git_handler, self.settings).run()
             elif action == 'compare_against_tag':
-                GitGutterCompareTag(self.view, self.git_handler).run()
+                GitGutterCompareTag(self.view, self.git_handler, self.settings).run()
             elif action == 'compare_against_head':
-                GitGutterCompareHead(self.view, self.git_handler).run()
+                GitGutterCompareHead(self.view, self.git_handler, self.settings).run()
             elif action == 'compare_against_origin':
-                GitGutterCompareOrigin(self.view, self.git_handler).run()
+                GitGutterCompareOrigin(self.view, self.git_handler, self.settings).run()
         else:
             self.show_diff_handler.run()

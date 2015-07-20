@@ -2,10 +2,8 @@ import os
 import sublime
 import sublime_plugin
 try:
-    from .git_gutter_settings import GitGutterSettings
     from .promise import ConstPromise
 except (ImportError, ValueError):
-    from git_gutter_settings import GitGutterSettings
     from promise import ConstPromise
 
 class GitGutterShowDiff:
@@ -13,16 +11,17 @@ class GitGutterShowDiff:
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
-    def __init__(self, view, git_handler):
+    def __init__(self, view, git_handler, settings):
         self.view = view
         self.git_handler = git_handler
+        self.settings = settings
         self.diff_results = None
 
     def run(self):
         self.git_handler.diff().flatMap(self.check_ignored_or_untracked)
 
     def check_ignored_or_untracked(self, contents):
-        if GitGutterSettings.show_untracked and self.are_all_lines_added(contents):
+        if self.settings.show_untracked and self.are_all_lines_added(contents):
             def bind_ignored_or_untracked(is_ignored):
                 if (is_ignored):
                     return ConstPromise(self.bind_files('ignored'))
@@ -30,6 +29,8 @@ class GitGutterShowDiff:
                     def bind_untracked(is_untracked):
                         if (is_untracked):
                             self.bind_files('untracked')
+                        else:
+                            self.lazy_update_ui(contents)
                     return self.git_handler.untracked().addCallback(bind_untracked)
 
             return self.git_handler.ignored().flatMap(bind_ignored_or_untracked)
@@ -63,8 +64,8 @@ class GitGutterShowDiff:
         self.bind_icons('inserted', inserted)
         self.bind_icons('changed', modified)
 
-        if(GitGutterSettings.show_status != "none"):
-            if(GitGutterSettings.show_status == 'all'):
+        if(self.settings.show_status != "none"):
+            if(self.settings.show_status == 'all'):
                 def decode_and_strip(branch_name):
                     return branch_name.decode("utf-8").strip()
                 branchPromise = self.git_handler.git_current_branch().map(decode_and_strip)
@@ -75,7 +76,7 @@ class GitGutterShowDiff:
                 self.update_status(len(inserted),
                                    len(modified),
                                    len(deleted),
-                                   GitGutterSettings.compare_against(),
+                                   self.settings.compare_against(self.git_handler.git_dir),
                                    branch_name)
             return branchPromise.addCallback(update_status_ui)
         else:

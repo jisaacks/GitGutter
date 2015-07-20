@@ -5,16 +5,15 @@ from functools import partial
 ST3 = int(sublime.version()) >= 3000
 
 if ST3:
-    from .git_gutter_settings import GitGutterSettings
     from .promise import Promise, ConstPromise
 else:
-    from git_gutter_settings import GitGutterSettings
     from promise import Promise, ConstPromise
 
 class GitGutterCompareCommit:
-    def __init__(self, view, git_handler):
+    def __init__(self, view, git_handler, settings):
         self.view = view
         self.git_handler = git_handler
+        self.settings = settings
 
     def run(self):
         def show_quick_panel(results):
@@ -38,7 +37,7 @@ class GitGutterCompareCommit:
             return
         item = results[selected]
         commit = self.item_to_commit(item)
-        GitGutterSettings.set('git_gutter_compare_against', commit)
+        self.settings.set_compare_against(self.git_handler.git_dir, commit)
         self.git_handler.clear_git_time()
         self.view.run_command('git_gutter') # refresh ui
 
@@ -84,12 +83,15 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        GitGutterSettings.set('git_gutter_compare_against', 'HEAD')
+        self.settings.set_compare_against(self.git_handler.git_dir, 'HEAD')
         self.git_handler.clear_git_time()
         self.view.run_command('git_gutter') # refresh ui
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
-        GitGutterSettings.set('git_gutter_compare_against', 'origin')
-        self.git_handler.clear_git_time()
-        self.view.run_command('git_gutter') # refresh ui
+        def on_branch_name(branch_name):
+            if branch_name:
+                self.settings.set_compare_against(self.git_handler.git_dir, 'origin/' + branch_name.decode("utf-8").strip())
+                self.git_handler.clear_git_time()
+                self.view.run_command('git_gutter') # refresh ui
+        self.git_handler.git_current_branch().addCallback(on_branch_name)

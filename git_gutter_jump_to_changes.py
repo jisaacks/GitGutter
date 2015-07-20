@@ -2,15 +2,11 @@ import sublime
 import sublime_plugin
 from functools import partial
 
-try:
-    from .git_gutter_settings import GitGutterSettings
-except (ImportError, ValueError):
-    from git_gutter_settings import GitGutterSettings
-
 class GitGutterJumpToChanges:
-    def __init__(self, view, git_handler):
+    def __init__(self, view, git_handler, settings):
         self.view = view
         self.git_handler = git_handler
+        self.settings = settings
 
     def lines_to_blocks(self, lines):
         blocks = []
@@ -39,7 +35,7 @@ class GitGutterJumpToChanges:
         self.git_handler.diff().addCallback(partial(self.goto_line, self.prev_jump))
 
     def next_jump(self, all_changes, current_row):
-        if GitGutterSettings.get('next_prev_change_wrap', True):
+        if self.settings.get('next_prev_change_wrap', True):
             default = all_changes[0]
         else:
             default = all_changes[-1]
@@ -48,7 +44,7 @@ class GitGutterJumpToChanges:
                     if change > current_row), default)
 
     def prev_jump(self, all_changes, current_row):
-        if GitGutterSettings.get('next_prev_change_wrap', True):
+        if self.settings.get('next_prev_change_wrap', True):
             default = all_changes[-1]
         else:
             default = all_changes[0]

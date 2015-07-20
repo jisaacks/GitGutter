@@ -6,10 +6,11 @@ from threading import Timer
 
 ST3 = int(sublime.version()) >= 3000
 
-try:
-    from .git_gutter_settings import GitGutterSettings
-except (ImportError, ValueError):
-    from git_gutter_settings import GitGutterSettings
+settings = None
+
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 def async_event_listener(EventListener):
     if ST3:
@@ -67,13 +68,16 @@ class GitGutterEvents(sublime_plugin.EventListener):
     # Settings
 
     def debounce_delay_secs(self, view, default = 1000):
-        return GitGutterSettings.get('debounce_delay', default) / 1000.0
+        return settings.get('debounce_delay', default) / 1000.0
 
     def live_mode(self, view, default = True):
-        return GitGutterSettings.get('live_mode', default)
+        return settings.get('live_mode', default)
 
     def focus_change_mode(self, view, default = True):
-        return GitGutterSettings.get('focus_change_mode', default)
+        return settings.get('focus_change_mode', default)
 
     def non_blocking(self, view, default = True):
-        return GitGutterSettings.get.get('non_blocking', default)
+        return settings.get.get('non_blocking', default)
+
+if not ST3:
+    plugin_loaded()

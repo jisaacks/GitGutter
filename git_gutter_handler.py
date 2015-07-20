@@ -10,11 +10,9 @@ import tempfile
 try:
     from . import git_helper
     from .promise import Promise, ConstPromise
-    from .git_gutter_settings import GitGutterSettings
 except (ImportError, ValueError):
     import git_helper
     from promise import Promise, ConstPromise
-    from git_gutter_settings import GitGutterSettings
 
 class GitGutterHandler:
     # the git repo won't change that often
@@ -22,8 +20,9 @@ class GitGutterHandler:
     # between updates for performance
     GitFileUpdateIntervalSecs = 5
 
-    def __init__(self, view):
+    def __init__(self, view, settings):
         self.view = view
+        self.settings = settings
 
         self.git_temp_file = tempfile.NamedTemporaryFile()
         self.git_temp_file.close()
@@ -112,11 +111,11 @@ class GitGutterHandler:
         if self.git_time() > self.GitFileUpdateIntervalSecs:
             open(self.git_temp_file.name, 'w').close()
             args = [
-                GitGutterSettings.git_binary_path,
+                self.settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                GitGutterSettings.get('git_gutter_compare_against', 'HEAD') + ':' + self.git_path,
+                self.settings.compare_against(self.git_dir) + ':' + self.git_path,
             ]
             def write_file(contents):
                 contents = contents.replace(b'\r\n', b'\n')
@@ -190,9 +189,9 @@ class GitGutterHandler:
             def run_diff(_unused):
                 self.update_buf_file()
                 args = [
-                    GitGutterSettings.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
-                    GitGutterSettings.ignore_whitespace,
-                    GitGutterSettings.patience_switch,
+                    self.settings.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
+                    self.settings.ignore_whitespace,
+                    self.settings.patience_switch,
                     self.git_temp_file.name,
                     self.buf_temp_file.name,
                 ]
@@ -218,7 +217,7 @@ class GitGutterHandler:
                     decoded_results = results.decode("utf-8")
                 return (decoded_results != "")
             args = [
-                GitGutterSettings.git_binary_path,
+                self.settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
@@ -232,7 +231,7 @@ class GitGutterHandler:
 
     def git_commits(self):
         args = [
-            GitGutterSettings.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
@@ -244,7 +243,7 @@ class GitGutterHandler:
 
     def git_branches(self):
         args = [
-            GitGutterSettings.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'for-each-ref',
@@ -257,7 +256,7 @@ class GitGutterHandler:
 
     def git_tags(self):
         args = [
-            GitGutterSettings.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'show-ref',
@@ -269,7 +268,7 @@ class GitGutterHandler:
 
     def git_current_branch(self):
         args = [
-            GitGutterSettings.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'rev-parse',
