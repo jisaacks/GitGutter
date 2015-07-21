@@ -2,27 +2,48 @@ import os
 import subprocess
 import re
 import codecs
-
+import time
+import threading
 import sublime
+import tempfile
 
 try:
     from . import git_helper
-    from .view_collection import ViewCollection
+    from .promise import Promise, ConstPromise
 except (ImportError, ValueError):
     import git_helper
-    from view_collection import ViewCollection
-
+    from promise import Promise, ConstPromise
 
 class GitGutterHandler:
+    # the git repo won't change that often
+    # so we can easily wait  seconds
+    # between updates for performance
+    GitFileUpdateIntervalSecs = 5
 
-    def __init__(self, view):
-        self.load_settings()
+    def __init__(self, view, settings):
         self.view = view
-        self.git_temp_file = ViewCollection.git_tmp_file(self.view)
-        self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
+        self.settings = settings
+
+        self.git_temp_file = tempfile.NamedTemporaryFile()
+        self.git_temp_file.close()
+
+        self.buf_temp_file = tempfile.NamedTemporaryFile()
+        self.buf_temp_file.close()
+
         self.git_tree = None
         self.git_dir = None
         self.git_path = None
+
+        self.clear_git_time()
+
+    def clear_git_time(self):
+        self.last_refresh_time_git_file = time.time() - (self.GitFileUpdateIntervalSecs + 1)
+
+    def update_git_time(self):
+        self.last_refresh_time_git_file = time.time()
+
+    def git_time(self):
+        return time.time() - self.last_refresh_time_git_file
 
     def _get_view_encoding(self):
         # get encoding and clean it for python ex: "Western (ISO 8859-1)"
@@ -55,8 +76,8 @@ class GitGutterHandler:
         return on_disk
 
     def reset(self):
-        if self.on_disk() and self.git_path and self.view.window():
-            self.view.window().run_command('git_gutter')
+        if self.on_disk() and self.git_path:
+            self.view.run_command('git_gutter')
 
     def get_git_path(self):
         return self.git_path
@@ -87,28 +108,29 @@ class GitGutterHandler:
         f.close()
 
     def update_git_file(self):
-        # the git repo won't change that often
-        # so we can easily wait 5 seconds
-        # between updates for performance
-        if ViewCollection.git_time(self.view) > 5:
+        if self.git_time() > self.GitFileUpdateIntervalSecs:
             open(self.git_temp_file.name, 'w').close()
             args = [
-                self.git_binary_path,
+                self.settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                ViewCollection.get_compare(self.view) + ':' + self.git_path,
+                self.settings.get_compare_against(self.git_dir) + ':' + self.git_path,
             ]
-            try:
-                contents = self.run_command(args)
+            def write_file(contents):
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
                 f = open(self.git_temp_file.name, 'wb')
                 f.write(contents)
                 f.close()
-                ViewCollection.update_git_time(self.view)
+            try:
+                self.update_git_time()
+                return self.run_command(args).addCallback(write_file)
             except Exception:
+                print('got exception')
                 pass
+        else:
+            return ConstPromise(None)
 
     def total_lines(self):
         chars = self.view.size()
@@ -148,33 +170,36 @@ class GitGutterHandler:
 
     def diff(self):
         if self.on_disk() and self.git_path:
-            self.update_git_file()
-            self.update_buf_file()
-            args = [
-                self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
-                self.ignore_whitespace,
-                self.patience_switch,
-                self.git_temp_file.name,
-                self.buf_temp_file.name,
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
-            except UnicodeError:
+            def decode_and_process_diff(results):
+                encoding = self._get_view_encoding()
                 try:
-                    decoded_results = results.decode("utf-8")
-                except UnicodeDecodeError:
-                    decoded_results = ""
-            except LookupError:
-                try:
-                    decoded_results = codecs.decode(results)
-                except UnicodeDecodeError:
-                    decoded_results = ""
-            return self.process_diff(decoded_results)
+                    decoded_results = results.decode(encoding.replace(' ', ''))
+                except UnicodeError:
+                    try:
+                        decoded_results = results.decode("utf-8")
+                    except UnicodeDecodeError:
+                        decoded_results = ""
+                except LookupError:
+                    try:
+                        decoded_results = codecs.decode(results)
+                    except UnicodeDecodeError:
+                        decoded_results = ""
+                return self.process_diff(decoded_results)
+
+            def run_diff(_unused):
+                self.update_buf_file()
+                args = [
+                    self.settings.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
+                    self.settings.ignore_whitespace,
+                    self.settings.patience_switch,
+                    self.git_temp_file.name,
+                    self.buf_temp_file.name,
+                ]
+                args = list(filter(None, args))  # Remove empty args
+                return self.run_command(args).map(decode_and_process_diff)
+            return self.update_git_file().flatMap(run_diff)
         else:
-            return ([], [], [])
+            return ConstPromise(([], [], []))
 
     def untracked(self):
         return self.handle_files([])
@@ -184,8 +209,15 @@ class GitGutterHandler:
 
     def handle_files(self, additionnal_args):
         if self.on_disk() and self.git_path:
+            def is_nonempty(results):
+                encoding = self._get_view_encoding()
+                try:
+                    decoded_results = results.decode(encoding.replace(' ', ''))
+                except UnicodeError:
+                    decoded_results = results.decode("utf-8")
+                return (decoded_results != "")
             args = [
-                self.git_binary_path,
+                self.settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
@@ -193,19 +225,13 @@ class GitGutterHandler:
                 os.path.join(self.git_tree, self.git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
-            except UnicodeError:
-                decoded_results = results.decode("utf-8")
-            return (decoded_results != "")
+            return self.run_command(args).map(is_nonempty)
         else:
-            return False
+            return ConstPromise(False)
 
     def git_commits(self):
         args = [
-            self.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
@@ -217,7 +243,7 @@ class GitGutterHandler:
 
     def git_branches(self):
         args = [
-            self.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'for-each-ref',
@@ -230,7 +256,7 @@ class GitGutterHandler:
 
     def git_tags(self):
         args = [
-            self.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'show-ref',
@@ -242,7 +268,7 @@ class GitGutterHandler:
 
     def git_current_branch(self):
         args = [
-            self.git_binary_path,
+            self.settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'rev-parse',
@@ -253,46 +279,17 @@ class GitGutterHandler:
         return result
 
     def run_command(self, args):
-        startupinfo = None
-        if os.name == 'nt':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                startupinfo=startupinfo, stderr=subprocess.PIPE)
-        return proc.stdout.read()
+        # print('run_command: ' + str(args))
+        p = Promise()
+        def read_output():
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            proc = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                    startupinfo=startupinfo, stderr=subprocess.PIPE)
+            stdout_output = proc.stdout.read()
+            p.updateValue(stdout_output)
 
-    def load_settings(self):
-        self.settings = sublime.load_settings('GitGutter.sublime-settings')
-        self.user_settings = sublime.load_settings(
-            'Preferences.sublime-settings')
-
-        # Git Binary Setting
-        self.git_binary_path = 'git'
-        git_binary = self.user_settings.get(
-            'git_binary') or self.settings.get('git_binary')
-        if git_binary:
-            self.git_binary_path = git_binary
-
-        # Ignore White Space Setting
-        self.ignore_whitespace = self.settings.get('ignore_whitespace')
-        if self.ignore_whitespace == 'all':
-            self.ignore_whitespace = '-w'
-        elif self.ignore_whitespace == 'eol':
-            self.ignore_whitespace = '--ignore-space-at-eol'
-        else:
-            self.ignore_whitespace = ''
-
-        # Patience Setting
-        self.patience_switch = ''
-        patience = self.settings.get('patience')
-        if patience:
-            self.patience_switch = '--patience'
-
-        # Untracked files
-        self.show_untracked = self.settings.get(
-            'show_markers_on_untracked_file')
-
-        # Show information in status bar
-        self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
-        if self.show_status != 'all' and self.show_status != 'none':
-            self.show_status = 'default'
+        sublime.set_timeout_async(read_output, 0)
+        return p

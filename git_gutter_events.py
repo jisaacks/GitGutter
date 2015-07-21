@@ -2,13 +2,15 @@ import time
 
 import sublime
 import sublime_plugin
+from threading import Timer
 
 ST3 = int(sublime.version()) >= 3000
-if ST3:
-    from .view_collection import ViewCollection
-else:
-    from view_collection import ViewCollection
 
+settings = None
+
+def plugin_loaded():
+    global settings
+    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 def async_event_listener(EventListener):
     if ST3:
@@ -30,87 +32,52 @@ def async_event_listener(EventListener):
                 delattr(EventListener, attr_name)
     return EventListener
 
-
 @async_event_listener
 class GitGutterEvents(sublime_plugin.EventListener):
-
     def __init__(self):
-        self._settings_loaded = False
-        self.latest_keypresses = {}
+        self.timer = None
+
+    def refresh(self, view, event_type):
+        try:
+            self.timer.cancel()
+        except(AttributeError):
+            pass
+
+        self.timer = Timer(self.debounce_delay_secs(view), view.run_command, ["git_gutter"])
+        self.timer.start()
 
     # Synchronous
-
     def on_modified(self, view):
-        if self.settings_loaded() and self.live_mode:
-            self.debounce(view, 'modified', ViewCollection.add)
+        if self.live_mode(view):
+            self.refresh(view, 'modified')
 
     def on_clone(self, view):
-        if self.settings_loaded():
-            self.debounce(view, 'clone', ViewCollection.add)
+        self.refresh(view, 'clone')
 
     def on_post_save(self, view):
-        if self.settings_loaded():
-            self.debounce(view, 'post-save', ViewCollection.add)
+        self.refresh(view, 'post-save')
 
     def on_load(self, view):
-        if self.settings_loaded() and self.live_mode:
-            self.debounce(view, 'load', ViewCollection.add)
+        if self.live_mode(view):
+            self.refresh(view, 'load')
 
     def on_activated(self, view):
-        if self.settings_loaded() and self.focus_change_mode:
-            self.debounce(view, 'activated', ViewCollection.add)
-
-    # Asynchronous
-
-    def debounce(self, view, event_type, func):
-        if self.non_blocking:
-            key = (event_type, view.file_name())
-            this_keypress = time.time()
-            self.latest_keypresses[key] = this_keypress
-
-            def callback():
-                latest_keypress = self.latest_keypresses.get(key, None)
-                if this_keypress == latest_keypress:
-                    func(view)
-
-            if ST3:
-                set_timeout = sublime.set_timeout_async
-            else:
-                set_timeout = sublime.set_timeout
-
-            set_timeout(callback, settings.get("debounce_delay"))
-        else:
-            func(view)
+        if self.focus_change_mode(view):
+            self.refresh(view, 'activated')
 
     # Settings
 
-    def settings_loaded(self):
-        if settings and not self._settings_loaded:
-            self._settings_loaded = self.load_settings()
+    def debounce_delay_secs(self, view, default = 1000):
+        return settings.get('debounce_delay', default) / 1000.0
 
-        return self._settings_loaded
+    def live_mode(self, view, default = True):
+        return settings.get('live_mode', default)
 
-    def load_settings(self):
-        self.live_mode = settings.get('live_mode')
-        if self.live_mode is None:
-            self.live_mode = True
+    def focus_change_mode(self, view, default = True):
+        return settings.get('focus_change_mode', default)
 
-        self.focus_change_mode = settings.get('focus_change_mode')
-        if self.focus_change_mode is None:
-            self.focus_change_mode = True
-
-        self.non_blocking = settings.get('non_blocking')
-        if self.non_blocking is None:
-            self.non_blocking = True
-
-        return True
-
-settings = {}
-
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
+    def non_blocking(self, view, default = True):
+        return settings.get.get('non_blocking', default)
 
 if not ST3:
     plugin_loaded()
