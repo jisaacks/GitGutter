@@ -27,7 +27,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler, self.settings)
 
     def run(self, edit_permit, **kwargs):
-        if self.git_handler.on_disk() is False:
+        if not self.git_handler.on_disk() or not self.git_handler.git_dir:
             return
 
         if kwargs and 'action' in kwargs:
