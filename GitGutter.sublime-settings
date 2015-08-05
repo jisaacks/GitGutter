@@ -48,6 +48,9 @@
   // Set "all" to also show on what branch you are
   "show_status": "default",
 
+  // Show GitGutter information in the minimap
+  "show_in_minimap": true,
+
   // Determines whether the git_gutter_next_change and git_gutter_prev_change
   // commands wrap around on reaching the beginning/ending of the file.
   "next_prev_change_wrap": true
