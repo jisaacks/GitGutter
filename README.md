@@ -124,6 +124,7 @@ Color schemes that already have support for GitGutter include:
 * [Fox](https://github.com/karelvuong/fox)
 * [Hitoshi](https://github.com/runxel/hitoshi)
 * [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
+* [Wildlife](https://github.com/tushortz/wildlife)
 * _Contact me if you want your color scheme listed here. Or do a pull request._
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
