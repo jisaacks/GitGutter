@@ -254,15 +254,11 @@ class GitGutterHandler:
 
     def run_command(self, args):
         startupinfo = None
-        # Per http://bugs.python.org/issue8557 shell=True is required to
-        # get $PATH on Windows. Yay portable code.
-        shell = os.name == 'nt'
         if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                startupinfo=startupinfo, stderr=subprocess.PIPE,
-                                shell=shell, env=os.environ)
+                                startupinfo=startupinfo, stderr=subprocess.PIPE)
         return proc.stdout.read()
 
     def load_settings(self):
@@ -275,7 +271,7 @@ class GitGutterHandler:
         git_binary = self.user_settings.get(
             'git_binary') or self.settings.get('git_binary')
         if git_binary:
-            self.git_binary_path = git_binary
+            self.git_binary_path = os.path.expandvars(git_binary)
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')
