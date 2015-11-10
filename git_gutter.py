@@ -142,7 +142,10 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             event_scope = 'deleted'
         scope = 'markup.%s.git_gutter' % event_scope
         icon = self.icon_path(event)
-        flags = (sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE if (ST3 and self.show_in_minimap) else sublime.HIDDEN)
+        if ST3 and self.show_in_minimap:
+            flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
+        else:
+            flags = sublime.HIDDEN
         self.view.add_regions('git_gutter_%s' % event, regions, scope, icon, flags)
 
     def bind_files(self, event):
