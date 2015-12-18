@@ -362,12 +362,14 @@ class GitGutterHandler(object):
     def run_command(args):
         def read_output(resolve):
             startupinfo = None
+            stdin = None
             if os.name == 'nt':
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                stdin = subprocess.PIPE
             proc = subprocess.Popen(
                 args, stdout=subprocess.PIPE, startupinfo=startupinfo,
-                stderr=subprocess.PIPE)
+                stderr=subprocess.PIPE, stdin=stdin)
             stdout_output = proc.stdout.read()
             resolve(stdout_output)
 
