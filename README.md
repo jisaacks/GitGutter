@@ -76,15 +76,13 @@ GitGutter will show diffs in the minimap on Sublime Text 3. This can be disabled
 #### Git path
 If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
 ```javascript
-{
-  "git_binary": "E:\\Portable\\git\\bin\\git.exe"
-}
+"git_binary": "E:\\Portable\\git\\bin\\git.exe"
 ```
 
 #### Protected Regions
 Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:
 ```javascript
-protected_regions: ["region", "names"]
+"protected_regions": ["region", "names"]
 ```
 You will need to figure out the names of the regions you are trying to protect.
 
