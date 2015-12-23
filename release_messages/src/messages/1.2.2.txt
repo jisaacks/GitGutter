@@ -1,0 +1,11 @@
+* Adds Protected Regions
+  
+  - Option to specify regions that should not be overridden.
+    
+  - This fixes GitGutter hiding Linters and other Gutter icons.
+
+  - You must manually specify what regions are protected in the settings.
+
+* Adds Minimap Support
+
+  - Can be turned off in settings.

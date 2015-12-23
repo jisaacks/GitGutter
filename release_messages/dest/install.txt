@@ -5,14 +5,26 @@ Thanks for installing Git Gutter!!!
 
 😍 Love Git Gutter? Want to support development?
 
-I've teamed up with Wes Bos to offer a discount on Sublime Text Power User.
+I've teamed up with Wes Bos to offer the following discounts:
+
+
+--> $10 OFF Sublime Text Power User.
 
 Become amazing with Sublime Text with this book + video series. 📖📹
-
-Join 3,000 other developers who have increased productivity and become better developers.
-
 
 👉 SublimeTextBook.com/friend/GITGUTTER
 💰 Use the coupon code GITGUTTER for $10 off 💵
 
-This is a fantastic resource - 100% money back guarantee! 🌟
+
+--> $10 OFF React for Beginners
+
+Upgrade your JavaScript skills. 
+Learn React.js in just a couple of afternoons. 📹
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+💰 Use the coupon code GITGUTTER for $10 off 💵
+
+
+Join 3,000 other developers already learning React.js with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
