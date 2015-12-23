@@ -30,7 +30,7 @@ git clone git://github.com/jisaacks/GitGutter.git
 
 GitGutter assumes that the `git` command is available on the command line. If it's not, add the directory containing `git.exe` to your `PATH` environment variable. Then clone the repo:
 
-```dos
+```shell
 cd "%APPDATA%\Sublime Text 2\Packages"
 git clone git://github.com/jisaacks/GitGutter.git
 ```
@@ -75,7 +75,7 @@ GitGutter will show diffs in the minimap on Sublime Text 3. This can be disabled
 
 #### Git path
 If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
-```json
+```javascript
 {
   "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
@@ -83,7 +83,7 @@ If git is not in your PATH, you may need to set the `git_binary` setting to the 
 
 #### Protected Regions
 Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:
-```json
+```javascript
 protected_regions: ["region", "names"]
 ```
 You will need to figure out the names of the regions you are trying to protect.
@@ -92,7 +92,7 @@ You will need to figure out the names of the regions you are trying to protect.
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
 To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
-```json
+```javascript
 {
     "folders":
     [
