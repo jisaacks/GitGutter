@@ -67,7 +67,6 @@ When using non_blocking mode, delay update of gutter icons by the following amou
 #### Live Mode
 By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
 
-
 #### Untracked Files
 GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
 
@@ -81,6 +80,13 @@ If git is not in your PATH, you may need to set the `git_binary` setting to the 
   "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 }
 ```
+
+#### Protected Regions
+Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:
+```json
+protected_regions: ["region", "names"]
+```
+You will need to figure out the names of the regions you are trying to protect.
 
 
 #### Per-project Settings
