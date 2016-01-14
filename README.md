@@ -1,4 +1,4 @@
-## Git Gutter
+# Git Gutter
 
 A sublime text 2/3 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
 
@@ -36,6 +36,10 @@ git clone git://github.com/jisaacks/GitGutter.git
 ```
 
 On OS X you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
+
+## It's not working!?
+
+The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on your [path](https://en.wikipedia.org/wiki/PATH_(variable)). Please read the section on the [git_binary](#git-path) setting for how to fix that.  
 
 ### Comparing against different commits/branches/tags
 
@@ -78,6 +82,7 @@ If git is not in your PATH, you may need to set the `git_binary` setting to the 
 ```javascript
 "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 ```
+Or in a POSIX environment you can run `which git` to find the path to git if it is in your path.
 
 #### Protected Regions
 Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:
