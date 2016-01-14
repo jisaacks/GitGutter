@@ -78,7 +78,7 @@ GitGutter shows icons for new files and ignored files. These icons will be on ev
 GitGutter will show diffs in the minimap on Sublime Text 3. This can be disabled by setting `show_in_minimap` to `false`.
 
 #### Git path
-If git is not in your PATH, you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
+If `git` is not found but GitGutter you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
 ```javascript
 "git_binary": "E:\\Portable\\git\\bin\\git.exe"
 ```
