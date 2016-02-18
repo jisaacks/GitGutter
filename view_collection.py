@@ -83,7 +83,8 @@ class ViewCollection:
     def git_tmp_file(view):
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.git_files:
-            ViewCollection.git_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.git_files[key] = \
+                tempfile.NamedTemporaryFile(prefix='git_gutter_')
             ViewCollection.git_files[key].close()
         return ViewCollection.git_files[key]
 
@@ -91,7 +92,8 @@ class ViewCollection:
     def buf_tmp_file(view):
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.buf_files:
-            ViewCollection.buf_files[key] = tempfile.NamedTemporaryFile()
+            ViewCollection.buf_files[key] = \
+                tempfile.NamedTemporaryFile(prefix='git_gutter_')
             ViewCollection.buf_files[key].close()
         return ViewCollection.buf_files[key]
 
