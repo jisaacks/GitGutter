@@ -87,7 +87,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         # List of Regions
         regions = [r for rs in sets for r in rs]
         for r in regions:
-            if r.contains(region):
+            if r.contains(region) or region.contains(r):
                 return True
 
         return False
