@@ -58,5 +58,8 @@
   // Do not set GitGutter icons in these regions
   // Useful for making sure GitGutter does not override other
   // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
-  "protected_regions": []
+  "protected_regions": [
+    "sublimelinter-warning-gutter-marks",
+    "sublimelinter-error-gutter-marks"  
+  ]
 }
