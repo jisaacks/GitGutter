@@ -118,6 +118,7 @@ Color schemes that already have support for GitGutter include:
 
 * [Afterglow](https://github.com/YabataDesign/afterglow-theme)
 * [Baara Dark](https://github.com/jobedom/sublime-baara-dark)
+* [Brackets Color Scheme](https://github.com/jwortmann/brackets-color-scheme)
 * [Cobalt2](https://github.com/wesbos/cobalt2)
 * [Dark Room](https://github.com/NeilCresswell/themes)
 * [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
