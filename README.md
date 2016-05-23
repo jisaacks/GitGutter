@@ -91,6 +91,13 @@ Is GitGutter blocking SublimeLinter or other icons? You can prevent this by addi
 ```
 You will need to figure out the names of the regions you are trying to protect.
 
+You can also use environmental variables in your git_binary path (Windows example):
+```json
+{
+  "git_binary": "%EnvVar%\\git\\bin\\git.exe"
+}
+```
+
 
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.

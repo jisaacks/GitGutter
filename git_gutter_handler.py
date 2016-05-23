@@ -271,7 +271,7 @@ class GitGutterHandler:
         git_binary = self.user_settings.get(
             'git_binary') or self.settings.get('git_binary')
         if git_binary:
-            self.git_binary_path = git_binary
+            self.git_binary_path = os.path.expandvars(git_binary)
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')
