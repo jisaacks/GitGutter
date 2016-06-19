@@ -40,6 +40,9 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
     # Synchronous
 
+    def on_close(self, view):
+        ViewCollection.remove(view)
+
     def on_modified(self, view):
         if self.settings_loaded() and self.live_mode:
             self.debounce(view, 'modified', ViewCollection.add)
