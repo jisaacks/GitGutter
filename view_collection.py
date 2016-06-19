@@ -1,3 +1,4 @@
+import os
 import sublime
 import tempfile
 import time
@@ -20,6 +21,17 @@ class ViewCollection:
         handler = ViewCollection.views[key] = GitGutterHandler(view)
         handler.reset()
         return handler
+
+    @staticmethod
+    def remove(view):
+        key = ViewCollection.get_key(view)
+        if key in ViewCollection.git_files:
+            os.unlink(ViewCollection.git_files[key].name)
+            del (ViewCollection.git_files[key])
+
+        if key in ViewCollection.buf_files:
+            os.unlink(ViewCollection.buf_files[key].name)
+            del (ViewCollection.buf_files[key])
 
     @staticmethod
     def git_path(view):
@@ -84,7 +96,7 @@ class ViewCollection:
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.git_files:
             ViewCollection.git_files[key] = \
-                tempfile.NamedTemporaryFile(prefix='git_gutter_')
+                tempfile.NamedTemporaryFile(prefix='git_gutter_', delete=False)
             ViewCollection.git_files[key].close()
         return ViewCollection.git_files[key]
 
@@ -93,7 +105,7 @@ class ViewCollection:
         key = ViewCollection.get_key(view)
         if not key in ViewCollection.buf_files:
             ViewCollection.buf_files[key] = \
-                tempfile.NamedTemporaryFile(prefix='git_gutter_')
+                tempfile.NamedTemporaryFile(prefix='git_gutter_', delete=False)
             ViewCollection.buf_files[key].close()
         return ViewCollection.buf_files[key]
 
