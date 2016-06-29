@@ -78,20 +78,22 @@ class GitGutterHandler:
 
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
-        f = open(self.buf_temp_file.name, 'wb')
 
-        if self.view.encoding() == "UTF-8 with BOM":
-            f.write(codecs.BOM_UTF8)
+        with open(self.buf_temp_file, 'wb') as f:
+            if self.view.encoding() == "UTF-8 with BOM":
+                f.write(codecs.BOM_UTF8)
 
-        f.write(contents)
-        f.close()
+            f.write(contents)
+
 
     def update_git_file(self):
         # the git repo won't change that often
         # so we can easily wait 5 seconds
         # between updates for performance
         if ViewCollection.git_time(self.view) > 5:
-            open(self.git_temp_file.name, 'w').close()
+            with open(self.git_temp_file, 'w'):
+                pass
+
             args = [
                 self.git_binary_path,
                 '--git-dir=' + self.git_dir,
@@ -103,9 +105,9 @@ class GitGutterHandler:
                 contents = self.run_command(args)
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
-                f = open(self.git_temp_file.name, 'wb')
-                f.write(contents)
-                f.close()
+                with open(self.git_temp_file, 'wb') as f:
+                    f.write(contents)
+
                 ViewCollection.update_git_time(self.view)
             except Exception:
                 pass
@@ -154,8 +156,8 @@ class GitGutterHandler:
                 self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
                 self.ignore_whitespace,
                 self.patience_switch,
-                self.git_temp_file.name,
-                self.buf_temp_file.name,
+                self.git_temp_file,
+                self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
             results = self.run_command(args)
