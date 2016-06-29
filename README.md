@@ -91,6 +91,9 @@ Is GitGutter blocking SublimeLinter or other icons? You can prevent this by addi
 ```
 You will need to figure out the names of the regions you are trying to protect.
 
+#### Status Bar Text
+
+You can turn off the status bar text by changing `"show_status": "default"` to `"show_status": "none"`.
 
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
