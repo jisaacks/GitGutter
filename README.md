@@ -128,7 +128,6 @@ Color schemes that already have support for GitGutter include:
 * [Desert Night](https://github.com/fgb/desert_night)
 * [Flatland](https://github.com/thinkpixellab/flatland)
 * [Fox](https://github.com/karelvuong/fox)
-* [Glacier](http://glaciertheme.com)
 * [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
 * [Hitoshi](https://github.com/runxel/hitoshi)
 * [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
