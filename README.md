@@ -94,7 +94,9 @@ Or it may be a dictionary keyed off what sublime.platform() returns, so it may b
 }
 ```
 
-Or in a POSIX environment you can run `which git` to find the path to git if it is in your path.
+It is valid to use environment variables in the setting value, and they will be expanded appropriately.
+
+In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
 #### Protected Regions
 Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:

@@ -278,7 +278,9 @@ class GitGutterHandler:
         else:
             self.git_binary_path = git_binary_setting
 
-        if not self.git_binary_path:
+        if self.git_binary_path:
+            self.git_binary_path = os.path.expandvars(self.git_binary_path)
+        else:
             self.git_binary_path = shutil.which("git")
 
         if not self.git_binary_path:
