@@ -78,11 +78,25 @@ GitGutter shows icons for new files and ignored files. These icons will be on ev
 GitGutter will show diffs in the minimap on Sublime Text 3. This can be disabled by setting `show_in_minimap` to `false`.
 
 #### Git path
-If `git` is not found by GitGutter you may need to set the `git_binary` setting to the location of the git binary, e.g. in a portable environment;
+If `git` is not found by GitGutter you may need to set the `git_binary` setting to the location of the git binary.  The value may be either a direct string to a git binary:
 ```javascript
-"git_binary": "E:\\Portable\\git\\bin\\git.exe"
+{
+  "git_binary": "E:\\Portable\\git\\bin\\git.exe"
+}
 ```
-Or in a POSIX environment you can run `which git` to find the path to git if it is in your path.
+
+Or it may be a dictionary keyed off what sublime.platform() returns, so it may be customized on a per-platform basis:
+```javascript
+"git_binary": {
+  "default": "",
+  "linux": "/usr/bin/git",
+  "windows": "C:/Program Files/Git/cmd/git.exe"
+}
+```
+
+It is valid to use environment variables in the setting value, and they will be expanded appropriately.
+
+In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
 #### Protected Regions
 Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:

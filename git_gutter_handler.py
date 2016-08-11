@@ -269,11 +269,26 @@ class GitGutterHandler:
             'Preferences.sublime-settings')
 
         # Git Binary Setting
-        self.git_binary_path = 'git'
-        git_binary = self.user_settings.get(
-            'git_binary') or self.settings.get('git_binary')
-        if git_binary:
-            self.git_binary_path = git_binary
+        git_binary_setting = self.user_settings.get("git_binary") or \
+                             self.settings.get("git_binary")
+        if isinstance(git_binary_setting, dict):
+            self.git_binary_path = git_binary_setting.get(sublime.platform())
+            if not self.git_binary_path:
+                self.git_binary_path = git_binary_setting.get('default')
+        else:
+            self.git_binary_path = git_binary_setting
+
+        if self.git_binary_path:
+            self.git_binary_path = os.path.expandvars(self.git_binary_path)
+        else:
+            self.git_binary_path = shutil.which("git")
+
+        if not self.git_binary_path:
+            msg = ("Your Git binary cannot be found.  If it is installed, add it "
+                   "to your PATH environment variable, or add a `git_binary` setting "
+                   "in the `User/GitGutter.sublime-settings` file.")
+            sublime.error_message(msg)
+            raise ValueError("Git binary not found.")
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')
