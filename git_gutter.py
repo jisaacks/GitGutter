@@ -64,6 +64,7 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
                     "text": "\n".join(lines)
                 }
                 view.run_command("git_gutter_replace_text", replace_param)
+                view.hide_popup()
             elif href == "copy":
                 sublime.set_clipboard("\n".join(lines))
                 copy_message = "  ".join(l.strip() for l in lines)
