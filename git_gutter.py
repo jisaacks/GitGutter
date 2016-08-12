@@ -72,13 +72,18 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
                 copy_message = "  ".join(l.strip() for l in lines)
                 sublime.status_message("Copied: " + copy_message)
 
-        close_char = chr(0x00D7)
+        # write the symbols/text for each button
+        close_button = chr(0x00D7)
+        copy_button = chr(0x2398)
+        revert_button = chr(0x27F2)
         if lines:
             lang = mdpopups.get_language_from_view(view) or ""
             min_indent = min(len(l) - len(l.lstrip(" ")) for l in lines)
             source_content = "\n".join(l[min_indent:] for l in lines)
             content = (
-                '[({close_char})](hide) [(Copy!)](copy) [(Revert!)](revert)\n'
+                '[{close_button}](hide) '
+                '[{copy_button}](copy) '
+                '[{revert_button}](revert)\n'
                 '``` {lang}\n'
                 '{source_content}\n'
                 '```'
@@ -86,11 +91,15 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
             )
         else:
             content = (
-                '[({close_char})](hide) [(Remove inserted lines!)](revert)'
+                '[{close_button}](hide) '
+                '[{revert_button}](revert)'
                 .format(**locals())
             )
+        wrapper_class = 'git-gutter'
+        css = 'div.git-gutter a { text-decoration: none; }'
         mdpopups.show_popup(
             view, content, location=point, on_navigate=navigate,
+            wrapper_class=wrapper_class, css=css,
             flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
 
