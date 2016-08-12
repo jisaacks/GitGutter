@@ -36,6 +36,8 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
         # don't let the popup flicker / fight with other packages
         if view.is_popup_visible():
             return
+        if not settings.get("enable_hover_popup"):
+            return
 
         line = view.rowcol(point)[0] + 1
         lines, start, size = ViewCollection.diff_line_change(view, line)
