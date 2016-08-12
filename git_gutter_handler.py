@@ -2,6 +2,7 @@ import os
 import subprocess
 import re
 import codecs
+import shutil
 
 import sublime
 
