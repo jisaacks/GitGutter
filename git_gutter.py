@@ -3,6 +3,12 @@ import sublime
 import sublime_plugin
 
 try:
+    _MDPOPUS_INSTALLED = True
+    import mdpopups
+except:
+    _MDPOPUS_INSTALLED = False
+
+try:
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
     from view_collection import ViewCollection
@@ -13,6 +19,70 @@ ST3 = int(sublime.version()) >= 3000
 def plugin_loaded():
     global settings
     settings = sublime.load_settings('GitGutter.sublime-settings')
+
+
+class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
+    def run(self, edit, a, b, text):
+        region = sublime.Region(a, b)
+        self.view.replace(edit, region, text)
+
+
+class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
+    def on_hover(self, view, point, hover_zone):
+        if not _MDPOPUS_INSTALLED:
+            return
+        if hover_zone != sublime.HOVER_GUTTER:
+            return
+        # don't let the popup flicker / fight with other packages
+        if view.is_popup_visible():
+            return
+
+        line = view.rowcol(point)[0] + 1
+        lines, start, size = ViewCollection.diff_line_change(view, line)
+        if start == -1:
+            return
+
+        def navigate(href):
+            if href == "revert":
+                if size != 0:
+                    start_point = view.text_point(start - 1, 0)
+                    end_point = view.text_point(start + size - 1, 0) - 1
+                    # if we have nothing to insert we need to remove the
+                    # trailing new line
+                    if not lines:
+                        end_point += 1
+                else:
+                    end_point = view.text_point(start, 0) - 1
+                    start_point = end_point
+                    # we need an extra new line before
+                    lines.insert(0, "")
+                replace_param = {
+                    "a": start_point,
+                    "b": end_point,
+                    "text": "\n".join(lines)
+                }
+                view.run_command("git_gutter_replace_text", replace_param)
+            elif href == "copy":
+                sublime.set_clipboard("\n".join(lines))
+                copy_message = "  ".join(l.strip() for l in lines)
+                sublime.status_message("Copied: " + copy_message)
+
+        if lines:
+            lang = mdpopups.get_language_from_view(view) or ""
+            min_indent = min(len(l) - len(l.lstrip(" ")) for l in lines)
+            source_content = "\n".join(l[min_indent:] for l in lines)
+            content = (
+                '[(Copy!)](copy) [(Revert!)](revert)\n'
+                '``` {lang}\n'
+                '{source_content}\n'
+                '```'
+                .format(**locals())
+            )
+        else:
+            content = "[(Remove inserted lines!)](revert)"
+        mdpopups.show_popup(
+            view, content, location=point, on_navigate=navigate,
+            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):

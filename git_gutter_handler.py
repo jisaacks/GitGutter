@@ -146,7 +146,7 @@ class GitGutterHandler:
                 modified += range(start, start + new_size)
         return (inserted, modified, deleted)
 
-    def diff(self):
+    def diff_str(self):
         if self.on_disk() and self.git_path:
             self.update_git_file()
             self.update_buf_file()
@@ -172,7 +172,44 @@ class GitGutterHandler:
                     decoded_results = codecs.decode(results)
                 except UnicodeDecodeError:
                     decoded_results = ""
-            return self.process_diff(decoded_results)
+            return decoded_results
+        else:
+            return ""
+
+    def process_diff_line_change(self, diff_str, line_nr):
+        hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
+        hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
+        for hunk in hunks:
+            start = int(hunk.group(3))
+            size = int(hunk.group(4) or 1)
+            # continue if the hunk is before the line
+            if start + size < line_nr:
+                continue
+            # break if the hunk is after the line
+            elif line_nr < start:
+                break
+            # in the following the line is inside the hunk
+            try:
+                next_hunk = next(hunks)
+                hunk_end = next_hunk.start()
+            except:
+                hunk_end = len(diff_str)
+            # extract the content of the hunk
+            hunk_content = diff_str[hunk.start():hunk_end]
+            # store all deleted lines (starting with -)
+            lines = [line[1:] for line in hunk_content.split("\n")[1:]
+                     if line.startswith("-")]
+            return lines, start, size
+        return [], -1, -1
+
+    def diff_line_change(self, line):
+        diff_str = self.diff_str()
+        return self.process_diff_line_change(diff_str, line)
+
+    def diff(self):
+        diff_str = self.diff_str()
+        if diff_str:
+            return self.process_diff(diff_str)
         else:
             return ([], [], [])
 

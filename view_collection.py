@@ -47,6 +47,10 @@ class ViewCollection:
             return ViewCollection.add(view)
 
     @staticmethod
+    def diff_line_change(view, line):
+        return ViewCollection.get_handler(view).diff_line_change(line)
+
+    @staticmethod
     def diff(view):
         return ViewCollection.get_handler(view).diff()
 
