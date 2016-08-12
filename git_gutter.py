@@ -45,7 +45,9 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
             return
 
         def navigate(href):
-            if href == "revert":
+            if href == "hide":
+                view.hide_popup()
+            elif href == "revert":
                 if size != 0:
                     start_point = view.text_point(start - 1, 0)
                     end_point = view.text_point(start + size - 1, 0) - 1
@@ -70,19 +72,23 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
                 copy_message = "  ".join(l.strip() for l in lines)
                 sublime.status_message("Copied: " + copy_message)
 
+        close_char = chr(0x00D7)
         if lines:
             lang = mdpopups.get_language_from_view(view) or ""
             min_indent = min(len(l) - len(l.lstrip(" ")) for l in lines)
             source_content = "\n".join(l[min_indent:] for l in lines)
             content = (
-                '[(Copy!)](copy) [(Revert!)](revert)\n'
+                '[({close_char})](hide) [(Copy!)](copy) [(Revert!)](revert)\n'
                 '``` {lang}\n'
                 '{source_content}\n'
                 '```'
                 .format(**locals())
             )
         else:
-            content = "[(Remove inserted lines!)](revert)"
+            content = (
+                '[({close_char})](hide) [(Remove inserted lines!)](revert)'
+                .format(**locals())
+            )
         mdpopups.show_popup(
             view, content, location=point, on_navigate=navigate,
             flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
