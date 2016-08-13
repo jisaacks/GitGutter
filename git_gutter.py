@@ -78,7 +78,11 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
         revert_button = chr(0x27F2)
         if lines:
             lang = mdpopups.get_language_from_view(view) or ""
-            min_indent = min(len(l) - len(l.lstrip(" ")) for l in lines)
+            # strip the indent to the minimal indentation
+            is_tab_indent = any(l.startswith("\t") for l in lines)
+            indent_char = "\t" if is_tab_indent else " "
+            min_indent = min(len(l) - len(l.lstrip(indent_char))
+                             for l in lines)
             source_content = "\n".join(l[min_indent:] for l in lines)
             content = (
                 '[{close_button}](hide) '
