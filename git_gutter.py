@@ -106,18 +106,6 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, text)
 
 
-class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
-    def on_hover(self, view, point, hover_zone):
-        if hover_zone != sublime.HOVER_GUTTER:
-            return
-        # don't let the popup flicker / fight with other packages
-        if view.is_popup_visible():
-            return
-        if not settings.get("enable_hover_popup"):
-            return
-        show_diff_popup(view, point)
-
-
 class GitGutterCommand(sublime_plugin.WindowCommand):
     region_names = ['deleted_top', 'deleted_bottom',
                     'deleted_dual', 'inserted', 'changed',

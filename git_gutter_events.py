@@ -6,8 +6,10 @@ import sublime_plugin
 ST3 = int(sublime.version()) >= 3000
 if ST3:
     from .view_collection import ViewCollection
+    from .git_gutter import show_diff_popup
 else:
     from view_collection import ViewCollection
+    from git_gutter import show_diff_popup
 
 
 def async_event_listener(EventListener):
@@ -59,6 +61,16 @@ class GitGutterEvents(sublime_plugin.EventListener):
     def on_activated(self, view):
         if self.settings_loaded() and self.focus_change_mode:
             self.debounce(view, 'activated', ViewCollection.add)
+
+    def on_hover(self, view, point, hover_zone):
+        if hover_zone != sublime.HOVER_GUTTER:
+            return
+        # don't let the popup flicker / fight with other packages
+        if view.is_popup_visible():
+            return
+        if not settings.get("enable_hover_popup"):
+            return
+        show_diff_popup(view, point)
 
     # Asynchronous
 
