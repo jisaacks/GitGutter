@@ -48,22 +48,27 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
             if href == "hide":
                 view.hide_popup()
             elif href == "revert":
-                if size != 0:
-                    start_point = view.text_point(start - 1, 0)
-                    end_point = view.text_point(start + size - 1, 0) - 1
-                    # if we have nothing to insert we need to remove the
-                    # trailing new line
-                    if not lines:
-                        end_point += 1
+                new_text = "\n".join(lines)
+                # (removed) if there is no text to remove, set the
+                # region to the end of the line, where the hunk starts
+                # and add a new line to the start of the text
+                if size == 0:
+                    start_point = end_point = view.text_point(start, 0) - 1
+                    new_text = "\n" + new_text
+                # (modified/added)
+                # set the start point to the start of the hunk
+                # and the end point to the end of the hunk
                 else:
-                    end_point = view.text_point(start, 0) - 1
-                    start_point = end_point
-                    # we need an extra new line before
-                    lines.insert(0, "")
+                    start_point = view.text_point(start - 1, 0)
+                    end_point = view.text_point(start + size - 1, 0)
+                    # (modified) if there is some text to inserted, we
+                    # don't want to capture the trailing newline
+                    if new_text and end_point != view.size():
+                        end_point -= 1
                 replace_param = {
                     "a": start_point,
                     "b": end_point,
-                    "text": "\n".join(lines)
+                    "text": new_text
                 }
                 view.run_command("git_gutter_replace_text", replace_param)
                 view.hide_popup()
