@@ -21,6 +21,85 @@ def plugin_loaded():
     settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
+def show_diff_popup(view, point):
+    if not _MDPOPUS_INSTALLED:
+        return
+
+    line = view.rowcol(point)[0] + 1
+    lines, start, size = ViewCollection.diff_line_change(view, line)
+    if start == -1:
+        return
+
+    def navigate(href):
+        if href == "hide":
+            view.hide_popup()
+        elif href == "revert":
+            new_text = "\n".join(lines)
+            # (removed) if there is no text to remove, set the
+            # region to the end of the line, where the hunk starts
+            # and add a new line to the start of the text
+            if size == 0:
+                start_point = end_point = view.text_point(start, 0) - 1
+                new_text = "\n" + new_text
+            # (modified/added)
+            # set the start point to the start of the hunk
+            # and the end point to the end of the hunk
+            else:
+                start_point = view.text_point(start - 1, 0)
+                end_point = view.text_point(start + size - 1, 0)
+                # (modified) if there is some text to inserted, we
+                # don't want to capture the trailing newline
+                if new_text and end_point != view.size():
+                    end_point -= 1
+            replace_param = {
+                "a": start_point,
+                "b": end_point,
+                "text": new_text
+            }
+            view.run_command("git_gutter_replace_text", replace_param)
+            # hide the popup and update the gutter
+            view.hide_popup()
+            view.window().run_command("git_gutter")
+        elif href == "copy":
+            sublime.set_clipboard("\n".join(lines))
+            copy_message = "  ".join(l.strip() for l in lines)
+            sublime.status_message("Copied: " + copy_message)
+
+    # write the symbols/text for each button
+    close_button = chr(0x00D7)
+    copy_button = chr(0x2398)
+    revert_button = chr(0x27F2)
+    if lines:
+        lang = mdpopups.get_language_from_view(view) or ""
+        # strip the indent to the minimal indentation
+        is_tab_indent = any(l.startswith("\t") for l in lines)
+        indent_char = "\t" if is_tab_indent else " "
+        min_indent = min(len(l) - len(l.lstrip(indent_char))
+                         for l in lines)
+        source_content = "\n".join(l[min_indent:] for l in lines)
+        content = (
+            '[{close_button}](hide) '
+            '[{copy_button}](copy) '
+            '[{revert_button}](revert)\n'
+            '``` {lang}\n'
+            '{source_content}\n'
+            '```'
+            .format(**locals())
+        )
+    else:
+        content = (
+            '[{close_button}](hide) '
+            '[{revert_button}](revert)'
+            .format(**locals())
+        )
+    wrapper_class = 'git-gutter'
+    css = 'div.git-gutter a { text-decoration: none; }'
+    mdpopups.show_popup(
+        view, content, location=point, on_navigate=navigate,
+        wrapper_class=wrapper_class, css=css,
+        flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+
+
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
     def run(self, edit, a, b, text):
         region = sublime.Region(a, b)
@@ -29,8 +108,6 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
 
 class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
     def on_hover(self, view, point, hover_zone):
-        if not _MDPOPUS_INSTALLED:
-            return
         if hover_zone != sublime.HOVER_GUTTER:
             return
         # don't let the popup flicker / fight with other packages
@@ -38,80 +115,7 @@ class GitGutterInlineDiffHoverListener(sublime_plugin.EventListener):
             return
         if not settings.get("enable_hover_popup"):
             return
-
-        line = view.rowcol(point)[0] + 1
-        lines, start, size = ViewCollection.diff_line_change(view, line)
-        if start == -1:
-            return
-
-        def navigate(href):
-            if href == "hide":
-                view.hide_popup()
-            elif href == "revert":
-                new_text = "\n".join(lines)
-                # (removed) if there is no text to remove, set the
-                # region to the end of the line, where the hunk starts
-                # and add a new line to the start of the text
-                if size == 0:
-                    start_point = end_point = view.text_point(start, 0) - 1
-                    new_text = "\n" + new_text
-                # (modified/added)
-                # set the start point to the start of the hunk
-                # and the end point to the end of the hunk
-                else:
-                    start_point = view.text_point(start - 1, 0)
-                    end_point = view.text_point(start + size - 1, 0)
-                    # (modified) if there is some text to inserted, we
-                    # don't want to capture the trailing newline
-                    if new_text and end_point != view.size():
-                        end_point -= 1
-                replace_param = {
-                    "a": start_point,
-                    "b": end_point,
-                    "text": new_text
-                }
-                view.run_command("git_gutter_replace_text", replace_param)
-                # hide the popup and update the gutter
-                view.hide_popup()
-                view.window().run_command("git_gutter")
-            elif href == "copy":
-                sublime.set_clipboard("\n".join(lines))
-                copy_message = "  ".join(l.strip() for l in lines)
-                sublime.status_message("Copied: " + copy_message)
-
-        # write the symbols/text for each button
-        close_button = chr(0x00D7)
-        copy_button = chr(0x2398)
-        revert_button = chr(0x27F2)
-        if lines:
-            lang = mdpopups.get_language_from_view(view) or ""
-            # strip the indent to the minimal indentation
-            is_tab_indent = any(l.startswith("\t") for l in lines)
-            indent_char = "\t" if is_tab_indent else " "
-            min_indent = min(len(l) - len(l.lstrip(indent_char))
-                             for l in lines)
-            source_content = "\n".join(l[min_indent:] for l in lines)
-            content = (
-                '[{close_button}](hide) '
-                '[{copy_button}](copy) '
-                '[{revert_button}](revert)\n'
-                '``` {lang}\n'
-                '{source_content}\n'
-                '```'
-                .format(**locals())
-            )
-        else:
-            content = (
-                '[{close_button}](hide) '
-                '[{revert_button}](revert)'
-                .format(**locals())
-            )
-        wrapper_class = 'git-gutter'
-        css = 'div.git-gutter a { text-decoration: none; }'
-        mdpopups.show_popup(
-            view, content, location=point, on_navigate=navigate,
-            wrapper_class=wrapper_class, css=css,
-            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+        show_diff_popup(view, point)
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):
