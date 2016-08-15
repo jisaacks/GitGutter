@@ -182,8 +182,12 @@ class GitGutterHandler:
         for hunk in hunks:
             start = int(hunk.group(3))
             size = int(hunk.group(4) or 1)
+            # special handling to also match the line below deleted
+            # content
+            if size == 0 and line_nr == start + 1:
+                pass
             # continue if the hunk is before the line
-            if start + size < line_nr:
+            elif start + size < line_nr:
                 continue
             # break if the hunk is after the line
             elif line_nr < start:
