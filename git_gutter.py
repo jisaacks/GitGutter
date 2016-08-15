@@ -3,10 +3,13 @@ import sublime
 import sublime_plugin
 
 try:
-    _MDPOPUS_INSTALLED = True
+    _MDPOPUPS_INSTALLED = True
     import mdpopups
+    # to be sure check, that ST also support popups
+    if int(sublime.version()) < 3080:
+        _MDPOPUPS_INSTALLED = False
 except:
-    _MDPOPUS_INSTALLED = False
+    _MDPOPUPS_INSTALLED = False
 
 try:
     from .view_collection import ViewCollection
@@ -21,8 +24,8 @@ def plugin_loaded():
     settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
-def show_diff_popup(view, point):
-    if not _MDPOPUS_INSTALLED:
+def show_diff_popup(view, point, flags=0):
+    if not _MDPOPUPS_INSTALLED:
         return
 
     line = view.rowcol(point)[0] + 1
@@ -94,16 +97,31 @@ def show_diff_popup(view, point):
         )
     wrapper_class = 'git-gutter'
     css = 'div.git-gutter a { text-decoration: none; }'
+    location = view.line(point).a
     mdpopups.show_popup(
-        view, content, location=point, on_navigate=navigate,
+        view, content, location=location, on_navigate=navigate,
         wrapper_class=wrapper_class, css=css,
-        flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+        flags=flags)
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
     def run(self, edit, a, b, text):
         region = sublime.Region(a, b)
         self.view.replace(edit, region, text)
+
+
+class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
+    def is_enabled(self):
+        if not _MDPOPUPS_INSTALLED:
+            return False
+        return True
+
+    def run(self):
+        view = self.window.active_view()
+        if len(view.sel()) == 0:
+            return
+        point = view.sel()[0].b
+        show_diff_popup(view, point, flags=0)
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):

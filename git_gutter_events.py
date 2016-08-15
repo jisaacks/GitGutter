@@ -70,7 +70,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
             return
         if not settings.get("enable_hover_popup"):
             return
-        show_diff_popup(view, point)
+        show_diff_popup(view, point, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
     # Asynchronous
 
