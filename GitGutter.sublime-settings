@@ -18,9 +18,14 @@
   "focus_change_mode": true,
 
   // (ST3, Build 3116+ only)
-  // Enable an hover popup, which shows an inline diff of
-  // the changed lines.
-  "enable_hover_popup": true,
+  // Enable an hover popup, which shows an diff of the
+  // changed lines.
+  "enable_hover_diff_popup": true,
+
+  // (ST3 only)
+  // Whether the the diff popup should use icons (true) or
+  // text (false) buttons
+  "diff_popup_use_icon_buttons": true,
 
   // When set to true GitGutter runs asynchronously in a seperate thread
   // This may cause a small delay between a modification and the icon change

@@ -69,9 +69,10 @@ def show_diff_popup(view, point, flags=0):
             sublime.status_message("Copied: " + copy_message)
 
     # write the symbols/text for each button
-    close_button = chr(0x00D7)
-    copy_button = chr(0x2398)
-    revert_button = chr(0x27F2)
+    use_icons = settings.get("diff_popup_use_icon_buttons")
+    close_button = chr(0x00D7) if use_icons else "(close)"
+    copy_button = chr(0x2398) if use_icons else "(copy)"
+    revert_button = chr(0x27F2) if use_icons else "(revert)"
     if lines:
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
@@ -96,7 +97,10 @@ def show_diff_popup(view, point, flags=0):
             .format(**locals())
         )
     wrapper_class = 'git-gutter'
-    css = 'div.git-gutter a { text-decoration: none; }'
+    if use_icons:
+        css = 'div.git-gutter a { text-decoration: none; }'
+    else:
+        css = ''
     location = view.line(point).a
     mdpopups.show_popup(
         view, content, location=location, on_navigate=navigate,

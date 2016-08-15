@@ -68,7 +68,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         # don't let the popup flicker / fight with other packages
         if view.is_popup_visible():
             return
-        if not settings.get("enable_hover_popup"):
+        if not settings.get("enable_hover_diff_popup"):
             return
         show_diff_popup(view, point, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
