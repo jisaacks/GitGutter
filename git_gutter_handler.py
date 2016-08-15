@@ -231,6 +231,7 @@ class GitGutterHandler:
             if next_change is None:
                 next_change = first_change
             meta = {
+                "first_change": first_change,
                 "next_change": next_change,
                 "prev_change": prev_change
             }

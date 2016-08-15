@@ -67,7 +67,7 @@ def show_diff_popup(view, point, flags=0):
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)
             sublime.status_message("Copied: " + copy_message)
-        elif href in ["next_change", "prev_change"]:
+        elif href in ["next_change", "prev_change", "first_change"]:
             next_line = meta.get(href, line)
             pt = view.text_point(next_line - 1, 0)
 
@@ -84,6 +84,7 @@ def show_diff_popup(view, point, flags=0):
     close_button = chr(0x00D7) if use_icons else "(close)"
     copy_button = chr(0x2398) if use_icons else "(copy)"
     revert_button = chr(0x27F2) if use_icons else "(revert)"
+    first_button = chr(0x2912) if use_icons else "(first)"
     prev_button = chr(0x2191) if use_icons else "(previous)"
     next_button = chr(0x2193) if use_icons else "(next)"
     if lines:
@@ -96,6 +97,7 @@ def show_diff_popup(view, point, flags=0):
         source_content = "\n".join(l[min_indent:] for l in lines)
         content = (
             '[{close_button}](hide) '
+            '[{first_button}](first_change) '
             '[{prev_button}](prev_change) '
             '[{next_button}](next_change) '
             '[{copy_button}](copy) '
@@ -108,6 +110,7 @@ def show_diff_popup(view, point, flags=0):
     else:
         content = (
             '[{close_button}](hide) '
+            '[{first_button}](first_change) '
             '[{prev_button}](prev_change) '
             '[{next_button}](next_change) '
             '[{revert_button}](revert)'
