@@ -179,15 +179,22 @@ class GitGutterHandler:
     def process_diff_line_change(self, diff_str, line_nr):
         hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
+
+        # we also want to extract the position of the surrounding changes
+        first_change = prev_change = next_change = None
+
         for hunk in hunks:
             start = int(hunk.group(3))
             size = int(hunk.group(4) or 1)
+            if first_change is None:
+                first_change = start
             # special handling to also match the line below deleted
             # content
             if size == 0 and line_nr == start + 1:
                 pass
             # continue if the hunk is before the line
             elif start + size < line_nr:
+                prev_change = start
                 continue
             # break if the hunk is after the line
             elif line_nr < start:
@@ -196,6 +203,7 @@ class GitGutterHandler:
             try:
                 next_hunk = next(hunks)
                 hunk_end = next_hunk.start()
+                next_change = int(next_hunk.group(3))
             except:
                 hunk_end = len(diff_str)
             # extract the content of the hunk
@@ -203,8 +211,23 @@ class GitGutterHandler:
             # store all deleted lines (starting with -)
             lines = [line[1:] for line in hunk_content.split("\n")[1:]
                      if line.startswith("-")]
-            return lines, start, size
-        return [], -1, -1
+
+            # if prev change is None set it to the wrap around the
+            # document: prev -> last hunk, next -> first hunk
+            if prev_change is None:
+                try:
+                    last_hunk = list(hunks)[-1]
+                    prev_change = int(last_hunk.group(3))
+                except:
+                    prev_change = start
+            if next_change is None:
+                next_change = first_change
+            meta = {
+                "next_change": next_change,
+                "prev_change": prev_change
+            }
+            return lines, start, size, meta
+        return [], -1, -1, {}
 
     def diff_line_change(self, line):
         diff_str = self.diff_str()

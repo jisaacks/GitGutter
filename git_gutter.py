@@ -29,7 +29,7 @@ def show_diff_popup(view, point, flags=0):
         return
 
     line = view.rowcol(point)[0] + 1
-    lines, start, size = ViewCollection.diff_line_change(view, line)
+    lines, start, size, meta = ViewCollection.diff_line_change(view, line)
     if start == -1:
         return
 
@@ -67,12 +67,25 @@ def show_diff_popup(view, point, flags=0):
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)
             sublime.status_message("Copied: " + copy_message)
+        elif href in ["next_change", "prev_change"]:
+            next_line = meta.get(href, line)
+            pt = view.text_point(next_line - 1, 0)
+
+            def show_new_popup():
+                if view.visible_region().contains(pt):
+                    show_diff_popup(view, pt, flags=flags)
+                else:
+                    sublime.set_timeout(show_new_popup, 10)
+            view.show_at_center(pt)
+            show_new_popup()
 
     # write the symbols/text for each button
     use_icons = settings.get("diff_popup_use_icon_buttons")
     close_button = chr(0x00D7) if use_icons else "(close)"
     copy_button = chr(0x2398) if use_icons else "(copy)"
     revert_button = chr(0x27F2) if use_icons else "(revert)"
+    prev_button = chr(0x2191) if use_icons else "(previous)"
+    next_button = chr(0x2193) if use_icons else "(next)"
     if lines:
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
@@ -83,6 +96,8 @@ def show_diff_popup(view, point, flags=0):
         source_content = "\n".join(l[min_indent:] for l in lines)
         content = (
             '[{close_button}](hide) '
+            '[{prev_button}](prev_change) '
+            '[{next_button}](next_change) '
             '[{copy_button}](copy) '
             '[{revert_button}](revert)\n'
             '``` {lang}\n'
@@ -93,6 +108,8 @@ def show_diff_popup(view, point, flags=0):
     else:
         content = (
             '[{close_button}](hide) '
+            '[{prev_button}](prev_change) '
+            '[{next_button}](next_change) '
             '[{revert_button}](revert)'
             .format(**locals())
         )
