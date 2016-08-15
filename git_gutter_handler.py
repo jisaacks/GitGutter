@@ -212,6 +212,14 @@ class GitGutterHandler:
             lines = [line[1:] for line in hunk_content.split("\n")[1:]
                      if line.startswith("-")]
 
+            # if wrap is disable avoid wrapping
+            wrap = self.settings.get('next_prev_change_wrap', True)
+            if not wrap:
+                if prev_change is None:
+                    prev_change = start
+                if next_change is None:
+                    next_change = start
+
             # if prev change is None set it to the wrap around the
             # document: prev -> last hunk, next -> first hunk
             if prev_change is None:
