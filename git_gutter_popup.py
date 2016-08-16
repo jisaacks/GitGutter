@@ -80,12 +80,28 @@ def show_diff_popup(view, point, flags=0):
 
     # write the symbols/text for each button
     use_icons = settings.get("diff_popup_use_icon_buttons")
-    close_button = chr(0x00D7) if use_icons else "(close)"
-    copy_button = chr(0x2398) if use_icons else "(copy)"
-    revert_button = chr(0x27F2) if use_icons else "(revert)"
-    first_button = chr(0x2912) if use_icons else "(first)"
-    prev_button = chr(0x2191) if use_icons else "(previous)"
-    next_button = chr(0x2193) if use_icons else "(next)"
+
+    # the buttons as a map from the href to the caption/icon
+    button_descriptions = {
+        "hide": chr(0x00D7) if use_icons else "(close)",
+        "copy": chr(0x2398) if use_icons else "(copy)",
+        "revert": chr(0x27F2) if use_icons else "(revert)",
+        "first_change": chr(0x2912) if use_icons else "(first)",
+        "prev_change": chr(0x2191) if use_icons else "(previous)",
+        "next_change": chr(0x2193) if use_icons else "(next)"
+    }
+
+    def is_button_enabled(k):
+        if k in ["first_change", "next_change", "prev_change"]:
+            return meta.get(k, start) != start
+        return True
+    buttons = {}
+    for k, v in button_descriptions.items():
+        if is_button_enabled(k):
+            buttons[k] = '[{0}]({1})'.format(v, k)
+        else:
+            buttons[k] = v
+
     if lines:
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
@@ -94,27 +110,27 @@ def show_diff_popup(view, point, flags=0):
         min_indent = min(len(l) - len(l.lstrip(indent_char))
                          for l in lines)
         source_content = "\n".join(l[min_indent:] for l in lines)
+        button_line = (
+            '{hide} '
+            '{first_change} {prev_change} {next_change} '
+            '{copy} {revert}'
+            .format(**buttons)
+        )
         content = (
-            '[{close_button}](hide) '
-            '[{first_button}](first_change) '
-            '[{prev_button}](prev_change) '
-            '[{next_button}](next_change) '
-            '[{copy_button}](copy) '
-            '[{revert_button}](revert)\n'
+            '{button_line}\n'
             '``` {lang}\n'
             '{source_content}\n'
             '```'
             .format(**locals())
         )
     else:
-        content = (
-            '[{close_button}](hide) '
-            '[{first_button}](first_change) '
-            '[{prev_button}](prev_change) '
-            '[{next_button}](next_change) '
-            '[{revert_button}](revert)'
-            .format(**locals())
+        button_line = (
+            '{hide} '
+            '{first_change} {prev_change} {next_change} '
+            '{revert}'
+            .format(**buttons)
         )
+        content = button_line
     wrapper_class = 'git-gutter'
     if use_icons:
         css = 'div.git-gutter a { text-decoration: none; }'
