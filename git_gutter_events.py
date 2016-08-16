@@ -6,10 +6,10 @@ import sublime_plugin
 ST3 = int(sublime.version()) >= 3000
 if ST3:
     from .view_collection import ViewCollection
-    from .git_gutter import show_diff_popup
+    from .git_gutter_popup import show_diff_popup
 else:
     from view_collection import ViewCollection
-    from git_gutter import show_diff_popup
+    from git_gutter_popup import show_diff_popup
 
 
 def async_event_listener(EventListener):
