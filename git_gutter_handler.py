@@ -17,6 +17,7 @@ except (ImportError, ValueError):
 
 
 class GitGutterHandler:
+    git_binary_path_error_shown = False
 
     def __init__(self, view):
         self.load_settings()
@@ -287,11 +288,13 @@ class GitGutterHandler:
             self.git_binary_path = shutil.which("git")
 
         if not self.git_binary_path:
-            msg = ("Your Git binary cannot be found.  If it is installed, add it "
-                   "to your PATH environment variable, or add a `git_binary` setting "
-                   "in the `User/GitGutter.sublime-settings` file.")
-            sublime.error_message(msg)
-            raise ValueError("Git binary not found.")
+            if not GitGutterHandler.git_binary_path_error_shown:
+                GitGutterHandler.git_binary_path_error_shown = True
+                msg = ("Your Git binary cannot be found.  If it is installed, add it "
+                       "to your PATH environment variable, or add a `git_binary` setting "
+                       "in the `User/GitGutter.sublime-settings` file.")
+                sublime.error_message(msg)
+                raise ValueError("Git binary not found.")
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')
