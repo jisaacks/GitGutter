@@ -6,6 +6,8 @@ import shutil
 
 import sublime
 
+ST3 = int(sublime.version()) >= 3006
+
 try:
     from . import git_helper
     from .view_collection import ViewCollection
@@ -281,7 +283,7 @@ class GitGutterHandler:
 
         if self.git_binary_path:
             self.git_binary_path = os.path.expandvars(self.git_binary_path)
-        else:
+        elif ST3:
             self.git_binary_path = shutil.which("git")
 
         if not self.git_binary_path:
