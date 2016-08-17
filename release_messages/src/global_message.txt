@@ -2,11 +2,11 @@
 
 I've teamed up with Wes Bos to offer the following discounts:
 
-⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡
-⚡                                                  ⚡
-⚡  Use the coupon code GITGUTTER for $10 💵 off:   ⚡
-⚡                                                  ⚡
-⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡⚡
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+⭐                                                  ⭐
+    Use the coupon code GITGUTTER for $10 💵 off
+⭐                                                  ⭐
+⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
 
 🏅 ⭐ ES6 ⭐
 
@@ -21,6 +21,6 @@ I've teamed up with Wes Bos to offer the following discounts:
 👉 ReactForBeginners.com/friend/GITGUTTER
 
 
-Join 3,000 other developers already learning React.js with Wes Bos.
+Join 15,000 other developers already learning with Wes Bos.
 
 These are fantastic resources - 100% money back guarantee! 🌟
