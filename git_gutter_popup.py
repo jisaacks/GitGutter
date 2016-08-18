@@ -32,6 +32,11 @@ def show_diff_popup(view, point, flags=0):
     if start == -1:
         return
 
+    # extract the type of the hunk: removed, modified, (x)or added
+    is_removed = size == 0
+    is_modified = not is_removed and bool(lines)
+    is_added = not is_removed and not is_modified
+
     def navigate(href):
         if href == "hide":
             view.hide_popup()
@@ -40,7 +45,7 @@ def show_diff_popup(view, point, flags=0):
             # (removed) if there is no text to remove, set the
             # region to the end of the line, where the hunk starts
             # and add a new line to the start of the text
-            if size == 0:
+            if is_removed:
                 start_point = end_point = view.text_point(start, 0) - 1
                 new_text = "\n" + new_text
             # (modified/added)
@@ -49,9 +54,10 @@ def show_diff_popup(view, point, flags=0):
             else:
                 start_point = view.text_point(start - 1, 0)
                 end_point = view.text_point(start + size - 1, 0)
-                # (modified) if there is some text to inserted, we
-                # don't want to capture the trailing newline
-                if new_text and end_point != view.size():
+                # (modified) if there is text to insert, we
+                # don't want to capture the trailing newline,
+                # because we insert lines without a trailing newline
+                if is_modified and end_point != view.size():
                     end_point -= 1
             replace_param = {
                 "a": start_point,
@@ -102,7 +108,9 @@ def show_diff_popup(view, point, flags=0):
         else:
             buttons[k] = v
 
-    if lines:
+    if not is_added:
+        # (modified/removed) show the button line above the content,
+        # which in git
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
         is_tab_indent = any(l.startswith("\t") for l in lines)
@@ -124,6 +132,8 @@ def show_diff_popup(view, point, flags=0):
             .format(**locals())
         )
     else:
+        # (added) only show the button line without the copy button
+        # (there is nothing to show or copy)
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
