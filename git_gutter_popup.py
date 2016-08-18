@@ -46,8 +46,17 @@ def show_diff_popup(view, point, flags=0):
             # region to the end of the line, where the hunk starts
             # and add a new line to the start of the text
             if is_removed:
-                start_point = end_point = view.text_point(start, 0) - 1
-                new_text = "\n" + new_text
+                if start != 0:
+                    # set the start and the end to the end of the start line
+                    start_point = end_point = view.text_point(start, 0) - 1
+                    # add a leading newline before inserting the text
+                    new_text = "\n" + new_text
+                else:
+                    # (special handling for deleted at the start of the file)
+                    # if we are before the start we need to set the start
+                    # to 0 and add the newline behind the text
+                    start_point = end_point = 0
+                    new_text = new_text + "\n"
             # (modified/added)
             # set the start point to the start of the hunk
             # and the end point to the end of the hunk
