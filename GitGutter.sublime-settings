@@ -71,6 +71,7 @@
   // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
   "protected_regions": [
     "sublimelinter-warning-gutter-marks",
-    "sublimelinter-error-gutter-marks"  
+    "sublimelinter-error-gutter-marks",
+    "bookmarks"
   ]
 }
