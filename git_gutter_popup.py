@@ -16,6 +16,7 @@ except (ImportError, ValueError):
     from view_collection import ViewCollection
 
 ST3 = int(sublime.version()) >= 3000
+_MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
 def plugin_loaded():
@@ -150,11 +151,15 @@ def show_diff_popup(view, point, flags=0):
             .format(**buttons)
         )
         content = button_line
-    wrapper_class = 'git-gutter'
-    if use_icons:
-        css = 'div.git-gutter a { text-decoration: none; }'
+    css = ''
+    if _MD_POPUPS_USE_WRAPPER_CLASS:
+        wrapper_class = "git-gutter"
+        if use_icons:
+            css = 'div.git-gutter a { text-decoration: none; }'
     else:
-        css = ''
+        wrapper_class = ""
+        if use_icons:
+            css = 'a { text-decoration: none; }'
     location = view.line(point).a
     mdpopups.show_popup(
         view, content, location=location, on_navigate=navigate,
