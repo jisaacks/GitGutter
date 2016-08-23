@@ -224,8 +224,14 @@ class GitGutterHandler:
             # document: prev -> last hunk, next -> first hunk
             if prev_change is None:
                 try:
-                    last_hunk = list(hunks)[-1]
-                    prev_change = int(last_hunk.group(3))
+                    remaining_hunks = list(hunks)
+                    if remaining_hunks:
+                        last_hunk = remaining_hunks[-1]
+                        prev_change = int(last_hunk.group(3))
+                    elif next_change is not None:
+                        prev_change = next_change
+                    else:
+                        prev_change = start
                 except:
                     prev_change = start
             if next_change is None:
