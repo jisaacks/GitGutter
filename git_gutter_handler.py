@@ -18,6 +18,7 @@ except (ImportError, ValueError):
 
 class GitGutterHandler:
     git_binary_path_error_shown = False
+    git_binary_path_fallback = None
 
     def __init__(self, view):
         self.load_settings()
@@ -284,8 +285,19 @@ class GitGutterHandler:
 
         if self.git_binary_path:
             self.git_binary_path = os.path.expandvars(self.git_binary_path)
+        elif self.git_binary_path_fallback:
+            self.git_binary_path = self.git_binary_path_fallback
         elif ST3:
             self.git_binary_path = shutil.which("git")
+            GitGutterHandler.git_binary_path_fallback = self.git_binary_path
+        else:
+            git_exe = "git.exe" if sublime.platform() == "windows" else "git"
+            for folder in os.environ["PATH"].split(os.pathsep):
+                path = os.path.join(folder.strip('"'), git_exe)
+                if os.path.isfile(path) and os.access(path, os.X_OK):
+                    self.git_binary_path = path
+                    GitGutterHandler.git_binary_path_fallback = path
+                    break
 
         if not self.git_binary_path:
             if not GitGutterHandler.git_binary_path_error_shown:
