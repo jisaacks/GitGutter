@@ -1,6 +1,7 @@
-Thanks for installing Git Gutter!!!
+* Fix error dialog for missing git binary from reopening
+  in an endless loop. Should only show once per session now.
 
-👣 Follow me: @jisaacks
+* Fix an bug that was introduced that broke GitGutter in ST2
 
 
 💛 Git Gutter? Want to support development?

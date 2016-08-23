@@ -2,8 +2,11 @@ import os
 import subprocess
 import re
 import codecs
+import shutil
 
 import sublime
+
+ST3 = int(sublime.version()) >= 3006
 
 try:
     from . import git_helper
@@ -14,6 +17,7 @@ except (ImportError, ValueError):
 
 
 class GitGutterHandler:
+    git_binary_path_error_shown = False
 
     def __init__(self, view):
         self.load_settings()
@@ -78,20 +82,22 @@ class GitGutterHandler:
 
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
-        f = open(self.buf_temp_file.name, 'wb')
 
-        if self.view.encoding() == "UTF-8 with BOM":
-            f.write(codecs.BOM_UTF8)
+        with open(self.buf_temp_file, 'wb') as f:
+            if self.view.encoding() == "UTF-8 with BOM":
+                f.write(codecs.BOM_UTF8)
 
-        f.write(contents)
-        f.close()
+            f.write(contents)
+
 
     def update_git_file(self):
         # the git repo won't change that often
         # so we can easily wait 5 seconds
         # between updates for performance
         if ViewCollection.git_time(self.view) > 5:
-            open(self.git_temp_file.name, 'w').close()
+            with open(self.git_temp_file, 'w'):
+                pass
+
             args = [
                 self.git_binary_path,
                 '--git-dir=' + self.git_dir,
@@ -103,9 +109,9 @@ class GitGutterHandler:
                 contents = self.run_command(args)
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
-                f = open(self.git_temp_file.name, 'wb')
-                f.write(contents)
-                f.close()
+                with open(self.git_temp_file, 'wb') as f:
+                    f.write(contents)
+
                 ViewCollection.update_git_time(self.view)
             except Exception:
                 pass
@@ -154,8 +160,8 @@ class GitGutterHandler:
                 self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
                 self.ignore_whitespace,
                 self.patience_switch,
-                self.git_temp_file.name,
-                self.buf_temp_file.name,
+                self.git_temp_file,
+                self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
             results = self.run_command(args)
@@ -346,11 +352,28 @@ class GitGutterHandler:
             'Preferences.sublime-settings')
 
         # Git Binary Setting
-        self.git_binary_path = 'git'
-        git_binary = self.user_settings.get(
-            'git_binary') or self.settings.get('git_binary')
-        if git_binary:
-            self.git_binary_path = git_binary
+        git_binary_setting = self.user_settings.get("git_binary") or \
+                             self.settings.get("git_binary")
+        if isinstance(git_binary_setting, dict):
+            self.git_binary_path = git_binary_setting.get(sublime.platform())
+            if not self.git_binary_path:
+                self.git_binary_path = git_binary_setting.get('default')
+        else:
+            self.git_binary_path = git_binary_setting
+
+        if self.git_binary_path:
+            self.git_binary_path = os.path.expandvars(self.git_binary_path)
+        elif ST3:
+            self.git_binary_path = shutil.which("git")
+
+        if not self.git_binary_path:
+            if not GitGutterHandler.git_binary_path_error_shown:
+                GitGutterHandler.git_binary_path_error_shown = True
+                msg = ("Your Git binary cannot be found.  If it is installed, add it "
+                       "to your PATH environment variable, or add a `git_binary` setting "
+                       "in the `User/GitGutter.sublime-settings` file.")
+                sublime.error_message(msg)
+                raise ValueError("Git binary not found.")
 
         # Ignore White Space Setting
         self.ignore_whitespace = self.settings.get('ignore_whitespace')

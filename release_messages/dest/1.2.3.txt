@@ -1,0 +1,9 @@
+* Better cleanup of temfiles
+
+* Make Sublime Linter regions protected by default
+
+* Enhance git_binary setting
+
+  - Allow git_binary to be customized on a per-platform basis.
+  
+  - Add support for environment variables in git_binary setting

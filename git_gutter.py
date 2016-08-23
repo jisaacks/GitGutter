@@ -86,8 +86,10 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         sets = [self.view.get_regions(r) for r in protected_regions]
         # List of Regions
         regions = [r for rs in sets for r in rs]
+        # get the line of the region (gutter icon applies to whole line)
+        region_line = self.view.line(region)
         for r in regions:
-            if r.contains(region) or region.contains(r):
+            if r.contains(region) or region_line.contains(r):
                 return True
 
         return False

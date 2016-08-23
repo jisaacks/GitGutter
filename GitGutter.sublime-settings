@@ -1,5 +1,16 @@
 {
-  // Custom path to git binary when not in PATH
+  // Custom path to git binary when not in PATH.  An empty string will search
+  // PATH for "git".  The setting may be a direct string to a git binary, e.g.:
+  //
+  //   "git_binary": "/usr/bin/git",
+  //
+  // Or it may be a dictionary keyed off what sublime.platform() returns,
+  // so it may be customized on a per-platform basis.  e.g.:
+  //
+  //   "git_binary": {
+  //       "default": "",
+  //       "windows": "C:/Program Files/Git/cmd/git.exe"
+  //   },
   "git_binary": "",
 
   // The commit, branch, tag, or remote to compare against
@@ -70,6 +81,7 @@
   // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
   "protected_regions": [
     "sublimelinter-warning-gutter-marks",
-    "sublimelinter-error-gutter-marks"
+    "sublimelinter-error-gutter-marks",
+    "bookmarks"
   ]
 }
