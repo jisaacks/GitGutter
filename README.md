@@ -71,6 +71,10 @@ When using non_blocking mode, delay update of gutter icons by the following amou
 #### Live Mode
 By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
 
+#### Hover Diff Popup
+*This hover feature is only available in Build 3116 and newer.*
+GitGutter shows a diff popup, when hovering over changes in the gutter. Set `enable_hover_diff_popup` to `false`, if you want to disable this popup. You can still open it with a keybinding and from the command panel.
+
 #### Untracked Files
 GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
 
