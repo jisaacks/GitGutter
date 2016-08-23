@@ -6,6 +6,21 @@ A sublime text 2/3 plugin to show an icon in the gutter area indicating whether 
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
 
+### Diff Popup
+
+![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17899505/d1bb34c8-695b-11e6-95d6-bed17e56008c.png)
+
+| symbol | meaning if the symbol              |
+| ---    | ---                                |
+| ×      | close the popup                    |
+| ⤒      | jump to first change               |
+| ↑      | jump to previous change            |
+| ↓      | jump to next change                |
+| ⎘      | copy the content of the git state  |
+| ⟲      | revert changes to the state in git |
+
+The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer *(which is currently only in the dev builds)*. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
+
 ### Installation
 
 You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control):
