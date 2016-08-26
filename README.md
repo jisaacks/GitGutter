@@ -6,24 +6,10 @@ A sublime text 2/3 plugin to show an icon in the gutter area indicating whether 
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
 
-### Diff Popup
-
-![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
-
-| symbol | meaning if the symbol              |
-| ---    | ---                                |
-| ×      | close the popup                    |
-| ⤒      | jump to first change               |
-| ↑      | jump to previous change            |
-| ↓      | jump to next change                |
-| ⎘      | copy the content of the git state  |
-| ⟲      | revert changes to the state in git |
-
-The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer *(which is currently only in the dev builds)*. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
-
 ### Installation
 
 You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control):
+
   * [GitGutter](https://sublime.wbond.net/packages/GitGutter) - Release based
   * [GitGutter-Edge](https://sublime.wbond.net/packages/GitGutter-Edge) - Stick with master branch (at your own peril)
 
@@ -56,6 +42,23 @@ On OS X you might need to install the package [SublimeFixMacPath](https://github
 
 The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on your [path](https://en.wikipedia.org/wiki/PATH_(variable)). Please read the section on the [git_binary](#git-path) setting for how to fix that.  
 
+## Advanced Features
+
+### Diff Popup
+
+![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
+
+| symbol | meaning if the symbol              |
+| ---    | ---                                |
+| ×      | close the popup                    |
+| ⤒      | jump to first change               |
+| ↑      | jump to previous change            |
+| ↓      | jump to next change                |
+| ⎘      | copy the content of the git state  |
+| ⟲      | revert changes to the state in git |
+
+The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer *(which is currently only in the dev builds)*. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
+
 ### Comparing against different commits/branches/tags
 
 By default, Git Gutter compares your working copy against the HEAD. You can change this behaviour through the ST command palette. The following options are available:
@@ -72,7 +75,17 @@ To change the compare option:
 - You'll see the 4 options listed above, select one with the keyboard.
 - Choose the branch/tag/commit to compare against.
 
-### Settings
+### Jumping Between Changes
+
+There are commands to jump between modifications. The default keybindings for these commands are:
+
+| OS X | Windows / Linux | Description |
+|------|-----------------|-------------|
+| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>k</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>k</kbd> | Previous |
+| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>j</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>j</kbd> | Next |
+
+
+## Settings
 Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kbd> > <kbd>GitGutter</kbd> menu.
 
 Default settings should not be modified, as they are overwritten when GitGutter updates. Instead, you should copy the relevant settings into GitGutter's user settings file.
@@ -236,15 +249,6 @@ If your color scheme file does not define the appropriate colors (or you want to
 </dict>
 ```
 
-### Jumping Between Changes
-
-There are commands to jump between modifications. The default keybindings for these commands are:
-
-| OS X | Windows / Linux | Description |
-|------|-----------------|-------------|
-| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>k</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>k</kbd> | Previous |
-| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>j</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>j</kbd> | Next |
-
-### Alternatives
+## Alternatives
 
 Check out the [collection of GitGutter(ish) packages for various editors](https://github.com/gitgutter)
