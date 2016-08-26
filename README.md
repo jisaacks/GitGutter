@@ -103,6 +103,10 @@ By default, GitGutter detects changes every time the file is modified. If you ex
 *This hover feature is only available in Build 3116 and newer.*
 GitGutter shows a diff popup, when hovering over changes in the gutter. Set `enable_hover_diff_popup` to `false`, if you want to disable this popup. You can still open it with a keybinding and from the command panel.
 
+#### Diff Popup appearance
+*The diff popup is only available in Sublime Text 3*
+The popup uses the [mdpopups library](https://github.com/facelessuser/sublime-markdown-popups) and the corresponding settings are global and not only for GitGutter. You can change the syntax highlighting style to the same as Sublime Text by adding `"mdpopups.use_sublime_highlighter": true` to your User settings. Other settings can be found [here](http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings).
+
 #### Untracked Files
 GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
 
