@@ -8,7 +8,7 @@ A sublime text 2/3 plugin to show an icon in the gutter area indicating whether 
 
 ### Diff Popup
 
-![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17899505/d1bb34c8-695b-11e6-95d6-bed17e56008c.png)
+![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
 
 | symbol | meaning if the symbol              |
 | ---    | ---                                |
