@@ -161,10 +161,11 @@ def show_diff_popup(view, point, flags=0):
         if use_icons:
             css = 'a { text-decoration: none; }'
     location = view.line(point).a
+    window_width = int(view.viewport_extent()[0])
     mdpopups.show_popup(
         view, content, location=location, on_navigate=navigate,
         wrapper_class=wrapper_class, css=css,
-        flags=flags)
+        flags=flags, max_width=window_width)
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
