@@ -128,6 +128,8 @@ def show_diff_popup(view, point, flags=0):
         min_indent = min(len(l) - len(l.lstrip(indent_char))
                          for l in lines)
         source_content = "\n".join(l[min_indent:] for l in lines)
+        # replace spaces by non-breakable ones to avoid line wrapping
+        source_content = source_content.replace(" ", "\u00A0")
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
