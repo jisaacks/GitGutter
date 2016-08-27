@@ -1,0 +1,12 @@
+
+* Diff Popup
+  - You can now get a popup to see what the code was before it was changed
+  - You can do so via a command pallete, keyboard shortcut, and after
+    Sublime Text 3116 is released it will auto show when hovering the gutter.
+    (you can turn that off.) See the READ ME for more info.
+
+* Protected Regions
+  - Better support for protected regions and auto set bookmarks as protected.
+
+* Bugfix
+  - Fix a bug that was incorrectly warning ST2 users that it could not find git
