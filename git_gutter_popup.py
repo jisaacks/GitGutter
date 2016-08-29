@@ -1,3 +1,6 @@
+import difflib
+import html
+
 import sublime
 import sublime_plugin
 
@@ -24,7 +27,7 @@ def plugin_loaded():
     settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
-def show_diff_popup(view, point, flags=0):
+def show_diff_popup(view, point, highlight_diff=False, flags=0):
     if not _MDPOPUPS_INSTALLED:
         return
 
@@ -78,6 +81,12 @@ def show_diff_popup(view, point, flags=0):
             # hide the popup and update the gutter
             view.hide_popup()
             view.window().run_command("git_gutter")
+        elif href in ["disable_hl_diff", "enable_hl_diff"]:
+            do_diff = {
+                "disable_hl_diff": False,
+                "enable_hl_diff": True
+            }.get(href)
+            show_diff_popup(view, point, highlight_diff=do_diff, flags=0)
         elif href == "copy":
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)
@@ -88,7 +97,8 @@ def show_diff_popup(view, point, flags=0):
 
             def show_new_popup():
                 if view.visible_region().contains(pt):
-                    show_diff_popup(view, pt, flags=flags)
+                    show_diff_popup(
+                        view, pt, highlight_diff=highlight_diff, flags=0)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
@@ -102,6 +112,8 @@ def show_diff_popup(view, point, flags=0):
         "hide": chr(0x00D7) if use_icons else "(close)",
         "copy": chr(0x2398) if use_icons else "(copy)",
         "revert": chr(0x27F2) if use_icons else "(revert)",
+        "disable_hl_diff": chr(0x2249) if use_icons else "(diff)",
+        "enable_hl_diff": chr(0x2248) if use_icons else "(diff)",
         "first_change": chr(0x2912) if use_icons else "(first)",
         "prev_change": chr(0x2191) if use_icons else "(previous)",
         "next_change": chr(0x2193) if use_icons else "(next)"
@@ -114,33 +126,51 @@ def show_diff_popup(view, point, flags=0):
     buttons = {}
     for k, v in button_descriptions.items():
         if is_button_enabled(k):
-            buttons[k] = '[{0}]({1})'.format(v, k)
+            buttons[k] = '<a href={1}>{0}</a>'.format(v, k)
         else:
             buttons[k] = v
 
-    if not is_added:
+    if highlight_diff:
+        # (*) show a highlighted diff of the merged git and editor content
+        min_indent = _get_min_indent(lines + meta["added_lines"])
+
+        git_content = "\n".join(l[min_indent:] for l in lines)
+        editor_content = "\n".join(l[min_indent:] for l in meta["added_lines"])
+        source_html = _highlight_diff(git_content, editor_content)
+
+        button_line = (
+            '{hide} '
+            '{first_change} {prev_change} {next_change} '
+            '{disable_hl_diff} {revert}'
+            .format(**buttons)
+        )
+        content = (
+            '{button_line}'
+            '{source_html}'
+            .format(**locals())
+        )
+    elif not is_added:
         # (modified/removed) show the button line above the content,
         # which in git
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
         is_tab_indent = any(l.startswith("\t") for l in lines)
         indent_char = "\t" if is_tab_indent else " "
-        min_indent = min(len(l) - len(l.lstrip(indent_char))
-                         for l in lines)
+        min_indent = _get_min_indent(lines)
         source_content = "\n".join(l[min_indent:] for l in lines)
         # replace spaces by non-breakable ones to avoid line wrapping
         source_content = source_content.replace(" ", "\u00A0")
+        source_html = mdpopups.syntax_highlight(
+            view, source_content, language=lang)
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
-            '{copy} {revert}'
+            '{enable_hl_diff} {copy} {revert}'
             .format(**buttons)
         )
         content = (
-            '{button_line}\n'
-            '``` {lang}\n'
-            '{source_content}\n'
-            '```'
+            '{button_line}'
+            '{source_html}'
             .format(**locals())
         )
     else:
@@ -149,7 +179,7 @@ def show_diff_popup(view, point, flags=0):
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
-            '{revert}'
+            '{enable_hl_diff} {revert}'
             .format(**buttons)
         )
         content = button_line
@@ -165,9 +195,71 @@ def show_diff_popup(view, point, flags=0):
     location = view.line(point).a
     window_width = int(view.viewport_extent()[0])
     mdpopups.show_popup(
-        view, content, location=location, on_navigate=navigate,
+        view, content, location=location, on_navigate=navigate, md=False,
         wrapper_class=wrapper_class, css=css,
         flags=flags, max_width=window_width)
+
+
+def _get_min_indent(lines):
+    is_tab_indent = any(l.startswith("\t") for l in lines)
+    indent_char = "\t" if is_tab_indent else " "
+    min_indent = min(len(l) - len(l.lstrip(indent_char))
+                     for l in lines if l)
+    return min_indent
+
+
+def _highlight_diff(git_content, editor_content):
+    seq_matcher = difflib.SequenceMatcher(None, git_content, editor_content)
+    tag_close = '</span>'
+
+    tag_eq = _tag_open('')
+    tag_ins = _tag_open('color: green;')
+    tag_del = _tag_open('color: red; text-decoration: underline;')
+    tag_modified_ins = _tag_open('color: green;')
+    tag_modified_del = _tag_open('color: yellow; text-decoration: underline;')
+
+    # build the html string
+    sb = ['<div class="highlight">', '<pre>']
+    for op in seq_matcher.get_opcodes():
+        op_type, git_start, git_end, edit_start, edit_end = op
+        if op_type == "equal":
+            sb.append(tag_eq)
+            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(tag_close)
+        elif op_type == "delete":
+            sb.append(tag_del)
+            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(tag_close)
+        elif op_type == "insert":
+            sb.append(tag_ins)
+            sb.append(_to_html(editor_content[edit_start:edit_end]))
+            sb.append(tag_close)
+        elif op_type == "replace":
+            sb.append(tag_modified_ins)
+            sb.append(_to_html(editor_content[edit_start:edit_end]))
+            sb.append(tag_close)
+            sb.append(tag_modified_del)
+            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(tag_close)
+    sb.extend(['</pre>', '</div>'])
+    return "".join(sb)
+
+
+def _to_html(s):
+    return (
+        html.escape(s, quote=False)
+        .replace("\n", "<br>")
+        .replace(" ", "&nbsp;")
+        .replace("\u00A0", "&nbsp;")
+    )
+
+
+def _tag_open(style):
+    if style:
+        tag = '<span style="{0}">'.format(style)
+    else:
+        tag = '<span>'
+    return tag
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
@@ -182,12 +274,13 @@ class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
             return False
         return True
 
-    def run(self):
+    def run(self, highlight_diff=False):
         view = self.window.active_view()
         if len(view.sel()) == 0:
             return
         point = view.sel()[0].b
-        show_diff_popup(view, point, flags=0)
+        show_diff_popup(
+            view, point, highlight_diff=highlight_diff, flags=0)
 
 
 if not ST3:
