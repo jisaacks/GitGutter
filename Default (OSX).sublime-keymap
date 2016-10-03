@@ -1,6 +1,6 @@
 [
-    { "keys": ["super+shift+option+j"], "command": "git_gutter_next_change" },
-    { "keys": ["super+shift+option+k"], "command": "git_gutter_prev_change" },
+    { "keys": ["super+shift+option+j"], "command": "git_gutter", "args": {"action": "jump_to_next_change"} },
+    { "keys": ["super+shift+option+k"], "command": "git_gutter", "args": {"action": "jump_to_prev_change"} },
     { "keys": ["super+shift+option+c", "super+d"], "command": "git_gutter_diff_popup" },
     { "keys": ["super+shift+option+c", "v"], "command": "git_gutter", "args": {"action": "show_compare"} },
     { "keys": ["super+shift+option+c", "h"], "command": "git_gutter", "args": {"action": "compare_against_head"} },

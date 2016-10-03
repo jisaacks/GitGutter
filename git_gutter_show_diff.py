@@ -10,7 +10,7 @@ except (ImportError, ValueError):
 ST3 = int(sublime.version()) >= 3000
 
 
-class GitGutterShowDiff:
+class GitGutterShowDiff(object):
     region_names = ['deleted_top', 'deleted_bottom',
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']

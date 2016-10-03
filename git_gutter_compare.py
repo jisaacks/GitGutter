@@ -1,4 +1,5 @@
 import sublime
+from functools import partial
 
 try:
     from .git_gutter_settings import settings
@@ -6,15 +7,16 @@ except (ImportError, ValueError):
     from git_gutter_settings import settings
 
 
-class GitGutterCompareCommit():
+class GitGutterCompareCommit(object):
     def __init__(self, view, git_handler):
         self.view = view
         self.git_handler = git_handler
 
     def run(self):
-        self.results = self.commit_list()
-        if self.results:
-            self.view.window().show_quick_panel(self.results, self.on_select)
+        results = self.commit_list()
+        if results:
+            self.view.window().show_quick_panel(
+                results, partial(self.on_select, results))
 
     def commit_list(self):
         result = self.git_handler.git_commits().decode("utf-8")
@@ -23,14 +25,14 @@ class GitGutterCompareCommit():
     def item_to_commit(self, item):
         return item[1].split(' ')[0]
 
-    def on_select(self, selected):
-        if 0 > selected < len(self.results):
+    def on_select(self, results, selected):
+        if 0 > selected < len(results):
             return
-        item = self.results[selected]
+        item = results[selected]
         commit = self.item_to_commit(item)
         settings.set_compare_against(commit)
         self.git_handler.clear_git_time()
-        self.git_handler.reset()
+        self.view.run_command('git_gutter')  # refresh ui
 
 
 class GitGutterCompareBranch(GitGutterCompareCommit):
@@ -66,16 +68,19 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        settings.set_compare_against("HEAD")
+        settings.set_compare_against('HEAD')
         self.git_handler.clear_git_time()
-        self.git_handler.reset()
+        self.view.run_command('git_gutter')  # refresh ui
 
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
-        settings.set_compare_against("origin")
-        self.git_handler.clear_git_time()
-        self.git_handler.reset()
+        branch_name = self.git_handler.git_current_branch()
+        if branch_name:
+            settings.set_compare_against(
+                'origin/%s' % branch_name.decode("utf-8").strip())
+            self.git_handler.clear_git_time()
+            self.view.run_command('git_gutter')  # refresh ui
 
 
 class GitGutterShowCompare(GitGutterCompareCommit):

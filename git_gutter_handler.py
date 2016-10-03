@@ -15,7 +15,7 @@ except (ImportError, ValueError):
     from git_gutter_settings import settings
 
 
-class GitGutterHandler:
+class GitGutterHandler(object):
     # the git repo won't change that often so we can easily wait few seconds
     # between updates for performance
     git_file_update_interval_secs = 5
@@ -77,13 +77,8 @@ class GitGutterHandler:
             self.git_tree = self.git_tree or git_helper.git_tree(self.view)
             self.git_dir = self.git_dir or git_helper.git_dir(self.git_tree)
             self.git_path = self.git_path or git_helper.git_file_path(
-                self.view, self.git_tree
-            )
+                self.view, self.git_tree)
         return on_disk
-
-    def reset(self):
-        if self.on_disk() and self.git_path:
-            self.view.run_command('git_gutter')
 
     def update_buf_file(self):
         chars = self.view.size()
@@ -119,10 +114,11 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                settings.get_compare_against(self.view) + ':' + self.git_path,
+                '%s:%s' % (
+                    settings.get_compare_against(self.view), self.git_path),
             ]
             try:
-                contents = self.run_command(args)
+                contents = GitGutterHandler.run_command(args)
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
                 with open(self.git_temp_file, 'wb') as f:
@@ -175,7 +171,7 @@ class GitGutterHandler:
                 self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
+            results = GitGutterHandler.run_command(args)
             encoding = self._get_view_encoding()
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
@@ -258,8 +254,8 @@ class GitGutterHandler:
                 "next_change": next_change,
                 "prev_change": prev_change
             }
-            return lines, start, size, meta
-        return [], -1, -1, {}
+            return (lines, start, size, meta)
+        return ([], -1, -1, {})
 
     def diff_line_change(self, line):
         diff_str = self.diff_str()
@@ -289,7 +285,7 @@ class GitGutterHandler:
                 os.path.join(self.git_tree, self.git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            results = self.run_command(args)
+            results = GitGutterHandler.run_command(args)
             encoding = self._get_view_encoding()
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
@@ -308,8 +304,7 @@ class GitGutterHandler:
             '--pretty=%s\a%h %an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
         ]
-        results = self.run_command(args)
-        return results
+        return GitGutterHandler.run_command(args)
 
     def git_branches(self):
         args = [
@@ -321,8 +316,7 @@ class GitGutterHandler:
             '--format=%(subject)\a%(refname)\a%(objectname)',
             'refs/heads/'
         ]
-        results = self.run_command(args)
-        return results
+        return GitGutterHandler.run_command(args)
 
     def git_tags(self):
         args = [
@@ -333,8 +327,7 @@ class GitGutterHandler:
             '--tags',
             '--abbrev=7'
         ]
-        results = self.run_command(args)
-        return results
+        return GitGutterHandler.run_command(args)
 
     def git_current_branch(self):
         args = [
@@ -345,10 +338,10 @@ class GitGutterHandler:
             '--abbrev-ref',
             'HEAD'
         ]
-        result = self.run_command(args)
-        return result
+        return GitGutterHandler.run_command(args)
 
-    def run_command(self, args):
+    @staticmethod
+    def run_command(args):
         startupinfo = None
         if os.name == 'nt':
             startupinfo = subprocess.STARTUPINFO()

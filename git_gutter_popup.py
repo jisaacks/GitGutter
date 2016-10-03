@@ -12,20 +12,18 @@ except:
 
 try:
     from .git_gutter_settings import settings
-    from .view_collection import ViewCollection
 except (ImportError, ValueError):
     from git_gutter_settings import settings
-    from view_collection import ViewCollection
 
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
-def show_diff_popup(view, point, flags=0):
+def show_diff_popup(view, point, git_handler, flags=0):
     if not _MDPOPUPS_INSTALLED:
         return
 
     line = view.rowcol(point)[0] + 1
-    lines, start, size, meta = ViewCollection.diff_line_change(view, line)
+    lines, start, size, meta = git_handler.diff_line_change(line)
     if start == -1:
         return
 
@@ -172,15 +170,15 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, text)
 
 
-class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
+class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
-        if not _MDPOPUPS_INSTALLED:
-            return False
-        return True
+        return _MDPOPUPS_INSTALLED
 
-    def run(self):
-        view = self.window.active_view()
-        if len(view.sel()) == 0:
-            return
-        point = view.sel()[0].b
-        show_diff_popup(view, point, flags=0)
+    def run(self, edit, point=None, flags=0):
+        if not point:
+            if len(self.view.sel()) == 0:
+                return
+            point = self.view.sel()[0].b
+        self.view.run_command(
+            'git_gutter',
+            {'action': 'show_diff_popup', 'point': point, 'flags': flags})
