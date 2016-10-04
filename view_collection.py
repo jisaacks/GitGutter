@@ -3,6 +3,21 @@ import sublime
 import tempfile
 import time
 
+try:
+    from .git_gutter_settings import GitGutterSettings
+except (ImportError, ValueError):
+    from git_gutter_settings import GitGutterSettings
+
+# Temporary global. Will be removed soon together with ViewCollection.
+settings = None
+
+
+def plugin_loaded():
+    global settings
+    settings = GitGutterSettings()
+    settings.load_settings()
+
+
 class ViewCollection:
     views = {} # Todo: these aren't really views but handlers. Refactor/Rename.
     git_times = {}
@@ -17,7 +32,7 @@ class ViewCollection:
             from .git_gutter_handler import GitGutterHandler
         except (ImportError, ValueError):
             from git_gutter_handler import GitGutterHandler
-        handler = ViewCollection.views[key] = GitGutterHandler(view)
+        handler = ViewCollection.views[key] = GitGutterHandler(view, settings)
         handler.reset()
         return handler
 
@@ -124,10 +139,4 @@ class ViewCollection:
 
     @staticmethod
     def show_status(view):
-        key = ViewCollection.get_key(view)
-        return ViewCollection.views[key].show_status
-
-
-def plugin_loaded():
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-    ViewCollection.compare_against = settings.get('compare_against', 'HEAD')
+        return settings.show_status

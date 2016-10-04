@@ -1,19 +1,18 @@
-import sublime
 import sublime_plugin
+
 try:
+    from .git_gutter_settings import GitGutterSettings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
+    from .git_gutter_settings import GitGutterSettings
     from view_collection import ViewCollection
-
-ST3 = int(sublime.version()) >= 3000
-
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
 class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
+        self.settings = GitGutterSettings()
+        self.settings.load_settings()
 
     def lines_to_blocks(self, lines):
         blocks = []
@@ -44,7 +43,7 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
 class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
 
     def jump(self, all_changes, current_row):
-        if settings.get('next_prev_change_wrap', True):
+        if self.settings.get('next_prev_change_wrap', True):
             default = all_changes[0]
         else:
             default = all_changes[-1]
@@ -56,14 +55,10 @@ class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
 class GitGutterPrevChangeCommand(GitGutterBaseChangeCommand):
 
     def jump(self, all_changes, current_row):
-        if settings.get('next_prev_change_wrap', True):
+        if self.settings.get('next_prev_change_wrap', True):
             default = all_changes[-1]
         else:
             default = all_changes[0]
 
         return next((change for change in reversed(all_changes)
                     if change < current_row), default)
-
-
-if not ST3:
-    plugin_loaded()

@@ -11,20 +11,16 @@ except:
     _MDPOPUPS_INSTALLED = False
 
 try:
+    from .git_gutter_settings import GitGutterSettings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
+    from git_gutter_settings import GitGutterSettings
     from view_collection import ViewCollection
 
-ST3 = int(sublime.version()) >= 3000
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-
-
-def show_diff_popup(view, point, flags=0):
+def show_diff_popup(view, point, settings, flags=0):
     if not _MDPOPUPS_INSTALLED:
         return
 
@@ -88,7 +84,7 @@ def show_diff_popup(view, point, flags=0):
 
             def show_new_popup():
                 if view.visible_region().contains(pt):
-                    show_diff_popup(view, pt, flags=flags)
+                    show_diff_popup(view, pt, settings, flags=flags)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
@@ -177,6 +173,11 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
 
 
 class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
+        self.settings = GitGutterSettings()
+        self.settings.load_settings()
+
     def is_enabled(self):
         if not _MDPOPUPS_INSTALLED:
             return False
@@ -187,8 +188,4 @@ class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
         if len(view.sel()) == 0:
             return
         point = view.sel()[0].b
-        show_diff_popup(view, point, flags=0)
-
-
-if not ST3:
-    plugin_loaded()
+        show_diff_popup(view, point, self.settings, flags=0)

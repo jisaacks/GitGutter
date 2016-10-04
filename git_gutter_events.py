@@ -7,9 +7,11 @@ ST3 = int(sublime.version()) >= 3000
 if ST3:
     from .view_collection import ViewCollection
     from .git_gutter_popup import show_diff_popup
+    from .git_gutter_settings import GitGutterSettings
 else:
     from view_collection import ViewCollection
     from git_gutter_popup import show_diff_popup
+    from git_gutter_settings import GitGutterSettings
 
 
 def async_event_listener(EventListener):
@@ -37,29 +39,28 @@ def async_event_listener(EventListener):
 class GitGutterEvents(sublime_plugin.EventListener):
 
     def __init__(self):
-        self._settings_loaded = False
+        self.settings = GitGutterSettings()
+        self.settings.load_settings()
         self.latest_keypresses = {}
 
     # Synchronous
 
     def on_modified(self, view):
-        if self.settings_loaded() and self.live_mode:
+        if self.live_mode():
             self.debounce(view, 'modified', ViewCollection.add)
 
     def on_clone(self, view):
-        if self.settings_loaded():
-            self.debounce(view, 'clone', ViewCollection.add)
+        self.debounce(view, 'clone', ViewCollection.add)
 
     def on_post_save(self, view):
-        if self.settings_loaded():
-            self.debounce(view, 'post-save', ViewCollection.add)
+        self.debounce(view, 'post-save', ViewCollection.add)
 
     def on_load(self, view):
-        if self.settings_loaded() and self.live_mode:
+        if self.live_mode():
             self.debounce(view, 'load', ViewCollection.add)
 
     def on_activated(self, view):
-        if self.settings_loaded() and self.focus_change_mode:
+        if self.focus_change_mode():
             self.debounce(view, 'activated', ViewCollection.add)
 
     def on_hover(self, view, point, hover_zone):
@@ -68,14 +69,15 @@ class GitGutterEvents(sublime_plugin.EventListener):
         # don't let the popup flicker / fight with other packages
         if view.is_popup_visible():
             return
-        if not settings.get("enable_hover_diff_popup"):
+        if not self.settings.get("enable_hover_diff_popup"):
             return
-        show_diff_popup(view, point, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+        show_diff_popup(
+            view, point, self.settings, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
     # Asynchronous
 
     def debounce(self, view, event_type, func):
-        if self.non_blocking:
+        if self.non_blocking():
             key = (event_type, view.file_name())
             this_keypress = time.time()
             self.latest_keypresses[key] = this_keypress
@@ -90,39 +92,17 @@ class GitGutterEvents(sublime_plugin.EventListener):
             else:
                 set_timeout = sublime.set_timeout
 
-            set_timeout(callback, settings.get("debounce_delay"))
+            set_timeout(callback, self.settings.get("debounce_delay"))
         else:
             func(view)
 
     # Settings
 
-    def settings_loaded(self):
-        if settings and not self._settings_loaded:
-            self._settings_loaded = self.load_settings()
+    def live_mode(self, default=True):
+        return self.settings.get('live_mode', default)
 
-        return self._settings_loaded
+    def focus_change_mode(self, default=True):
+        return self.settings.get('focus_change_mode', default)
 
-    def load_settings(self):
-        self.live_mode = settings.get('live_mode')
-        if self.live_mode is None:
-            self.live_mode = True
-
-        self.focus_change_mode = settings.get('focus_change_mode')
-        if self.focus_change_mode is None:
-            self.focus_change_mode = True
-
-        self.non_blocking = settings.get('non_blocking')
-        if self.non_blocking is None:
-            self.non_blocking = True
-
-        return True
-
-settings = {}
-
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-
-if not ST3:
-    plugin_loaded()
+    def non_blocking(self, default=True):
+        return self.settings.get('non_blocking', default)
