@@ -8,6 +8,9 @@ try:
 except (ImportError, ValueError):
     from git_gutter_settings import GitGutterSettings
 
+
+ST3 = int(sublime.version()) >= 3000
+
 # Temporary global. Will be removed soon together with ViewCollection.
 settings = None
 
@@ -16,6 +19,9 @@ def plugin_loaded():
     global settings
     settings = GitGutterSettings()
     settings.load_settings()
+
+if not ST3:
+    plugin_loaded()
 
 
 class ViewCollection:
