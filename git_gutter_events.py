@@ -5,13 +5,13 @@ import sublime_plugin
 
 ST3 = int(sublime.version()) >= 3000
 if ST3:
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
     from .git_gutter_popup import show_diff_popup
-    from .git_gutter_settings import GitGutterSettings
 else:
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
     from git_gutter_popup import show_diff_popup
-    from git_gutter_settings import GitGutterSettings
 
 
 def async_event_listener(EventListener):
@@ -37,10 +37,7 @@ def async_event_listener(EventListener):
 
 @async_event_listener
 class GitGutterEvents(sublime_plugin.EventListener):
-
     def __init__(self):
-        self.settings = GitGutterSettings()
-        self.settings.load_settings()
         self.latest_keypresses = {}
 
     # Synchronous
@@ -69,10 +66,10 @@ class GitGutterEvents(sublime_plugin.EventListener):
         # don't let the popup flicker / fight with other packages
         if view.is_popup_visible():
             return
-        if not self.settings.get("enable_hover_diff_popup"):
+        if not settings.get("enable_hover_diff_popup"):
             return
         show_diff_popup(
-            view, point, self.settings, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+            view, point, settings, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
 
     # Asynchronous
 
@@ -92,17 +89,17 @@ class GitGutterEvents(sublime_plugin.EventListener):
             else:
                 set_timeout = sublime.set_timeout
 
-            set_timeout(callback, self.settings.get("debounce_delay"))
+            set_timeout(callback, settings.get("debounce_delay"))
         else:
             func(view)
 
     # Settings
 
     def live_mode(self, default=True):
-        return self.settings.get('live_mode', default)
+        return settings.get('live_mode', default)
 
     def focus_change_mode(self, default=True):
-        return self.settings.get('focus_change_mode', default)
+        return settings.get('focus_change_mode', default)
 
     def non_blocking(self, default=True):
-        return self.settings.get('non_blocking', default)
+        return settings.get('non_blocking', default)

@@ -3,10 +3,10 @@ import sublime
 import sublime_plugin
 
 try:
-    from .git_gutter_settings import GitGutterSettings
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
-    from git_gutter_settings import GitGutterSettings
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
 ST3 = int(sublime.version()) >= 3000
@@ -17,10 +17,6 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
-    def __init__(self, *args, **kwargs):
-        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
-        self.settings = GitGutterSettings()
-
     def run(self, force_refresh=False):
         self.view = self.window.active_view()
         if not self.view:
@@ -29,9 +25,8 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             return
 
         self.clear_all()
-        self.show_in_minimap = self.settings.get('show_in_minimap', True)
-        show_untracked = self.settings.get('show_markers_on_untracked_file',
-                                           False)
+        self.show_in_minimap = settings.get('show_in_minimap', True)
+        show_untracked = settings.get('show_markers_on_untracked_file', False)
 
         if ViewCollection.untracked(self.view):
             if show_untracked:
@@ -83,7 +78,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def is_region_protected(self, region):
         # Load protected Regions from Settings
-        protected_regions = self.settings.get('protected_regions',[])
+        protected_regions = settings.get('protected_regions', [])
         # List of Lists of Regions
         sets = [self.view.get_regions(r) for r in protected_regions]
         # List of Regions

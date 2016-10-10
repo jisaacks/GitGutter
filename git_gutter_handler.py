@@ -2,24 +2,22 @@ import os
 import subprocess
 import re
 import codecs
-import shutil
 
 import sublime
 
-ST3 = int(sublime.version()) >= 3006
-
 try:
     from . import git_helper
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
     import git_helper
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
 
 class GitGutterHandler:
-    def __init__(self, view, settings):
+    def __init__(self, view):
         self.view = view
-        self.settings = settings
 
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
@@ -97,7 +95,7 @@ class GitGutterHandler:
                 pass
 
             args = [
-                self.settings.git_binary_path,
+                settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
@@ -155,10 +153,10 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                self.settings.git_binary_path,
+                settings.git_binary_path,
                 'diff', '-U0', '--no-color', '--no-index',
-                self.settings.ignore_whitespace,
-                self.settings.patience_switch,
+                settings.ignore_whitespace,
+                settings.patience_switch,
                 self.git_temp_file,
                 self.buf_temp_file,
             ]
@@ -218,7 +216,7 @@ class GitGutterHandler:
                      if line.startswith("-")]
 
             # if wrap is disable avoid wrapping
-            wrap = self.settings.get('next_prev_change_wrap', True)
+            wrap = settings.get('next_prev_change_wrap', True)
             if not wrap:
                 if prev_change is None:
                     prev_change = start
@@ -269,7 +267,7 @@ class GitGutterHandler:
     def handle_files(self, additionnal_args):
         if self.on_disk() and self.git_path:
             args = [
-                self.settings.git_binary_path,
+                settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
@@ -289,7 +287,7 @@ class GitGutterHandler:
 
     def git_commits(self):
         args = [
-            self.settings.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
@@ -301,7 +299,7 @@ class GitGutterHandler:
 
     def git_branches(self):
         args = [
-            self.settings.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'for-each-ref',
@@ -314,7 +312,7 @@ class GitGutterHandler:
 
     def git_tags(self):
         args = [
-            self.settings.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'show-ref',
@@ -326,7 +324,7 @@ class GitGutterHandler:
 
     def git_current_branch(self):
         args = [
-            self.settings.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'rev-parse',

@@ -4,24 +4,9 @@ import tempfile
 import time
 
 try:
-    from .git_gutter_settings import GitGutterSettings
+    from .git_gutter_settings import settings
 except (ImportError, ValueError):
-    from git_gutter_settings import GitGutterSettings
-
-
-ST3 = int(sublime.version()) >= 3000
-
-# Temporary global. Will be removed soon together with ViewCollection.
-settings = None
-
-
-def plugin_loaded():
-    global settings
-    settings = GitGutterSettings()
-    settings.load_settings()
-
-if not ST3:
-    plugin_loaded()
+    from git_gutter_settings import settings
 
 
 class ViewCollection:
@@ -38,7 +23,7 @@ class ViewCollection:
             from .git_gutter_handler import GitGutterHandler
         except (ImportError, ValueError):
             from git_gutter_handler import GitGutterHandler
-        handler = ViewCollection.views[key] = GitGutterHandler(view, settings)
+        handler = ViewCollection.views[key] = GitGutterHandler(view)
         handler.reset()
         return handler
 

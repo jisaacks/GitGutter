@@ -1,19 +1,14 @@
 import sublime_plugin
 
 try:
-    from .git_gutter_settings import GitGutterSettings
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
-    from .git_gutter_settings import GitGutterSettings
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
 
 class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
-    def __init__(self, *args, **kwargs):
-        sublime_plugin.WindowCommand.__init__(self, *args, **kwargs)
-        self.settings = GitGutterSettings()
-        self.settings.load_settings()
-
     def lines_to_blocks(self, lines):
         blocks = []
         last_line = -2
@@ -41,9 +36,8 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
 
 
 class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
-
     def jump(self, all_changes, current_row):
-        if self.settings.get('next_prev_change_wrap', True):
+        if settings.get('next_prev_change_wrap', True):
             default = all_changes[0]
         else:
             default = all_changes[-1]
@@ -53,9 +47,8 @@ class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
 
 
 class GitGutterPrevChangeCommand(GitGutterBaseChangeCommand):
-
     def jump(self, all_changes, current_row):
-        if self.settings.get('next_prev_change_wrap', True):
+        if settings.get('next_prev_change_wrap', True):
             default = all_changes[-1]
         else:
             default = all_changes[0]
