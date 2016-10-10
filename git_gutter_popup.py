@@ -84,7 +84,7 @@ def show_diff_popup(view, point, flags=0):
 
             def show_new_popup():
                 if view.visible_region().contains(pt):
-                    show_diff_popup(view, pt, settings, flags=flags)
+                    show_diff_popup(view, pt, flags=flags)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
