@@ -14,6 +14,7 @@ def plugin_loaded():
 class GitGutterSettings:
     git_binary_path_error_shown = False
     git_binary_path_fallback = None
+    compare_against = None
 
     def __init__(self):
         self._settings = None
@@ -104,6 +105,19 @@ class GitGutterSettings:
             self._settings.get('show_status'))
         if self.show_status != 'all' and self.show_status != 'none':
             self.show_status = 'default'
+
+    def get_compare_against(self, view):
+        # GitGutterSettings.compare_against overrides both project settings and
+        # plugin settings if set.
+        compare = GitGutterSettings.compare_against
+        if compare:
+            return compare
+        compare = self.get('compare_against', compare)
+        # Project settings override plugin settings if set.
+        return view.settings().get('git_gutter_compare_against', compare)
+
+    def set_compare_against(self, new_compare_against):
+        GitGutterSettings.compare_against = new_compare_against
 
 settings = GitGutterSettings()
 

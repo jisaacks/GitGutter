@@ -1,9 +1,9 @@
 import sublime
 
 try:
-    from .view_collection import ViewCollection
+    from .git_gutter_settings import settings
 except (ImportError, ValueError):
-    from view_collection import ViewCollection
+    from git_gutter_settings import settings
 
 
 class GitGutterCompareCommit():
@@ -28,7 +28,7 @@ class GitGutterCompareCommit():
             return
         item = self.results[selected]
         commit = self.item_to_commit(item)
-        ViewCollection.set_compare(commit)
+        settings.set_compare_against(commit)
         self.git_handler.clear_git_time()
         self.git_handler.reset()
 
@@ -66,19 +66,19 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        ViewCollection.set_compare("HEAD")
+        settings.set_compare_against("HEAD")
         self.git_handler.clear_git_time()
         self.git_handler.reset()
 
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
-        ViewCollection.set_compare("origin")
+        settings.set_compare_against("origin")
         self.git_handler.clear_git_time()
         self.git_handler.reset()
 
 
 class GitGutterShowCompare(GitGutterCompareCommit):
     def run(self):
-        comparing = ViewCollection.get_compare(self.view)
+        comparing = settings.get_compare_against(self.view)
         sublime.message_dialog('GitGutter is comparing against: %s' % comparing)

@@ -10,11 +10,9 @@ import sublime
 try:
     from . import git_helper
     from .git_gutter_settings import settings
-    from .view_collection import ViewCollection
 except (ImportError, ValueError):
     import git_helper
     from git_gutter_settings import settings
-    from view_collection import ViewCollection
 
 
 class GitGutterHandler:
@@ -87,9 +85,6 @@ class GitGutterHandler:
         if self.on_disk() and self.git_path:
             self.view.run_command('git_gutter')
 
-    def get_git_path(self):
-        return self.git_path
-
     def update_buf_file(self):
         chars = self.view.size()
         region = sublime.Region(0, chars)
@@ -124,7 +119,7 @@ class GitGutterHandler:
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
-                ViewCollection.get_compare(self.view) + ':' + self.git_path,
+                settings.get_compare_against(self.view) + ':' + self.git_path,
             ]
             try:
                 contents = self.run_command(args)
@@ -136,12 +131,6 @@ class GitGutterHandler:
                 self.update_git_time()
             except Exception:
                 pass
-
-    def total_lines(self):
-        chars = self.view.size()
-        region = sublime.Region(0, chars)
-        lines = self.view.lines(region)
-        return len(lines)
 
     # Parse unified diff with 0 lines of context.
     # Hunk range info format:
