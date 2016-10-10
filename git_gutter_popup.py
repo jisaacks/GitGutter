@@ -73,7 +73,7 @@ def show_diff_popup(view, point, flags=0):
             view.run_command("git_gutter_replace_text", replace_param)
             # hide the popup and update the gutter
             view.hide_popup()
-            view.window().run_command("git_gutter")
+            view.run_command("git_gutter")
         elif href == "copy":
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)

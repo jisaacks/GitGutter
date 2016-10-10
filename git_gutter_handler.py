@@ -2,6 +2,8 @@ import os
 import subprocess
 import re
 import codecs
+import tempfile
+import time
 
 import sublime
 
@@ -16,14 +18,40 @@ except (ImportError, ValueError):
 
 
 class GitGutterHandler:
+    # the git repo won't change that often so we can easily wait few seconds
+    # between updates for performance
+    git_file_update_interval_secs = 5
+
     def __init__(self, view):
         self.view = view
 
-        self.git_temp_file = ViewCollection.git_tmp_file(self.view)
-        self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
+        self.git_temp_file = GitGutterHandler.tmp_file()
+        self.buf_temp_file = GitGutterHandler.tmp_file()
+
         self.git_tree = None
         self.git_dir = None
         self.git_path = None
+
+        self._last_refresh_time_git_file = 0
+
+    @staticmethod
+    def tmp_file():
+        '''
+            Create a temp file and return the filepath to it.
+            Caller is responsible for clean up
+        '''
+        fd, filepath = tempfile.mkstemp(prefix='git_gutter_')
+        os.close(fd)
+        return filepath
+
+    def clear_git_time(self):
+        self._last_refresh_time_git_file = 0
+
+    def update_git_time(self):
+        self._last_refresh_time_git_file = time.time()
+
+    def git_time(self):
+        return time.time() - self._last_refresh_time_git_file
 
     def _get_view_encoding(self):
         # get encoding and clean it for python ex: "Western (ISO 8859-1)"
@@ -56,8 +84,8 @@ class GitGutterHandler:
         return on_disk
 
     def reset(self):
-        if self.on_disk() and self.git_path and self.view.window():
-            self.view.window().run_command('git_gutter')
+        if self.on_disk() and self.git_path:
+            self.view.run_command('git_gutter')
 
     def get_git_path(self):
         return self.git_path
@@ -87,10 +115,7 @@ class GitGutterHandler:
             f.write(contents)
 
     def update_git_file(self):
-        # the git repo won't change that often
-        # so we can easily wait 5 seconds
-        # between updates for performance
-        if ViewCollection.git_time(self.view) > 5:
+        if self.git_time() > self.git_file_update_interval_secs:
             with open(self.git_temp_file, 'w'):
                 pass
 
@@ -108,7 +133,7 @@ class GitGutterHandler:
                 with open(self.git_temp_file, 'wb') as f:
                     f.write(contents)
 
-                ViewCollection.update_git_time(self.view)
+                self.update_git_time()
             except Exception:
                 pass
 

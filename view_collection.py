@@ -1,6 +1,5 @@
 import os
 import sublime
-import tempfile
 import time
 
 try:
@@ -11,9 +10,6 @@ except (ImportError, ValueError):
 
 class ViewCollection:
     views = {} # Todo: these aren't really views but handlers. Refactor/Rename.
-    git_times = {}
-    git_files = {}
-    buf_files = {}
     compare_against = "HEAD"
 
     @staticmethod
@@ -71,47 +67,6 @@ class ViewCollection:
     @staticmethod
     def total_lines(view):
         return ViewCollection.get_handler(view).total_lines()
-
-    @staticmethod
-    def git_time(view):
-        key = ViewCollection.get_key(view)
-        if not key in ViewCollection.git_times:
-            ViewCollection.git_times[key] = 0
-        return time.time() - ViewCollection.git_times[key]
-
-    @staticmethod
-    def clear_git_time(view):
-        key = ViewCollection.get_key(view)
-        ViewCollection.git_times[key] = 0
-
-    @staticmethod
-    def update_git_time(view):
-        key = ViewCollection.get_key(view)
-        ViewCollection.git_times[key] = time.time()
-
-    @staticmethod
-    def tmp_file():
-        '''
-            Create a temp file and return the filepath to it.
-            Caller is responsible for clean up
-        '''
-        fd, filepath = tempfile.mkstemp(prefix='git_gutter_')
-        os.close(fd)
-        return filepath
-
-    @staticmethod
-    def git_tmp_file(view):
-        key = ViewCollection.get_key(view)
-        if not key in ViewCollection.git_files:
-            ViewCollection.git_files[key] = ViewCollection.tmp_file()
-        return ViewCollection.git_files[key]
-
-    @staticmethod
-    def buf_tmp_file(view):
-        key = ViewCollection.get_key(view)
-        if not key in ViewCollection.buf_files:
-            ViewCollection.buf_files[key] = ViewCollection.tmp_file()
-        return ViewCollection.buf_files[key]
 
     @staticmethod
     def set_compare(commit):

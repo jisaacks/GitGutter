@@ -3,25 +3,36 @@ import sublime
 import sublime_plugin
 
 try:
-    from .git_gutter_settings import settings
+    from .git_gutter_handler import GitGutterHandler
+    from .git_gutter_compare import (
+        GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
-    from git_gutter_settings import settings
+    from git_gutter_handler import GitGutterHandler
+    from git_gutter_compare import (
+        GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
     from view_collection import ViewCollection
 
 ST3 = int(sublime.version()) >= 3000
 
 
-class GitGutterCommand(sublime_plugin.WindowCommand):
+class GitGutterCommand(sublime_plugin.TextCommand):
     region_names = ['deleted_top', 'deleted_bottom',
                     'deleted_dual', 'inserted', 'changed',
                     'untracked', 'ignored']
 
-    def run(self, force_refresh=False):
-        self.view = self.window.active_view()
-        if not self.view:
-            # View is not ready yet, try again later.
-            sublime.set_timeout(self.run, 1)
+    def __init__(self, *args, **kwargs):
+        sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
+        self.git_handler = GitGutterHandler(self.view)
+
+    def run(self, edit, **kwargs):
+        if not self.git_handler.on_disk() or not self.git_handler.git_dir:
+            return
+
+        if kwargs and 'action' in kwargs:
+            self._handle_subcommand(kwargs['action'])
             return
 
         self.clear_all()
@@ -37,8 +48,6 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
         else:
             # If the file is untracked there is no need to execute the diff
             # update
-            if force_refresh:
-                ViewCollection.clear_git_time(self.view)
             inserted, modified, deleted = ViewCollection.diff(self.view)
             self.lines_removed(deleted)
             self.bind_icons('inserted', inserted)
@@ -155,3 +164,21 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             lines += [i + 1]
             i = i + 1
         self.bind_icons(event, lines)
+
+    def _handle_subcommand(self, action):
+        view = self.view
+        git_handler = self.git_handler
+        if action == 'compare_against_commit':
+            GitGutterCompareCommit(view, git_handler).run()
+        elif action == 'compare_against_branch':
+            GitGutterCompareBranch(view, git_handler).run()
+        elif action == 'compare_against_tag':
+            GitGutterCompareTag(view, git_handler).run()
+        elif action == 'compare_against_head':
+            GitGutterCompareHead(view, git_handler).run()
+        elif action == 'compare_against_origin':
+            GitGutterCompareOrigin(view, git_handler).run()
+        elif action == 'show_compare':
+            GitGutterShowCompare(view, git_handler).run()
+        else:
+            assert False, 'Unhandled sub command "%s"' % action
