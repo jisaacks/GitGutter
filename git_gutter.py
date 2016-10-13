@@ -3,16 +3,13 @@ import sublime
 import sublime_plugin
 
 try:
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
 ST3 = int(sublime.version()) >= 3000
-
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
 class GitGutterCommand(sublime_plugin.WindowCommand):
@@ -81,7 +78,7 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
 
     def is_region_protected(self, region):
         # Load protected Regions from Settings
-        protected_regions = settings.get('protected_regions',[])
+        protected_regions = settings.get('protected_regions', [])
         # List of Lists of Regions
         sets = [self.view.get_regions(r) for r in protected_regions]
         # List of Regions
@@ -158,7 +155,3 @@ class GitGutterCommand(sublime_plugin.WindowCommand):
             lines += [i + 1]
             i = i + 1
         self.bind_icons(event, lines)
-
-
-if not ST3:
-    plugin_loaded()

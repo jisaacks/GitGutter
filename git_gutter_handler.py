@@ -2,27 +2,23 @@ import os
 import subprocess
 import re
 import codecs
-import shutil
 
 import sublime
 
-ST3 = int(sublime.version()) >= 3006
-
 try:
     from . import git_helper
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
     import git_helper
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
 
 class GitGutterHandler:
-    git_binary_path_error_shown = False
-    git_binary_path_fallback = None
-
     def __init__(self, view):
-        self.load_settings()
         self.view = view
+
         self.git_temp_file = ViewCollection.git_tmp_file(self.view)
         self.buf_temp_file = ViewCollection.buf_tmp_file(self.view)
         self.git_tree = None
@@ -90,7 +86,6 @@ class GitGutterHandler:
 
             f.write(contents)
 
-
     def update_git_file(self):
         # the git repo won't change that often
         # so we can easily wait 5 seconds
@@ -100,7 +95,7 @@ class GitGutterHandler:
                 pass
 
             args = [
-                self.git_binary_path,
+                settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'show',
@@ -158,9 +153,10 @@ class GitGutterHandler:
             self.update_git_file()
             self.update_buf_file()
             args = [
-                self.git_binary_path, 'diff', '-U0', '--no-color', '--no-index',
-                self.ignore_whitespace,
-                self.patience_switch,
+                settings.git_binary_path,
+                'diff', '-U0', '--no-color', '--no-index',
+                settings.ignore_whitespace,
+                settings.patience_switch,
                 self.git_temp_file,
                 self.buf_temp_file,
             ]
@@ -220,7 +216,7 @@ class GitGutterHandler:
                      if line.startswith("-")]
 
             # if wrap is disable avoid wrapping
-            wrap = self.settings.get('next_prev_change_wrap', True)
+            wrap = settings.get('next_prev_change_wrap', True)
             if not wrap:
                 if prev_change is None:
                     prev_change = start
@@ -271,7 +267,7 @@ class GitGutterHandler:
     def handle_files(self, additionnal_args):
         if self.on_disk() and self.git_path:
             args = [
-                self.git_binary_path,
+                settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
@@ -291,7 +287,7 @@ class GitGutterHandler:
 
     def git_commits(self):
         args = [
-            self.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
@@ -303,7 +299,7 @@ class GitGutterHandler:
 
     def git_branches(self):
         args = [
-            self.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'for-each-ref',
@@ -316,7 +312,7 @@ class GitGutterHandler:
 
     def git_tags(self):
         args = [
-            self.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'show-ref',
@@ -328,7 +324,7 @@ class GitGutterHandler:
 
     def git_current_branch(self):
         args = [
-            self.git_binary_path,
+            settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'rev-parse',
@@ -346,70 +342,3 @@ class GitGutterHandler:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE,
                                 startupinfo=startupinfo, stderr=subprocess.PIPE)
         return proc.stdout.read()
-
-    def load_settings(self):
-        self.settings = sublime.load_settings('GitGutter.sublime-settings')
-        self.user_settings = sublime.load_settings(
-            'Preferences.sublime-settings')
-
-        # Git Binary Setting
-        git_binary_setting = self.user_settings.get("git_binary") or \
-                             self.settings.get("git_binary")
-        if isinstance(git_binary_setting, dict):
-            self.git_binary_path = git_binary_setting.get(sublime.platform())
-            if not self.git_binary_path:
-                self.git_binary_path = git_binary_setting.get('default')
-        else:
-            self.git_binary_path = git_binary_setting
-
-        if self.git_binary_path:
-            self.git_binary_path = os.path.expandvars(self.git_binary_path)
-        elif self.git_binary_path_fallback:
-            self.git_binary_path = self.git_binary_path_fallback
-        elif ST3:
-            self.git_binary_path = shutil.which("git")
-            GitGutterHandler.git_binary_path_fallback = self.git_binary_path
-        else:
-            git_exe = "git.exe" if sublime.platform() == "windows" else "git"
-            for folder in os.environ["PATH"].split(os.pathsep):
-                path = os.path.join(folder.strip('"'), git_exe)
-                if os.path.isfile(path) and os.access(path, os.X_OK):
-                    self.git_binary_path = path
-                    GitGutterHandler.git_binary_path_fallback = path
-                    break
-
-        if not self.git_binary_path:
-            if not GitGutterHandler.git_binary_path_error_shown:
-                GitGutterHandler.git_binary_path_error_shown = True
-                msg = ("Your Git binary cannot be found.  If it is installed, add it "
-                       "to your PATH environment variable, or add a `git_binary` setting "
-                       "in the `User/GitGutter.sublime-settings` file.")
-                sublime.error_message(msg)
-                raise ValueError("Git binary not found.")
-
-        # Ignore White Space Setting
-        self.ignore_whitespace = self.settings.get('ignore_whitespace')
-        if self.ignore_whitespace == 'all':
-            self.ignore_whitespace = '-w'
-        elif self.ignore_whitespace == 'eol':
-            self.ignore_whitespace = '--ignore-space-at-eol'
-        else:
-            self.ignore_whitespace = ''
-
-        # Patience Setting
-        self.patience_switch = ''
-        patience = self.settings.get('patience')
-        if patience:
-            self.patience_switch = '--patience'
-
-        # Untracked files
-        self.show_untracked = self.settings.get(
-            'show_markers_on_untracked_file')
-
-        # Show in minimap
-        self.show_in_minimap = self.user_settings.get('show_in_minimap') or self.settings.get('show_in_minimap')
-
-        # Show information in status bar
-        self.show_status = self.user_settings.get('show_status') or self.settings.get('show_status')
-        if self.show_status != 'all' and self.show_status != 'none':
-            self.show_status = 'default'

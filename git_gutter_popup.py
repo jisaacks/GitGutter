@@ -11,17 +11,13 @@ except:
     _MDPOPUPS_INSTALLED = False
 
 try:
+    from .git_gutter_settings import settings
     from .view_collection import ViewCollection
 except (ImportError, ValueError):
+    from git_gutter_settings import settings
     from view_collection import ViewCollection
 
-ST3 = int(sublime.version()) >= 3000
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
-
-
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
 
 
 def show_diff_popup(view, point, flags=0):
@@ -188,7 +184,3 @@ class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
             return
         point = view.sel()[0].b
         show_diff_popup(view, point, flags=0)
-
-
-if not ST3:
-    plugin_loaded()
