@@ -43,8 +43,9 @@ class GitGutterSettings:
             'Preferences.sublime-settings')
 
         # Git Binary Setting
-        git_binary_setting = self._user_settings.get("git_binary") or \
-            self._settings.get("git_binary")
+        git_binary_setting = (
+            self._user_settings.get("git_binary") or
+            self._settings.get("git_binary"))
         if isinstance(git_binary_setting, dict):
             self.git_binary_path = git_binary_setting.get(sublime.platform())
             if not self.git_binary_path:
@@ -93,12 +94,14 @@ class GitGutterSettings:
             self.patience_switch = '--patience'
 
         # Show in minimap
-        self.show_in_minimap = self._user_settings.get('show_in_minimap') or \
-            self._settings.get('show_in_minimap')
+        self.show_in_minimap = (
+            self._user_settings.get('show_in_minimap') or
+            self._settings.get('show_in_minimap'))
 
         # Show information in status bar
-        self.show_status = self._user_settings.get('show_status') or \
-            self._settings.get('show_status')
+        self.show_status = (
+            self._user_settings.get('show_status') or
+            self._settings.get('show_status'))
         if self.show_status != 'all' and self.show_status != 'none':
             self.show_status = 'default'
 
