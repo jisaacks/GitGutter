@@ -10,6 +10,7 @@ try:
     # to be sure check, that ST also support popups
     if int(sublime.version()) < 3080:
         _MDPOPUPS_INSTALLED = False
+    import jinja2
 except:
     _MDPOPUPS_INSTALLED = False
 
@@ -126,9 +127,13 @@ def show_diff_popup(view, point, highlight_diff=False, flags=0):
     buttons = {}
     for k, v in button_descriptions.items():
         if is_button_enabled(k):
-            buttons[k] = '<a href={1}>{0}</a>'.format(v, k)
+            button = '<a href={1}>{0}</a>'.format(v, k)
         else:
-            buttons[k] = v
+            button = v
+        buttons[k] = (
+            '<span class="gitgutter-button">{0}</span>'
+            .format(button)
+        )
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
@@ -185,18 +190,33 @@ def show_diff_popup(view, point, highlight_diff=False, flags=0):
         content = button_line
     css = ''
     if _MD_POPUPS_USE_WRAPPER_CLASS:
-        wrapper_class = "git-gutter"
-        if use_icons:
-            css = 'div.git-gutter a { text-decoration: none; }'
+        wrapper_class = ".git-gutter"
     else:
         wrapper_class = ""
-        if use_icons:
-            css = 'a { text-decoration: none; }'
+
+    # load the user css file
+    css = sublime.load_resource("Packages/GitGutter/gitgutter_popup.css")
+    try:
+        user_css = sublime.load_resource("Packages/User/gitgutter_popup.css")
+        css += "\n"
+        css += user_css
+    except OSError:
+        pass
+
+    # apply the jinja template
+    jinja_kwargs = {
+        "wrapper_class": wrapper_class,
+        "use_icons": use_icons
+    }
+    tmpl = jinja2.environment.Template(css)
+    css = tmpl.render(wrapper_class=wrapper_class)
+
+    # create the popup
     location = view.line(point).a
     window_width = int(view.viewport_extent()[0])
     mdpopups.show_popup(
         view, content, location=location, on_navigate=navigate, md=False,
-        wrapper_class=wrapper_class, css=css,
+        wrapper_class=wrapper_class[1:], css=css,
         flags=flags, max_width=window_width)
 
 
@@ -212,11 +232,16 @@ def _highlight_diff(git_content, editor_content):
     seq_matcher = difflib.SequenceMatcher(None, git_content, editor_content)
     tag_close = '</span>'
 
-    tag_eq = _tag_open('')
-    tag_ins = _tag_open('color: green;')
-    tag_del = _tag_open('color: red; text-decoration: underline;')
-    tag_modified_ins = _tag_open('color: green;')
-    tag_modified_del = _tag_open('color: yellow; text-decoration: underline;')
+    tag_eq = '<span class="gitgutter-hi-equal">'
+    tag_ins = '<span class="gitgutter-hi-inserted">'
+    tag_del = '<span class="gitgutter-hi-deleted">'
+    tag_modified_ins = (
+        '<span class="gitgutter-hi-changed gitgutter-hi-inserted">'
+    )
+    tag_modified_del = (
+        '<span class="gitgutter-hi-changed gitgutter-hi-deleted">'
+    )
+    tag_close = '</span>'
 
     # build the html string
     sb = ['<div class="highlight">', '<pre>']

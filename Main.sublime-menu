@@ -128,7 +128,18 @@
                                     "platform": "Windows"
                                 },
                                 "caption": "Key Bindings – User"
-                            }
+                            },
+                            { "caption": "-" },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/GitGutter/gitgutter_popup.css"},
+                                "caption": "Stylesheet Popup – Default"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/User/gitgutter_popup.css"},
+                                "caption": "Stylesheet Popup – User"
+                            },
                         ]
                     }
                 ]
