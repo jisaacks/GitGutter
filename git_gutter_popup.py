@@ -299,10 +299,13 @@ class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
             return False
         return True
 
-    def run(self, highlight_diff=False):
+    def run(self, highlight_diff=None):
         view = self.window.active_view()
         if len(view.sel()) == 0:
             return
+        if highlight_diff is None:
+            mode = settings.get("diff_popup_default_mode", "")
+            highlight_diff = mode == "diff"
         point = view.sel()[0].b
         show_diff_popup(
             view, point, highlight_diff=highlight_diff, flags=0)
