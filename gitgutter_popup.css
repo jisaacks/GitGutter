@@ -21,7 +21,6 @@
 
 {{wrapper_class}} .gitgutter-hi-inserted {
     color: green;
-    color: blue;
 }
 
 {{wrapper_class}} .gitgutter-hi-deleted {

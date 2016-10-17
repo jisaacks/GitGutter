@@ -139,7 +139,7 @@
                                 "command": "open_file",
                                 "args": {"file": "${packages}/User/gitgutter_popup.css"},
                                 "caption": "Stylesheet Popup – User"
-                            },
+                            }
                         ]
                     }
                 ]
