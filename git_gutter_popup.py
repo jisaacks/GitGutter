@@ -1,3 +1,5 @@
+from functools import partial
+
 import sublime
 import sublime_plugin
 
@@ -23,7 +25,12 @@ def show_diff_popup(view, point, git_handler, flags=0):
         return
 
     line = view.rowcol(point)[0] + 1
-    lines, start, size, meta = git_handler.diff_line_change(line)
+    git_handler.diff_line_change(line).then(
+        partial(_show_diff_popup_impl, view, point, flags))
+
+
+def _show_diff_popup_impl(view, point, flags, diff_info):
+    (lines, start, size, meta) = diff_info
     if start == -1:
         return
 

@@ -72,24 +72,21 @@ class GitGutterEvents(sublime_plugin.EventListener):
     # Asynchronous
 
     def debounce(self, view, event_type):
-        if self.non_blocking():
-            key = (event_type, view.file_name())
-            this_keypress = time.time()
-            self.latest_keypresses[key] = this_keypress
+        key = (event_type, view.file_name())
+        this_keypress = time.time()
+        self.latest_keypresses[key] = this_keypress
 
-            def callback():
-                latest_keypress = self.latest_keypresses.get(key, None)
-                if this_keypress == latest_keypress:
-                    view.run_command('git_gutter')
+        def callback():
+            latest_keypress = self.latest_keypresses.get(key, None)
+            if this_keypress == latest_keypress:
+                view.run_command('git_gutter')
 
-            if ST3:
-                set_timeout = sublime.set_timeout_async
-            else:
-                set_timeout = sublime.set_timeout
-
-            set_timeout(callback, settings.get("debounce_delay"))
+        if ST3:
+            set_timeout = sublime.set_timeout_async
         else:
-            view.run_command('git_gutter')
+            set_timeout = sublime.set_timeout
+
+        set_timeout(callback, settings.get("debounce_delay"))
 
     # Settings
 
@@ -98,6 +95,3 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
     def focus_change_mode(self, default=True):
         return settings.get('focus_change_mode', default)
-
-    def non_blocking(self, default=True):
-        return settings.get('non_blocking', default)
