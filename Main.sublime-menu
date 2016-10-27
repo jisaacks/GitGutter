@@ -13,33 +13,27 @@
                         [
                             {
                                 "caption": "View Current",
-                                "command": "git_gutter",
-                                "args": {"action": "show_compare"}
+                                "command": "git_gutter_show_compare"
                             },
                             {
                                 "caption": "HEAD",
-                                "command": "git_gutter",
-                                "args": {"action": "compare_against_head"}
+                                "command": "git_gutter_compare_head"
                             },
                             {
                                 "caption": "Origin",
-                                "command": "git_gutter",
-                                "args": {"action": "compare_against_origin"}
+                                "command": "git_gutter_compare_origin"
                             },
                             {
                                 "caption": "Commit",
-                                "command": "git_gutter",
-                                "args": {"action": "compare_against_commit"}
+                                "command": "git_gutter_compare_commit"
                             },
                             {
                                 "caption": "Branch",
-                                "command": "git_gutter",
-                                "args": {"action": "compare_against_branch"}
+                                "command": "git_gutter_compare_branch"
                             },
                             {
                                 "caption": "Tag",
-                                "command": "git_gutter",
-                                "args": {"action": "compare_against_tag"}
+                                "command": "git_gutter_compare_tag"
                             }
                         ]
                     }

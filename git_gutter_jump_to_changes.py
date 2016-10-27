@@ -56,27 +56,3 @@ class GitGutterJumpToChanges(object):
 
         return next((change for change in reversed(all_changes)
                     if change < current_row), default)
-
-
-# Proxy command provided for backwards compatibility.
-class GitGutterNextChangeCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        print(
-            '"git_gutter_next_change" command is deprecated. '
-            'Please update your keybindings to use this instead: '
-            '"git_gutter", "args": {"action": "jump_to_next_change"}"')
-        view = self.window.active_view()
-        if view:
-            view.run_command('git_gutter', {'action': 'jump_to_next_change'})
-
-
-# Proxy command provided for backwards compatibility.
-class GitGutterPrevChangeCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        print(
-            '"git_gutter_prev_change" command is deprecated. '
-            'Please update your keybindings to use this instead: '
-            '"git_gutter", "args": {"action": "jump_to_prev_change"}"')
-        view = self.window.active_view()
-        if view:
-            view.run_command('git_gutter', {'action': 'jump_to_prev_change'})
