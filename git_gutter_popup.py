@@ -125,7 +125,9 @@ def show_diff_popup(view, point, flags=0):
                          for l in lines)
         source_content = "\n".join(l[min_indent:] for l in lines)
         # replace spaces by non-breakable ones to avoid line wrapping
-        source_content = source_content.replace(" ", "\u00A0")
+        # (this has been added to mdpopups in version 1.11.0)
+        if mdpopups.version() < (1, 11, 0):
+            source_content = source_content.replace(" ", "\u00A0")
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
