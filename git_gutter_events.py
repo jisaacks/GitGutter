@@ -3,15 +3,12 @@ import time
 import sublime
 import sublime_plugin
 
-ST3 = int(sublime.version()) >= 3000
-if ST3:
+try:
     from .git_gutter_settings import settings
-    from .view_collection import ViewCollection
-    from .git_gutter_popup import show_diff_popup
-else:
+except (ImportError, ValueError):
     from git_gutter_settings import settings
-    from view_collection import ViewCollection
-    from git_gutter_popup import show_diff_popup
+
+ST3 = int(sublime.version()) >= 3000
 
 
 def async_event_listener(EventListener):
@@ -44,21 +41,21 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
     def on_modified(self, view):
         if self.live_mode():
-            self.debounce(view, 'modified', ViewCollection.add)
+            self.debounce(view, 'modified')
 
     def on_clone(self, view):
-        self.debounce(view, 'clone', ViewCollection.add)
+        self.debounce(view, 'clone')
 
     def on_post_save(self, view):
-        self.debounce(view, 'post-save', ViewCollection.add)
+        self.debounce(view, 'post-save')
 
     def on_load(self, view):
         if self.live_mode():
-            self.debounce(view, 'load', ViewCollection.add)
+            self.debounce(view, 'load')
 
     def on_activated(self, view):
         if self.focus_change_mode():
-            self.debounce(view, 'activated', ViewCollection.add)
+            self.debounce(view, 'activated')
 
     def on_hover(self, view, point, hover_zone):
         if hover_zone != sublime.HOVER_GUTTER:
@@ -68,11 +65,13 @@ class GitGutterEvents(sublime_plugin.EventListener):
             return
         if not settings.get("enable_hover_diff_popup"):
             return
-        show_diff_popup(view, point, flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+        view.run_command(
+            'git_gutter_diff_popup',
+            args={'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
 
     # Asynchronous
 
-    def debounce(self, view, event_type, func):
+    def debounce(self, view, event_type):
         if self.non_blocking():
             key = (event_type, view.file_name())
             this_keypress = time.time()
@@ -81,7 +80,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
             def callback():
                 latest_keypress = self.latest_keypresses.get(key, None)
                 if this_keypress == latest_keypress:
-                    func(view)
+                    view.run_command('git_gutter')
 
             if ST3:
                 set_timeout = sublime.set_timeout_async
@@ -90,7 +89,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
             set_timeout(callback, settings.get("debounce_delay"))
         else:
-            func(view)
+            view.run_command('git_gutter')
 
     # Settings
 
