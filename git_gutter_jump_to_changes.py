@@ -1,19 +1,15 @@
-import sublime
 import sublime_plugin
+
 try:
-    from .view_collection import ViewCollection
+    from .git_gutter_settings import settings
 except (ImportError, ValueError):
-    from view_collection import ViewCollection
-
-ST3 = int(sublime.version()) >= 3000
+    from git_gutter_settings import settings
 
 
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-
-
-class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
+class GitGutterJumpToChanges(object):
+    def __init__(self, view, git_handler):
+        self.view = view
+        self.git_handler = git_handler
 
     def lines_to_blocks(self, lines):
         blocks = []
@@ -24,26 +20,26 @@ class GitGutterBaseChangeCommand(sublime_plugin.WindowCommand):
             last_line = line
         return blocks
 
-    def run(self):
-        view = self.window.active_view()
-
-        inserted, modified, deleted = ViewCollection.diff(view)
+    def goto_line(self, jump_func, diff_results):
+        inserted, modified, deleted = diff_results
         inserted = self.lines_to_blocks(inserted)
         modified = self.lines_to_blocks(modified)
         all_changes = sorted(inserted + modified + deleted)
         if all_changes:
-            row, col = view.rowcol(view.sel()[0].begin())
-
+            row, col = self.view.rowcol(self.view.sel()[0].begin())
             current_row = row + 1
+            line = jump_func(all_changes, current_row)
+            self.view.run_command("goto_line", {"line": line})
 
-            line = self.jump(all_changes, current_row)
+    def jump_to_next_change(self):
+        all_changes = self.git_handler.diff()
+        self.goto_line(self.next_jump, all_changes)
 
-            self.window.active_view().run_command("goto_line", {"line": line})
+    def jump_to_prev_change(self):
+        all_changes = self.git_handler.diff()
+        self.goto_line(self.prev_jump, all_changes)
 
-
-class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
-
-    def jump(self, all_changes, current_row):
+    def next_jump(self, all_changes, current_row):
         if settings.get('next_prev_change_wrap', True):
             default = all_changes[0]
         else:
@@ -52,10 +48,7 @@ class GitGutterNextChangeCommand(GitGutterBaseChangeCommand):
         return next((change for change in all_changes
                     if change > current_row), default)
 
-
-class GitGutterPrevChangeCommand(GitGutterBaseChangeCommand):
-
-    def jump(self, all_changes, current_row):
+    def prev_jump(self, all_changes, current_row):
         if settings.get('next_prev_change_wrap', True):
             default = all_changes[-1]
         else:
@@ -63,7 +56,3 @@ class GitGutterPrevChangeCommand(GitGutterBaseChangeCommand):
 
         return next((change for change in reversed(all_changes)
                     if change < current_row), default)
-
-
-if not ST3:
-    plugin_loaded()

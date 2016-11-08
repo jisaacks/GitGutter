@@ -15,25 +15,19 @@ except:
     _MDPOPUPS_INSTALLED = False
 
 try:
-    from .view_collection import ViewCollection
+    from .git_gutter_settings import settings
 except (ImportError, ValueError):
-    from view_collection import ViewCollection
+    from git_gutter_settings import settings
 
-ST3 = int(sublime.version()) >= 3000
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
-def plugin_loaded():
-    global settings
-    settings = sublime.load_settings('GitGutter.sublime-settings')
-
-
-def show_diff_popup(view, point, highlight_diff=False, flags=0):
+def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
     if not _MDPOPUPS_INSTALLED:
         return
 
     line = view.rowcol(point)[0] + 1
-    lines, start, size, meta = ViewCollection.diff_line_change(view, line)
+    lines, start, size, meta = git_handler.diff_line_change(line)
     if start == -1:
         return
 
@@ -81,13 +75,14 @@ def show_diff_popup(view, point, highlight_diff=False, flags=0):
             view.run_command("git_gutter_replace_text", replace_param)
             # hide the popup and update the gutter
             view.hide_popup()
-            view.window().run_command("git_gutter")
+            view.run_command("git_gutter")
         elif href in ["disable_hl_diff", "enable_hl_diff"]:
             do_diff = {
                 "disable_hl_diff": False,
                 "enable_hl_diff": True
             }.get(href)
-            show_diff_popup(view, point, highlight_diff=do_diff, flags=0)
+            show_diff_popup(
+                view, point, git_handler, highlight_diff=do_diff, flags=0)
         elif href == "copy":
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)
@@ -99,7 +94,8 @@ def show_diff_popup(view, point, highlight_diff=False, flags=0):
             def show_new_popup():
                 if view.visible_region().contains(pt):
                     show_diff_popup(
-                        view, pt, highlight_diff=highlight_diff, flags=0)
+                        view, pt, git_handler, highlight_diff=highlight_diff,
+                        flags=0)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
@@ -164,7 +160,9 @@ def show_diff_popup(view, point, highlight_diff=False, flags=0):
         min_indent = _get_min_indent(lines)
         source_content = "\n".join(l[min_indent:] for l in lines)
         # replace spaces by non-breakable ones to avoid line wrapping
-        source_content = source_content.replace(" ", "\u00A0")
+        # (this has been added to mdpopups in version 1.11.0)
+        if mdpopups.version() < (1, 11, 0):
+            source_content = source_content.replace(" ", "\u00A0")
         source_html = mdpopups.syntax_highlight(
             view, source_content, language=lang)
         button_line = (
@@ -293,23 +291,23 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, region, text)
 
 
-class GitGutterDiffPopupCommand(sublime_plugin.WindowCommand):
+class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
-        if not _MDPOPUPS_INSTALLED:
-            return False
-        return True
+        return _MDPOPUPS_INSTALLED
 
-    def run(self, highlight_diff=None):
-        view = self.window.active_view()
-        if len(view.sel()) == 0:
-            return
+    def run(self, edit, point=None, highlight_diff=None, flags=0):
+        if not point:
+            if len(self.view.sel()) == 0:
+                return
+            point = self.view.sel()[0].b
+
         if highlight_diff is None:
             mode = settings.get("diff_popup_default_mode", "")
             highlight_diff = mode == "diff"
-        point = view.sel()[0].b
-        show_diff_popup(
-            view, point, highlight_diff=highlight_diff, flags=0)
-
-
-if not ST3:
-    plugin_loaded()
+        kwargs = {
+            'action': 'show_diff_popup',
+            'point': point,
+            'highlight_diff': highlight_diff,
+            'flags': flags
+        }
+        self.view.run_command('git_gutter', kwargs)
