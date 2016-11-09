@@ -21,10 +21,20 @@ except (ImportError, ValueError):
 class GitGutterCommand(sublime_plugin.TextCommand):
     def __init__(self, *args, **kwargs):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
-        self.git_handler = GitGutterHandler(self.view)
-        self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler)
+        self.is_valid_view = self.view.settings().get('is_widget') is not True
+        self.git_handler = None
+        self.show_diff_handler = None
+
+    def is_enabled(self, **kwargs):
+        return self.is_valid_view
 
     def run(self, edit, **kwargs):
+        if not self.git_handler:
+            self.git_handler = GitGutterHandler(self.view)
+        if not self.show_diff_handler:
+            self.show_diff_handler = GitGutterShowDiff(
+                self.view, self.git_handler)
+
         if not self.git_handler.on_disk() or not self.git_handler.git_dir:
             return
 
