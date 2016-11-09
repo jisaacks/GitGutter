@@ -35,6 +35,10 @@ class GitGutterHandler(object):
 
         self._last_refresh_time_git_file = 0
 
+    def __del__(self):
+        os.unlink(self.git_temp_file)
+        os.unlink(self.buf_temp_file)
+
     @staticmethod
     def tmp_file():
         '''
