@@ -1,20 +1,24 @@
 /*
     Jinja2 css template. Provided values are:
         - wrapper_class: the surrounding class;
-        - use_icons: whether use_icons is set to true;
     Copy the values you want to change into your user directory
     and change them there to overwrite the stylesheet.
 */
 
-{% if not use_icons %}
 {{wrapper_class}} .gitgutter-button {
     font-size: 15px;
 }
 
+/* Don't underline button links. */
 {{wrapper_class}} .gitgutter-button a {
     text-decoration: none;
 }
-{% endif %}
+
+/* Size of button, if they are an image. */
+{{wrapper_class}} .gitgutter-button img {
+    height: 15px;
+    width: 15px;
+}
 
 {{wrapper_class}} .gitgutter-hi-equal {
 }
