@@ -28,7 +28,7 @@ def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
 
     line = view.rowcol(point)[0] + 1
     git_handler.diff_line_change(line).then(
-        partial(_show_diff_popup_impl, view, highlight_diff, point, flags))
+        partial(_show_diff_popup_impl, view, point, highlight_diff, flags))
 
 
 def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
@@ -229,8 +229,11 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
 def _get_min_indent(lines):
     is_tab_indent = any(l.startswith("\t") for l in lines)
     indent_char = "\t" if is_tab_indent else " "
-    min_indent = min(len(l) - len(l.lstrip(indent_char))
-                     for l in lines if l)
+    try:
+        min_indent = min(len(l) - len(l.lstrip(indent_char))
+                         for l in lines if l)
+    except ValueError:
+        min_indent = 0
     return min_indent
 
 
