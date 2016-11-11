@@ -47,13 +47,7 @@
   // text (false) buttons
   "diff_popup_use_icon_buttons": true,
 
-  // When set to true GitGutter runs asynchronously in a seperate thread
-  // This may cause a small delay between a modification and the icon change
-  // but can increase performance greatly if needed.
-  "non_blocking": true,
-
-  // When using non_blocking mode, delay update of gutter icons by the
-  // following amount (in milliseconds).
+  // Delay update of gutter icons by the following amount (in milliseconds).
   "debounce_delay": 1000,
 
   // Determines whether GitGutter ignores whitespace in modified files.

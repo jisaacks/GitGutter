@@ -4,15 +4,18 @@ import re
 import codecs
 import tempfile
 import time
+from functools import partial
 
 import sublime
 
 try:
     from . import git_helper
     from .git_gutter_settings import settings
+    from .promise import Promise
 except (ImportError, ValueError):
     import git_helper
     from git_gutter_settings import settings
+    from promise import Promise
 
 
 class GitGutterHandler(object):
@@ -105,6 +108,13 @@ class GitGutterHandler(object):
             f.write(contents)
 
     def update_git_file(self):
+
+        def write_file(contents):
+            contents = contents.replace(b'\r\n', b'\n')
+            contents = contents.replace(b'\r', b'\n')
+            with open(self.git_temp_file, 'wb') as f:
+                f.write(contents)
+
         if self.git_time() > self.git_file_update_interval_secs:
             with open(self.git_temp_file, 'w'):
                 pass
@@ -117,16 +127,13 @@ class GitGutterHandler(object):
                 '%s:%s' % (
                     settings.get_compare_against(self.view), self.git_path),
             ]
-            try:
-                contents = GitGutterHandler.run_command(args)
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-                with open(self.git_temp_file, 'wb') as f:
-                    f.write(contents)
 
+            try:
                 self.update_git_time()
+                return GitGutterHandler.run_command(args).then(write_file)
             except Exception:
                 pass
+        return Promise.resolve()
 
     # Parse unified diff with 0 lines of context.
     # Hunk range info format:
@@ -159,19 +166,7 @@ class GitGutterHandler(object):
         return (inserted, modified, deleted)
 
     def diff_str(self):
-        if self.on_disk() and self.git_path:
-            self.update_git_file()
-            self.update_buf_file()
-            args = [
-                settings.git_binary_path,
-                'diff', '-U0', '--no-color', '--no-index',
-                settings.ignore_whitespace,
-                settings.patience_switch,
-                self.git_temp_file,
-                self.buf_temp_file,
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            results = GitGutterHandler.run_command(args)
+        def decode_diff(results):
             encoding = self._get_view_encoding()
             try:
                 decoded_results = results.decode(encoding.replace(' ', ''))
@@ -186,10 +181,26 @@ class GitGutterHandler(object):
                 except UnicodeDecodeError:
                     decoded_results = ""
             return decoded_results
-        else:
-            return ""
 
-    def process_diff_line_change(self, diff_str, line_nr):
+        def run_diff(_unused):
+            self.update_buf_file()
+            args = [
+                settings.git_binary_path,
+                'diff', '-U0', '--no-color', '--no-index',
+                settings.ignore_whitespace,
+                settings.patience_switch,
+                self.git_temp_file,
+                self.buf_temp_file,
+            ]
+            args = list(filter(None, args))  # Remove empty args
+            return GitGutterHandler.run_command(args).then(decode_diff)
+
+        if self.on_disk() and self.git_path:
+            return self.update_git_file().then(run_diff)
+        else:
+            return Promise.resolve("")
+
+    def process_diff_line_change(self, line_nr, diff_str):
         hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
 
@@ -261,15 +272,11 @@ class GitGutterHandler(object):
         return ([], -1, -1, {})
 
     def diff_line_change(self, line):
-        diff_str = self.diff_str()
-        return self.process_diff_line_change(diff_str, line)
+        return self.diff_str().then(
+            partial(self.process_diff_line_change, line))
 
     def diff(self):
-        diff_str = self.diff_str()
-        if diff_str:
-            return self.process_diff(diff_str)
-        else:
-            return ([], [], [])
+        return self.diff_str().then(self.process_diff)
 
     def untracked(self):
         return self.handle_files([])
@@ -277,26 +284,27 @@ class GitGutterHandler(object):
     def ignored(self):
         return self.handle_files(['-i'])
 
-    def handle_files(self, additionnal_args):
+    def handle_files(self, additional_args):
         if self.on_disk() and self.git_path:
+            def is_nonempty(results):
+                encoding = self._get_view_encoding()
+                try:
+                    decoded_results = results.decode(encoding.replace(' ', ''))
+                except UnicodeError:
+                    decoded_results = results.decode("utf-8")
+                return (decoded_results != "")
+
             args = [
                 settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
-            ] + additionnal_args + [
+            ] + additional_args + [
                 os.path.join(self.git_tree, self.git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            results = GitGutterHandler.run_command(args)
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
-            except UnicodeError:
-                decoded_results = results.decode("utf-8")
-            return (decoded_results != "")
-        else:
-            return False
+            return GitGutterHandler.run_command(args).then(is_nonempty)
+        return Promise.resolve(False)
 
     def git_commits(self):
         args = [
@@ -345,10 +353,21 @@ class GitGutterHandler(object):
 
     @staticmethod
     def run_command(args):
-        startupinfo = None
-        if os.name == 'nt':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                startupinfo=startupinfo, stderr=subprocess.PIPE)
-        return proc.stdout.read()
+        def read_output(resolve):
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            proc = subprocess.Popen(
+                args, stdout=subprocess.PIPE, startupinfo=startupinfo,
+                stderr=subprocess.PIPE)
+            stdout_output = proc.stdout.read()
+            resolve(stdout_output)
+
+        def run_async(resolve):
+            if hasattr(sublime, 'set_timeout_async'):
+                sublime.set_timeout_async(lambda: read_output(resolve), 0)
+            else:
+                read_output(resolve)
+
+        return Promise(run_async)

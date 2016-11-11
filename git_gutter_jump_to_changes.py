@@ -1,3 +1,5 @@
+from functools import partial
+
 import sublime_plugin
 
 try:
@@ -32,12 +34,10 @@ class GitGutterJumpToChanges(object):
             self.view.run_command("goto_line", {"line": line})
 
     def jump_to_next_change(self):
-        all_changes = self.git_handler.diff()
-        self.goto_line(self.next_jump, all_changes)
+        self.git_handler.diff().then(partial(self.goto_line, self.next_jump))
 
     def jump_to_prev_change(self):
-        all_changes = self.git_handler.diff()
-        self.goto_line(self.prev_jump, all_changes)
+        self.git_handler.diff().then(partial(self.goto_line, self.prev_jump))
 
     def next_jump(self, all_changes, current_row):
         if settings.get('next_prev_change_wrap', True):

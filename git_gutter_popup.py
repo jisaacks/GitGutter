@@ -1,6 +1,6 @@
 import difflib
 import html
-
+from functools import partial
 import sublime
 import sublime_plugin
 
@@ -27,10 +27,16 @@ def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
         return
 
     line = view.rowcol(point)[0] + 1
-    lines, start, size, meta = git_handler.diff_line_change(line)
+    git_handler.diff_line_change(line).then(
+        partial(_show_diff_popup_impl, view, highlight_diff, point, flags))
+
+
+def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
+    (lines, start, size, meta) = diff_info
     if start == -1:
         return
 
+    line = view.rowcol(point)[0] + 1
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
     is_modified = not is_removed and bool(lines)
@@ -81,8 +87,10 @@ def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
                 "disable_hl_diff": False,
                 "enable_hl_diff": True
             }.get(href)
-            show_diff_popup(
-                view, point, git_handler, highlight_diff=do_diff, flags=0)
+            # show a diff popup with the same diff info
+            _show_diff_popup_impl(
+                view, point, highlight_diff=do_diff, flags=0,
+                diff_info=diff_info)
         elif href == "copy":
             sublime.set_clipboard("\n".join(lines))
             copy_message = "  ".join(l.strip() for l in lines)
@@ -94,7 +102,7 @@ def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
             def show_new_popup():
                 if view.visible_region().contains(pt):
                     show_diff_popup(
-                        view, pt, git_handler, highlight_diff=highlight_diff,
+                        view, pt, highlight_diff=highlight_diff,
                         flags=0)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
