@@ -4,8 +4,10 @@ import sublime
 
 try:
     from .git_gutter_settings import settings
+    from .promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
+    from promise import Promise
 
 ST3 = int(sublime.version()) >= 3000
 
@@ -18,19 +20,47 @@ class GitGutterShowDiff(object):
     def __init__(self, view, git_handler):
         self.view = view
         self.git_handler = git_handler
+        self.diff_results = None
 
     def run(self):
-        contents = self.git_handler.diff()
-        show_untracked = settings.get('show_markers_on_untracked_file', False)
-        if self.git_handler.untracked():
-            if show_untracked:
-                self._bind_files('untracked')
-        elif self.git_handler.ignored():
-            if show_untracked:
-                self._bind_files('ignored')
+        self.git_handler.diff().then(self._check_ignored_or_untracked)
+
+    def _check_ignored_or_untracked(self, contents):
+        show_untracked = settings.get(
+            'show_markers_on_untracked_file', False)
+        if show_untracked and self._are_all_lines_added(contents):
+            def bind_ignored_or_untracked(is_ignored):
+                if is_ignored:
+                    self._bind_files('ignored')
+                else:
+                    def bind_untracked(is_untracked):
+                        if is_untracked:
+                            self._bind_files('untracked')
+                        else:
+                            self._lazy_update_ui(contents)
+                    self.git_handler.untracked().then(bind_untracked)
+
+            self.git_handler.ignored().then(bind_ignored_or_untracked)
+            return
+        self._lazy_update_ui(contents)
+
+    # heuristic to determine if the file is either untracked or ignored: all
+    # lines show up as "inserted" in the diff. Relying on the output of the
+    # normal diff command to trigger the actual untracked / ignored check (which
+    # is expensive because it's two separate git ls-files calls) allows us to
+    # save the extra git calls
+    def _are_all_lines_added(self, contents):
+        inserted, modified, deleted = contents
+        if len(modified) == 0 and len(deleted) == 0:
+            chars = self.view.size()
+            region = sublime.Region(0, chars)
+            return len(self.view.split_by_newlines(region)) == len(inserted)
         else:
-            # If the file is untracked there is no need to execute the diff
-            # update
+            return False
+
+    def _lazy_update_ui(self, contents):
+        if self.diff_results is None or self.diff_results != contents:
+            self.diff_results = contents
             self._update_ui(contents)
 
     def _update_ui(self, contents):
@@ -42,14 +72,18 @@ class GitGutterShowDiff(object):
 
         if settings.show_status != "none":
             if settings.show_status == 'all':
-                branch = self.git_handler.git_current_branch().decode(
-                    "utf-8").strip()
+                def decode_and_strip(branch_name):
+                    return branch_name.decode("utf-8").strip()
+                branch_promise = self.git_handler.git_current_branch().then(
+                    decode_and_strip)
             else:
-                branch = ""
+                branch_promise = Promise.resolve("")
 
-            self._update_status(
-                len(inserted), len(modified), len(deleted),
-                settings.get_compare_against(self.view), branch)
+            def update_status_ui(branch_name):
+                self._update_status(
+                    len(inserted), len(modified), len(deleted),
+                    settings.get_compare_against(self.view), branch_name)
+            branch_promise.then(update_status_ui)
         else:
             self._update_status(0, 0, 0, "", "")
 
