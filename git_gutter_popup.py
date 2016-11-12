@@ -1,24 +1,22 @@
-import difflib
-import html
-from functools import partial
-
 import sublime
 import sublime_plugin
 
 try:
+    if int(sublime.version()) < 3080:
+        raise Exception("No popup available.")
+
+    import difflib
+    import html
+    from functools import partial
+
     _MDPOPUPS_INSTALLED = True
     import mdpopups
-    # to be sure check, that ST also support popups
-    if int(sublime.version()) < 3080:
-        _MDPOPUPS_INSTALLED = False
     import jinja2
 except:
     _MDPOPUPS_INSTALLED = False
 
-try:
+if _MDPOPUPS_INSTALLED:
     from .git_gutter_settings import settings
-except (ImportError, ValueError):
-    from git_gutter_settings import settings
 
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
