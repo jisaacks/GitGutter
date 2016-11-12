@@ -20,21 +20,30 @@
     width: 1.15rem;
 }
 
+/*
+    The following entries apply to the "difference highlight"
+    mode of the popup.
+*/
+/* Highlight text, that has not changed. */
 {{wrapper_class}} .gitgutter-hi-equal {
 }
 
+/* Highlight text, that has been inserted. */
 {{wrapper_class}} .gitgutter-hi-inserted {
     color: green;
 }
 
+/* Highlight text, that has been deleted. */
 {{wrapper_class}} .gitgutter-hi-deleted {
     color: red;
     text-decoration: underline;
 }
 
+/* Highlight text, that has been inserted and substitutes other text. */
 {{wrapper_class}} .gitgutter-hi-changed .gitgutter-hi-inserted {
 }
 
+/* Highlight text, that has been deleted and is substituted by other text. */
 {{wrapper_class}} .gitgutter-hi-changed .gitgutter-hi-deleted {
     color: yellow;
 }
