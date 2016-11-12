@@ -33,21 +33,21 @@ def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
 
 
 def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
-    (lines, start, size, meta) = diff_info
+    (deleted_lines, start, size, meta) = diff_info
     if start == -1:
         return
 
     line = view.rowcol(point)[0] + 1
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
-    is_modified = not is_removed and bool(lines)
+    is_modified = not is_removed and bool(deleted_lines)
     is_added = not is_removed and not is_modified
 
     def navigate(href):
         if href == "hide":
             view.hide_popup()
         elif href == "revert":
-            new_text = "\n".join(lines)
+            new_text = "\n".join(deleted_lines)
             # (removed) if there is no text to remove, set the
             # region to the end of the line, where the hunk starts
             # and add a new line to the start of the text
@@ -93,8 +93,8 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
                 view, point, highlight_diff=do_diff, flags=0,
                 diff_info=diff_info)
         elif href == "copy":
-            sublime.set_clipboard("\n".join(lines))
-            copy_message = "  ".join(l.strip() for l in lines)
+            sublime.set_clipboard("\n".join(deleted_lines))
+            copy_message = "  ".join(l.strip() for l in deleted_lines)
             sublime.status_message("Copied: " + copy_message)
         elif href in ["next_change", "prev_change", "first_change"]:
             next_line = meta.get(href, line)
@@ -142,9 +142,9 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
-        min_indent = _get_min_indent(lines + meta["added_lines"])
+        min_indent = _get_min_indent(deleted_lines + meta["added_lines"])
 
-        old_content = "\n".join(l[min_indent:] for l in lines)
+        old_content = "\n".join(l[min_indent:] for l in deleted_lines)
         new_content = "\n".join(l[min_indent:] for l in meta["added_lines"])
         source_html = _highlight_diff(old_content, new_content)
 
@@ -164,10 +164,10 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
         # which in git
         lang = mdpopups.get_language_from_view(view) or ""
         # strip the indent to the minimal indentation
-        is_tab_indent = any(l.startswith("\t") for l in lines)
+        is_tab_indent = any(l.startswith("\t") for l in deleted_lines)
         indent_char = "\t" if is_tab_indent else " "
-        min_indent = _get_min_indent(lines)
-        source_content = "\n".join(l[min_indent:] for l in lines)
+        min_indent = _get_min_indent(deleted_lines)
+        source_content = "\n".join(l[min_indent:] for l in deleted_lines)
         # replace spaces by non-breakable ones to avoid line wrapping
         # (this has been added to mdpopups in version 1.11.0)
         if mdpopups.version() < (1, 11, 0):
