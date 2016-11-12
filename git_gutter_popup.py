@@ -34,6 +34,7 @@ def _show_diff_popup_impl(view, point, flags, diff_info):
     if start == -1:
         return
 
+    line = view.rowcol(point)[0] + 1
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
     is_modified = not is_removed and bool(lines)
@@ -89,7 +90,12 @@ def _show_diff_popup_impl(view, point, flags, diff_info):
 
             def show_new_popup():
                 if view.visible_region().contains(pt):
-                    show_diff_popup(view, pt, flags=flags)
+                    popup_kwargs = {
+                        'action': 'show_diff_popup',
+                        'point': pt,
+                        'flags': 0
+                    }
+                    view.run_command('git_gutter', popup_kwargs)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
