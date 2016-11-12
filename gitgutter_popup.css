@@ -6,7 +6,7 @@
 */
 
 {{wrapper_class}} .gitgutter-button {
-    font-size: 15px;
+    font-size: 1.15rem;
 }
 
 /* Don't underline button links. */
@@ -16,8 +16,8 @@
 
 /* Size of button, if they are an image. */
 {{wrapper_class}} .gitgutter-button img {
-    height: 15px;
-    width: 15px;
+    height: 1.15rem;
+    width: 1.15rem;
 }
 
 {{wrapper_class}} .gitgutter-hi-equal {
