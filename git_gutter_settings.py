@@ -12,14 +12,13 @@ def plugin_loaded():
 
 
 class GitGutterSettings:
-    git_binary_path_error_shown = False
-    git_binary_path_fallback = None
     compare_against = None
 
     def __init__(self):
         self._settings = None
         self._user_settings = None
         self._git_binary_path_fallback = None
+        self._git_binary_path_error_shown = False
         # These settings have public getters as they go through more
         # complex initialization than just getting the value from settings.
         self.git_binary_path = None
@@ -60,19 +59,19 @@ class GitGutterSettings:
             self.git_binary_path = self._git_binary_path_fallback
         elif ST3:
             self.git_binary_path = shutil.which("git")
-            GitGutterSettings.git_binary_path_fallback = self.git_binary_path
+            self._git_binary_path_fallback = self.git_binary_path
         else:
             git_exe = "git.exe" if sublime.platform() == "windows" else "git"
             for folder in os.environ["PATH"].split(os.pathsep):
                 path = os.path.join(folder.strip('"'), git_exe)
                 if os.path.isfile(path) and os.access(path, os.X_OK):
                     self.git_binary_path = path
-                    GitGutterSettings.git_binary_path_fallback = path
+                    self._git_binary_path_fallback = path
                     break
 
         if not self.git_binary_path:
-            if not GitGutterSettings.git_binary_path_error_shown:
-                GitGutterSettings.git_binary_path_error_shown = True
+            if not self._git_binary_path_error_shown:
+                self._git_binary_path_error_shown = True
                 msg = ("Your Git binary cannot be found. If it is installed, "
                        "add it to your PATH environment variable, or add "
                        "a `git_binary` setting in the "
