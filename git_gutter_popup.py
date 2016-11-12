@@ -1,6 +1,7 @@
 import difflib
 import html
 from functools import partial
+
 import sublime
 import sublime_plugin
 
@@ -143,9 +144,9 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
         # (*) show a highlighted diff of the merged git and editor content
         min_indent = _get_min_indent(lines + meta["added_lines"])
 
-        git_content = "\n".join(l[min_indent:] for l in lines)
-        editor_content = "\n".join(l[min_indent:] for l in meta["added_lines"])
-        source_html = _highlight_diff(git_content, editor_content)
+        old_content = "\n".join(l[min_indent:] for l in lines)
+        new_content = "\n".join(l[min_indent:] for l in meta["added_lines"])
+        source_html = _highlight_diff(old_content, new_content)
 
         button_line = (
             '{hide} '
@@ -215,7 +216,7 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
         "use_icons": use_icons
     }
     tmpl = jinja2.environment.Template(css)
-    css = tmpl.render(wrapper_class=wrapper_class)
+    css = tmpl.render(**jinja_kwargs)
 
     # create the popup
     location = view.line(point).a
@@ -237,8 +238,8 @@ def _get_min_indent(lines):
     return min_indent
 
 
-def _highlight_diff(git_content, editor_content):
-    seq_matcher = difflib.SequenceMatcher(None, git_content, editor_content)
+def _highlight_diff(old_content, new_content):
+    seq_matcher = difflib.SequenceMatcher(None, old_content, new_content)
     tag_close = '</span>'
 
     tag_eq = '<span class="gitgutter-hi-equal">'
@@ -258,22 +259,22 @@ def _highlight_diff(git_content, editor_content):
         op_type, git_start, git_end, edit_start, edit_end = op
         if op_type == "equal":
             sb.append(tag_eq)
-            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
         elif op_type == "delete":
             sb.append(tag_del)
-            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
         elif op_type == "insert":
             sb.append(tag_ins)
-            sb.append(_to_html(editor_content[edit_start:edit_end]))
+            sb.append(_to_html(new_content[edit_start:edit_end]))
             sb.append(tag_close)
         elif op_type == "replace":
             sb.append(tag_modified_ins)
-            sb.append(_to_html(editor_content[edit_start:edit_end]))
+            sb.append(_to_html(new_content[edit_start:edit_end]))
             sb.append(tag_close)
             sb.append(tag_modified_del)
-            sb.append(_to_html(git_content[git_start:git_end]))
+            sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
     sb.extend(['</pre>', '</div>'])
     return "".join(sb)
@@ -286,14 +287,6 @@ def _to_html(s):
         .replace(" ", "&nbsp;")
         .replace("\u00A0", "&nbsp;")
     )
-
-
-def _tag_open(style):
-    if style:
-        tag = '<span style="{0}">'.format(style)
-    else:
-        tag = '<span>'
-    return tag
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
