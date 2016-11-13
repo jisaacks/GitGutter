@@ -100,9 +100,13 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
 
             def show_new_popup():
                 if view.visible_region().contains(pt):
-                    show_diff_popup(
-                        view, pt, highlight_diff=highlight_diff,
-                        flags=0)
+                    popup_kwargs = {
+                        'action': 'show_diff_popup',
+                        'highlight_diff': highlight_diff,
+                        'point': pt,
+                        'flags': 0
+                    }
+                    view.run_command('git_gutter', popup_kwargs)
                 else:
                     sublime.set_timeout(show_new_popup, 10)
             view.show_at_center(pt)
