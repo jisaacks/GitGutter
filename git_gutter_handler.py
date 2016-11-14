@@ -26,8 +26,8 @@ class GitGutterHandler(object):
     def __init__(self, view):
         self.view = view
 
-        self.git_temp_file = GitGutterHandler.tmp_file()
-        self.buf_temp_file = GitGutterHandler.tmp_file()
+        self.git_temp_file = None
+        self.buf_temp_file = None
 
         self.git_tree = None
         self.git_dir = None
@@ -36,15 +36,17 @@ class GitGutterHandler(object):
         self._last_refresh_time_git_file = 0
 
     def __del__(self):
-        os.unlink(self.git_temp_file)
-        os.unlink(self.buf_temp_file)
+        if self.git_temp_file:
+            os.unlink(self.git_temp_file)
+        if self.buf_temp_file:
+            os.unlink(self.buf_temp_file)
 
     @staticmethod
     def tmp_file():
-        '''
-            Create a temp file and return the filepath to it.
-            Caller is responsible for clean up
-        '''
+        """Create a temp file and return the filepath to it.
+
+        CAUTION: Caller is responsible for clean up
+        """
         fd, filepath = tempfile.mkstemp(prefix='git_gutter_')
         os.close(fd)
         return filepath
@@ -105,6 +107,9 @@ class GitGutterHandler(object):
         contents = contents.replace(b'\r\n', b'\n')
         contents = contents.replace(b'\r', b'\n')
 
+        if not self.buf_temp_file:
+            self.buf_temp_file = GitGutterHandler.tmp_file()
+
         with open(self.buf_temp_file, 'wb') as f:
             if self.view.encoding() == "UTF-8 with BOM":
                 f.write(codecs.BOM_UTF8)
@@ -120,8 +125,8 @@ class GitGutterHandler(object):
                 f.write(contents)
 
         if self.git_time() > self.git_file_update_interval_secs:
-            with open(self.git_temp_file, 'w'):
-                pass
+            if not self.git_temp_file:
+                self.git_temp_file = GitGutterHandler.tmp_file()
 
             args = [
                 settings.git_binary_path,
