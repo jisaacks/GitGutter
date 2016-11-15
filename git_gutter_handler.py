@@ -234,11 +234,6 @@ class GitGutterHandler(object):
                 next_change = int(next_hunk.group(3))
             except:
                 hunk_end = len(diff_str)
-            # extract the content of the hunk
-            hunk_content = diff_str[hunk.start():hunk_end]
-            # store all deleted lines (starting with -)
-            lines = [line[1:] for line in hunk_content.split("\n")[1:]
-                     if line.startswith("-")]
 
             # if wrap is disable avoid wrapping
             wrap = settings.get('next_prev_change_wrap', True)
@@ -264,12 +259,23 @@ class GitGutterHandler(object):
                     prev_change = start
             if next_change is None:
                 next_change = first_change
+
+            # extract the content of the hunk
+            hunk_content = diff_str[hunk.start():hunk_end]
+            # store all deleted lines (starting with -)
+            hunk_lines = hunk_content.splitlines()[1:]
+            deleted_lines = [
+                line[1:] for line in hunk_lines if line.startswith("-")
+            ]
+            added_lines = [line[1:] for line in hunk_lines
+                           if line.startswith("+")]
             meta = {
+                "added_lines": added_lines,
                 "first_change": first_change,
                 "next_change": next_change,
                 "prev_change": prev_change
             }
-            return (lines, start, size, meta)
+            return (deleted_lines, start, size, meta)
         return ([], -1, -1, {})
 
     def diff_line_change(self, line):

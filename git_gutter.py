@@ -66,8 +66,11 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             GitGutterShowCompare(view, git_handler).run()
         elif action == 'show_diff_popup':
             point = kwargs['point']
+            highlight_diff = kwargs['highlight_diff']
             flags = kwargs['flags']
-            show_diff_popup(view, point, git_handler, flags=flags)
+            show_diff_popup(
+                view, point, git_handler, highlight_diff=highlight_diff,
+                flags=flags)
         else:
             assert False, 'Unhandled sub command "%s"' % action
 

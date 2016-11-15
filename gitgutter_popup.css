@@ -1,0 +1,49 @@
+/*
+    Jinja2 css template. Provided values are:
+        - wrapper_class: the surrounding class;
+    Copy the values you want to change into your user directory
+    and change them there to overwrite the stylesheet.
+*/
+
+{{wrapper_class}} .gitgutter-button {
+    font-size: 1.15rem;
+}
+
+/* Don't underline button links. */
+{{wrapper_class}} .gitgutter-button a {
+    text-decoration: none;
+}
+
+/* Size of button, if they are an image. */
+{{wrapper_class}} .gitgutter-button img {
+    height: 1.15rem;
+    width: 1.15rem;
+}
+
+/*
+    The following entries apply to the "difference highlight"
+    mode of the popup.
+*/
+/* Highlight text, that has not changed. */
+{{wrapper_class}} .gitgutter-hi-equal {
+}
+
+/* Highlight text, that has been inserted. */
+{{wrapper_class}} .gitgutter-hi-inserted {
+    color: green;
+}
+
+/* Highlight text, that has been deleted. */
+{{wrapper_class}} .gitgutter-hi-deleted {
+    color: red;
+    text-decoration: underline;
+}
+
+/* Highlight text, that has been inserted and substitutes other text. */
+{{wrapper_class}} .gitgutter-hi-changed .gitgutter-hi-inserted {
+}
+
+/* Highlight text, that has been deleted and is substituted by other text. */
+{{wrapper_class}} .gitgutter-hi-changed .gitgutter-hi-deleted {
+    color: yellow;
+}

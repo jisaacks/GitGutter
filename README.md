@@ -48,14 +48,15 @@ The most common reason for the icons to not show up is likely a problem with Git
 
 ![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
 
-| symbol | meaning if the symbol              |
-| ---    | ---                                |
-| ×      | close the popup                    |
-| ⤒      | jump to first change               |
-| ↑      | jump to previous change            |
-| ↓      | jump to next change                |
-| ⎘      | copy the content of the git state  |
-| ⟲      | revert changes to the state in git |
+| symbol | meaning if the symbol                  |
+| ---    | ---                                    |
+| ×      | close the popup                        |
+| ⤒      | jump to first change                   |
+| ↑      | jump to previous change                |
+| ↓      | jump to next change                    |
+| ≈, ≉   | enable/disable difference highlighting |
+| ⎘      | copy the content of the git state      |
+| ⟲      | revert changes to the state in git     |
 
 The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer *(which is currently only in the dev builds)*. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
 
@@ -100,9 +101,15 @@ By default, GitGutter detects changes every time the file is modified. If you ex
 *This hover feature is only available in Build 3116 and newer.*
 GitGutter shows a diff popup, when hovering over changes in the gutter. Set `enable_hover_diff_popup` to `false`, if you want to disable this popup. You can still open it with a keybinding and from the command panel.
 
-#### Diff Popup appearance
+#### Diff Popup Default Mode
+*The diff popup is only available in Sublime Text 3*
+The diff popup has two modes: The default mode to show the previous git state with code highlighting and the diff mode to highlight the differences between the git state and the editor state.
+You can set `diff_popup_default_mode` to `"default"` or `"diff"` to change the mode in which the popup opens.
+
+#### Diff Popup Appearance
 *The diff popup is only available in Sublime Text 3*
 The popup uses the [mdpopups library](https://github.com/facelessuser/sublime-markdown-popups) and the corresponding settings are global and not only for GitGutter. You can change the syntax highlighting style to the same as Sublime Text by adding `"mdpopups.use_sublime_highlighter": true` to your User settings. Other settings can be found [here](http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings).
+In addition the popup loads the css file `gitgutter_popup.css`, which can be modified by the user and is also accessible via the settings menu.
 
 #### Untracked Files
 GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
