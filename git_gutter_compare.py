@@ -39,7 +39,7 @@ class GitGutterCompareCommit(object):
             return
         item = results[selected]
         commit = self.item_to_commit(item)
-        settings.set_compare_against(commit)
+        settings.set_compare_against(self.git_handler.git_dir, commit)
         self.git_handler.clear_git_time()
         self.view.run_command('git_gutter')  # refresh ui
 
@@ -86,7 +86,7 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        settings.set_compare_against('HEAD')
+        settings.set_compare_against(self.git_handler.git_dir, 'HEAD')
         self.git_handler.clear_git_time()
         self.view.run_command('git_gutter')  # refresh ui
 
@@ -96,6 +96,7 @@ class GitGutterCompareOrigin(GitGutterCompareCommit):
         def on_branch_name(branch_name):
             if branch_name:
                 settings.set_compare_against(
+                    self.git_handler.git_dir,
                     'origin/%s' % branch_name.decode("utf-8").strip())
                 self.git_handler.clear_git_time()
                 self.view.run_command('git_gutter')  # refresh ui
@@ -104,5 +105,6 @@ class GitGutterCompareOrigin(GitGutterCompareCommit):
 
 class GitGutterShowCompare(GitGutterCompareCommit):
     def run(self):
-        comparing = settings.get_compare_against(self.view)
+        comparing = settings.get_compare_against(self.git_handler.git_dir,
+                                                 self.view)
         sublime.message_dialog('GitGutter is comparing against: %s' % comparing)
