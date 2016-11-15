@@ -82,7 +82,9 @@ class GitGutterShowDiff(object):
             def update_status_ui(branch_name):
                 self._update_status(
                     len(inserted), len(modified), len(deleted),
-                    settings.get_compare_against(self.view), branch_name)
+                    settings.get_compare_against(
+                        self.git_handler.git_dir, self.view),
+                    branch_name)
             branch_promise.then(update_status_ui)
         else:
             self._update_status(0, 0, 0, "", "")

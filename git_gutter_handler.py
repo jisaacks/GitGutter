@@ -138,7 +138,8 @@ class GitGutterHandler(object):
                 '--work-tree=' + self.git_tree,
                 'show',
                 '%s:%s' % (
-                    settings.get_compare_against(self.view), self.git_path),
+                    settings.get_compare_against(self.git_dir, self.view),
+                    self.git_path),
             ]
 
             try:

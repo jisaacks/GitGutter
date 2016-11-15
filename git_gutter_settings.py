@@ -10,13 +10,14 @@ def plugin_loaded():
 
 
 class GitGutterSettings:
-    compare_against = None
 
     def __init__(self):
         self._settings = None
         self._user_settings = None
         self._git_binary_path_fallback = None
         self._git_binary_path_error_shown = False
+        # A mapping from git dir to a string indicating what to compare against.
+        self._compare_against_mapping = {}
         # These settings have public getters as they go through more
         # complex initialization than just getting the value from settings.
         self.git_binary_path = None
@@ -103,18 +104,16 @@ class GitGutterSettings:
         if self.show_status != 'all' and self.show_status != 'none':
             self.show_status = 'default'
 
-    def get_compare_against(self, view):
-        # GitGutterSettings.compare_against overrides both project settings and
-        # plugin settings if set.
-        compare = GitGutterSettings.compare_against
-        if compare:
-            return compare
-        compare = self.get('compare_against', compare)
+    def get_compare_against(self, git_dir, view):
+        # Interactively specified compare target overrides settings.
+        if git_dir in self._compare_against_mapping:
+            return self._compare_against_mapping[git_dir]
+        compare = self.get('compare_against')
         # Project settings override plugin settings if set.
         return view.settings().get('git_gutter_compare_against', compare)
 
-    def set_compare_against(self, new_compare_against):
-        GitGutterSettings.compare_against = new_compare_against
+    def set_compare_against(self, git_dir, new_compare_against):
+        self._compare_against_mapping[git_dir] = new_compare_against
 
 if 'settings' not in globals():
     settings = GitGutterSettings()
