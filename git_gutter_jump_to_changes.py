@@ -1,7 +1,5 @@
 from functools import partial
 
-import sublime_plugin
-
 try:
     from .git_gutter_settings import settings
 except (ImportError, ValueError):
