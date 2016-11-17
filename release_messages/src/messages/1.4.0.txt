@@ -8,7 +8,7 @@
     "syntax highlighting" and "differences highlighting".
 
 * Async Invocations
-  - GitGutter now runs in a separate thread usnig promises to update
+  - GitGutter now runs in a separate thread using promises to update
     the gutter when finished.
   - non_blocking setting is gone, it is always non blocking now.
 
