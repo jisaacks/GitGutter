@@ -61,7 +61,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         live_mode or focus_change_mode enabled as they would trigger
         git_gutter with the next on_activate() event.
         """
-        if not self.change_mode() or self.is_view_visible(view):
+        if not self.live_mode() and not self.focus_change_mode() or self.is_view_visible(view):
             self.debounce(view, 'post-save')
 
     def on_activated(self, view):
@@ -70,7 +70,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         This event is also called after a file is opened into an
         active view.
         """
-        if self.change_mode():
+        if self.live_mode() or self.focus_change_mode():
             self.debounce(view, 'activated')
 
     def on_hover(self, view, point, hover_zone):
@@ -112,15 +112,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
     def focus_change_mode(self, default=True):
         return settings.get('focus_change_mode', default)
 
-    def change_mode(self):
-        return self.live_mode() or self.focus_change_mode()
-
     def is_view_visible(self, view):
-        """Return true if the view is visible.
-
-        Only an active view of a group is visible.
-        Note: this should be part of the View class but it isn't.
-        """
         w = view.window()
         return any(view == w.active_view_in_group(g)
                    for g in range(w.num_groups())) if w is not None else False
