@@ -62,7 +62,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         git_gutter with the next on_activate() event.
         """
         if self.is_view_visible(view) or not (
-           self.live_mode() or self.focus_change_mode()):
+                self.live_mode() or self.focus_change_mode()):
             self.debounce(view, 'post-save')
 
     def on_activated(self, view):
