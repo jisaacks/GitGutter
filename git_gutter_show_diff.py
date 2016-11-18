@@ -21,49 +21,35 @@ class GitGutterShowDiff(object):
         self.view = view
         self.git_handler = git_handler
         self.diff_results = None
-        self.show_untracked = False
 
     def run(self):
         self.git_handler.diff().then(self._check_ignored_or_untracked)
 
     def _check_ignored_or_untracked(self, contents):
-        if self._are_all_lines_added(contents):
-            show_untracked = settings.get(
-                'show_markers_on_untracked_file', False)
-            # need to check for ignored or untracked file
-            if show_untracked:
-                def bind_ignored_or_untracked(is_ignored):
-                    if is_ignored:
-                        self._bind_files('ignored')
-                    else:
-                        def bind_untracked(is_untracked):
-                            if is_untracked:
-                                self._bind_files('untracked')
-                            else:
-                                self._lazy_update_ui(contents)
+        show_untracked = settings.get(
+            'show_markers_on_untracked_file', False)
+        if show_untracked and self._are_all_lines_added(contents):
+            def bind_ignored_or_untracked(is_ignored):
+                if is_ignored:
+                    self._bind_files('ignored')
+                else:
+                    def bind_untracked(is_untracked):
+                        if is_untracked:
+                            self._bind_files('untracked')
+                        else:
+                            self._lazy_update_ui(contents)
+                    self.git_handler.untracked().then(bind_untracked)
 
-                        self.git_handler.untracked().then(bind_untracked)
+            self.git_handler.ignored().then(bind_ignored_or_untracked)
+            return
+        self._lazy_update_ui(contents)
 
-                self.git_handler.ignored().then(bind_ignored_or_untracked)
-
-            # show_untracked was set to false recently so clear gutter
-            elif self.show_untracked:
-                self._clear_all()
-                self._update_status(0, 0, 0, "", "")
-
-            self.show_untracked = show_untracked
-
-        else:
-            self._lazy_update_ui(contents)
-
+    # heuristic to determine if the file is either untracked or ignored: all
+    # lines show up as "inserted" in the diff. Relying on the output of the
+    # normal diff command to trigger the actual untracked / ignored check (which
+    # is expensive because it's two separate git ls-files calls) allows us to
+    # save the extra git calls
     def _are_all_lines_added(self, contents):
-        """Heuristic to determine if the file is either untracked or ignored.
-
-        All lines show up as "inserted" in the diff. Relying on the output of
-        the normal diff command to trigger the actual untracked / ignored check
-        (which is expensive because it's two separate git ls-files calls)
-        allows us to save the extra git calls
-        """
         inserted, modified, deleted = contents
         if len(modified) == 0 and len(deleted) == 0:
             chars = self.view.size()
@@ -73,7 +59,7 @@ class GitGutterShowDiff(object):
             return False
 
     def _lazy_update_ui(self, contents):
-        if self.diff_results != contents:
+        if self.diff_results is None or self.diff_results != contents:
             self.diff_results = contents
             self._update_ui(contents)
 
@@ -191,7 +177,12 @@ class GitGutterShowDiff(object):
             'git_gutter_%s' % event, regions, scope, icon, flags)
 
     def _bind_files(self, event):
-        lines = [line + 1 for line in range(self._total_lines())]
+        lines = []
+        line_count = self._total_lines()
+        i = 0
+        while i < line_count:
+            lines += [i + 1]
+            i = i + 1
         self._bind_icons(event, lines)
 
     def _total_lines(self):
