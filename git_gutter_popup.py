@@ -203,14 +203,15 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
     else:
         wrapper_class = ""
 
-    # load the user css file
-    css = sublime.load_resource("Packages/GitGutter/gitgutter_popup.css")
-    try:
-        user_css = sublime.load_resource("Packages/User/gitgutter_popup.css")
-        css += "\n"
-        css += user_css
-    except OSError:
-        pass
+    # load the css files
+    css_contents = []
+    css_files = sublime.find_resources("gitgutter_popup.css")
+    for css_file in css_files:
+        try:
+            css_contents.append(sublime.load_resource(css_file))
+        except OSError:
+            print("Error while loading '{0}'.".format(css_file))
+    css = "\n".join(css_contents)
 
     # apply the jinja template
     jinja_kwargs = {
