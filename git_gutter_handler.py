@@ -81,8 +81,8 @@ class GitGutterHandler(object):
 
     def on_disk(self):
         # if the view is saved to disk
-        fn = self.view.file_name()
-        on_disk = (fn is not None) and os.path.exists(fn)
+        file_name = self.view.file_name()
+        on_disk = file_name is not None and os.path.isfile(file_name)
         if on_disk:
             self.git_tree = self.git_tree or git_helper.git_tree(self.view)
             self.git_dir = self.git_dir or git_helper.git_dir(self.git_tree)
