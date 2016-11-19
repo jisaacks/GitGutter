@@ -36,6 +36,7 @@ class GitGutterHandler(object):
         self._last_refresh_time_git_file = 0
 
     def __del__(self):
+        """Delete temporary files."""
         if self.git_temp_file:
             os.unlink(self.git_temp_file)
         if self.buf_temp_file:
@@ -61,8 +62,10 @@ class GitGutterHandler(object):
         return time.time() - self._last_refresh_time_git_file
 
     def _get_view_encoding(self):
-        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
-        # NOTE(maelnor): are we need regex here?
+        """Get encoding and clean it for python ex: "Western (ISO 8859-1)".
+
+        NOTE(maelnor): are we need regex here?
+        """
         pattern = re.compile(r'.+\((.*)\)')
         encoding = self.view.encoding()
         if encoding == "Undefined":
@@ -80,7 +83,7 @@ class GitGutterHandler(object):
         return origin_encoding or encoding
 
     def on_disk(self):
-        # if the view is saved to disk
+        """Determine, if the view is saved to disk."""
         file_name = self.view.file_name()
         on_disk = file_name is not None and os.path.isfile(file_name)
         if on_disk:
@@ -91,6 +94,7 @@ class GitGutterHandler(object):
         return on_disk
 
     def update_buf_file(self):
+        """Write view's content to temporary file as source for git diff."""
         chars = self.view.size()
         region = sublime.Region(0, chars)
 
@@ -114,7 +118,6 @@ class GitGutterHandler(object):
         with open(self.buf_temp_file, 'wb') as f:
             if self.view.encoding() == "UTF-8 with BOM":
                 f.write(codecs.BOM_UTF8)
-
             f.write(contents)
 
     def update_git_file(self):
@@ -145,19 +148,21 @@ class GitGutterHandler(object):
                 pass
         return Promise.resolve()
 
-    # Parse unified diff with 0 lines of context.
-    # Hunk range info format:
-    #   @@ -3,2 +4,0 @@
-    #     Hunk originally starting at line 3, and occupying 2 lines, now
-    #     starts at line 4, and occupies 0 lines, i.e. it was deleted.
-    #   @@ -9 +10,2 @@
-    #     Hunk size can be omitted, and defaults to one line.
-    # Dealing with ambiguous hunks:
-    #   "A\nB\n" -> "C\n"
-    #   Was 'A' modified, and 'B' deleted? Or 'B' modified, 'A' deleted?
-    #   Or both deleted? To minimize confusion, let's simply mark the
-    #   hunk as modified.
     def process_diff(self, diff_str):
+        r"""Parse unified diff with 0 lines of context.
+
+        Hunk range info format:
+          @@ -3,2 +4,0 @@
+            Hunk originally starting at line 3, and occupying 2 lines, now
+            starts at line 4, and occupies 0 lines, i.e. it was deleted.
+          @@ -9 +10,2 @@
+            Hunk size can be omitted, and defaults to one line.
+        Dealing with ambiguous hunks:
+          "A\nB\n" -> "C\n"
+          Was 'A' modified, and 'B' deleted? Or 'B' modified, 'A' deleted?
+          Or both deleted? To minimize confusion, let's simply mark the
+          hunk as modified.
+        """
         inserted = []
         modified = []
         deleted = []
@@ -176,6 +181,8 @@ class GitGutterHandler(object):
         return (inserted, modified, deleted)
 
     def diff_str(self):
+        """Run git diff against view and decode the result then."""
+
         def decode_diff(results):
             encoding = self._get_view_encoding()
             try:
@@ -285,33 +292,44 @@ class GitGutterHandler(object):
         return ([], -1, -1, {})
 
     def diff_line_change(self, line):
+        """Run git diff and extract the changes of a certain line.
+
+        NOTE: This method is used for diff popup.
+        """
         return self.diff_str().then(
             partial(self.process_diff_line_change, line))
 
     def diff(self):
+        """Run git diff to check for inserted, modified and deleted lines.
+
+        NOTE: This method is used to update the gutter markers.
+        """
         return self.diff_str().then(self.process_diff)
 
     def untracked(self):
+        """Determine whether the view shows an untracked file."""
         return self.handle_files([])
 
     def ignored(self):
+        """Determine whether the view shows an ignored file."""
         return self.handle_files(['-i'])
 
     def handle_files(self, additional_args):
+        """Run git ls-files to check for untracked or ignored file."""
         if self.on_disk() and self.git_path:
             def is_nonempty(results):
-                encoding = self._get_view_encoding()
-                try:
-                    decoded_results = results.decode(encoding.replace(' ', ''))
-                except UnicodeError:
-                    decoded_results = results.decode("utf-8")
-                return (decoded_results != "")
+                """Determine if view's file is in git's index.
+
+                If the view's file is not part of the index
+                git returns empty output to stdout.
+                """
+                return bool(results[1])
 
             args = [
                 settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
-                'ls-files', '--other', '--exclude-standard',
+                'ls-files', '--other', '--exclude-standard'
             ] + additional_args + [
                 os.path.join(self.git_tree, self.git_path),
             ]
@@ -366,7 +384,10 @@ class GitGutterHandler(object):
 
     @staticmethod
     def run_command(args):
+        """Run a git command asynchronously and return a Promise."""
+
         def read_output(resolve):
+            """Start git process and forward its output to the Resolver."""
             startupinfo = None
             if os.name == 'nt':
                 startupinfo = subprocess.STARTUPINFO()
