@@ -4,8 +4,6 @@ import sublime
 
 ST3 = int(sublime.version()) >= 3000
 
-settings = None
-
 
 def plugin_loaded():
     settings.load_settings()
@@ -118,7 +116,7 @@ class GitGutterSettings:
     def set_compare_against(self, new_compare_against):
         GitGutterSettings.compare_against = new_compare_against
 
-settings = GitGutterSettings()
-
-if not ST3:
-    plugin_loaded()
+if 'settings' not in globals():
+    settings = GitGutterSettings()
+    if not ST3:
+        plugin_loaded()
