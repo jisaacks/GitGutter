@@ -1,0 +1,99 @@
+[default]
+bears = FilenameBear, InvalidLinkBear
+files = **.rb, **.yml, **.md, **.css, **.py, **.json
+
+# FilenameBear Configuration
+file_naming_convention = snake
+ignore_uppercase_filenames = True
+
+# InvalidLinkBear Configuration
+link_ignore_regex = https?://(\w+.)?wbond.net
+timeout = 2
+
+
+[json]
+bears = KeywordBear, SpaceConsistencyBear, LineLengthBear, JSONFormatBear
+files = **.json
+language = json
+
+# KeywordBear Configuration
+keywords = TODO, FIXME
+
+# SpaceConsistencyBear Configuration
+use_spaces = True
+indent_size = 4
+
+# LineLengthBear Configuration
+max_line_length = 80
+
+
+[ruby]
+bears = KeywordBear, SpaceConsistencyBear, LineLengthBear, LineCountBear, CPDBear, RubySyntaxBear, RubySmellBear
+language = ruby
+files = **.rb
+
+# KeywordBear Configuration
+keywords = TODO, FIXME
+
+# SpaceConsistencyBear Configuration
+use_spaces = True
+indent_size = 2
+
+# LineLengthBear Configuration
+max_line_length = 100
+
+# LineCountBear Configuration
+max_lines_per_file = 200
+
+
+[python]
+bears = LineCountBear, PEP8Bear
+files = **.py
+
+# LineCountBear Configuration
+max_lines_per_file = 500
+
+
+[yaml]
+bears = KeywordBear, SpaceConsistencyBear, LineCountBear
+files = **.yml
+language = yaml
+
+# KeywordBear Configuration
+keywords = TODO, FIXME
+
+# SpaceConsistencyBear Configuration
+use_spaces = True
+indent_size = 2
+
+# LineCountBear Configuration
+max_lines_per_file = 200
+
+
+[markdown]
+bears = KeywordBear, SpaceConsistencyBear, LineLengthBear, MarkdownBear
+files = **.md
+language = markdown
+
+# KeywordBear Configuration
+keywords = TODO, FIXME
+
+# SpaceConsistencyBear Configuration
+use_spaces = True
+indent_size = 2
+
+# LineLengthBear Configuration
+max_line_length = 80
+ignore_length_regex = \[(.*?)\]\((.*?)\)|\|(.*?)\|
+
+
+[css]
+bears = SpaceConsistencyBear, LineCountBear
+files = **.css
+
+# SpaceConsistencyBear Configuration
+use_spaces = True
+indent_size = 4
+
+# LineCountBear Configuration
+max_lines_per_file = 1000

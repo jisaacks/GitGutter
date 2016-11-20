@@ -11,6 +11,7 @@ except (ImportError, ValueError):
 
 
 class GitGutterCompareCommit(object):
+
     def __init__(self, view, git_handler):
         self.view = view
         self.git_handler = git_handler
@@ -45,6 +46,7 @@ class GitGutterCompareCommit(object):
 
 
 class GitGutterCompareBranch(GitGutterCompareCommit):
+
     def commit_list(self):
         def decode_and_parse_branch_list(result):
             branch_lines = result.decode("utf-8").strip().split('\n')
@@ -57,12 +59,13 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
     def _parse_result(self, result):
         pieces = result.split('\a')
         message = pieces[0]
-        branch  = pieces[1].split("/", 2)[2]
-        commit  = pieces[2][0:7]
+        branch = pieces[1].split("/", 2)[2]
+        commit = pieces[2][0:7]
         return [branch, commit + " " + message]
 
 
 class GitGutterCompareTag(GitGutterCompareCommit):
+
     def commit_list(self):
         def decode_and_parse_tag_list(results):
             if results:
@@ -77,7 +80,7 @@ class GitGutterCompareTag(GitGutterCompareCommit):
     def _parse_result(self, result):
         pieces = result.split(' ')
         commit = pieces[0]
-        tag    = pieces[1].replace("refs/tags/", "")
+        tag = pieces[1].replace("refs/tags/", "")
         return [tag, commit]
 
     def item_to_commit(self, item):
@@ -85,6 +88,7 @@ class GitGutterCompareTag(GitGutterCompareCommit):
 
 
 class GitGutterCompareHead(GitGutterCompareCommit):
+
     def run(self):
         settings.set_compare_against('HEAD')
         self.git_handler.clear_git_time()
@@ -92,6 +96,7 @@ class GitGutterCompareHead(GitGutterCompareCommit):
 
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
+
     def run(self):
         def on_branch_name(branch_name):
             if branch_name:
@@ -103,6 +108,8 @@ class GitGutterCompareOrigin(GitGutterCompareCommit):
 
 
 class GitGutterShowCompare(GitGutterCompareCommit):
+
     def run(self):
         comparing = settings.get_compare_against(self.view)
-        sublime.message_dialog('GitGutter is comparing against: %s' % comparing)
+        sublime.message_dialog(
+            'GitGutter is comparing against: %s' % comparing)

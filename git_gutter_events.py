@@ -34,6 +34,7 @@ def async_event_listener(EventListener):
 
 @async_event_listener
 class GitGutterEvents(sublime_plugin.EventListener):
+
     def __init__(self):
         self.latest_keypresses = {}
 

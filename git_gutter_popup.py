@@ -293,12 +293,14 @@ def _to_html(s):
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
+
     def run(self, edit, a, b, text):
         region = sublime.Region(a, b)
         self.view.replace(edit, region, text)
 
 
 class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
+
     def is_enabled(self):
         return _MDPOPUPS_INSTALLED
 
