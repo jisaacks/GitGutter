@@ -323,13 +323,13 @@ class GitGutterHandler(object):
                 If the view's file is not part of the index
                 git returns empty output to stdout.
                 """
-                return bool(results[1])
+                return bool(results)
 
             args = [
                 settings.git_binary_path,
                 '--git-dir=' + self.git_dir,
                 '--work-tree=' + self.git_tree,
-                'ls-files', '--other', '--exclude-standard'
+                'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
                 os.path.join(self.git_tree, self.git_path),
             ]
