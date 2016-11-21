@@ -97,7 +97,8 @@ class GitGutterShowDiff(object):
         set_status_if(inserted > 0, "inserted", "Inserted : %d" % inserted)
         set_status_if(modified > 0, "modified", "Modified : %d" % modified)
         set_status_if(deleted > 0, "deleted", "Deleted : %d regions" % deleted)
-        set_status_if(compare, "comparison", "Comparing against : %s" % compare)
+        set_status_if(compare, "comparison",
+                      "Comparing against : %s" % compare)
         set_status_if(branch, "branch", "On branch : %s" % branch)
 
     def _clear_all(self):

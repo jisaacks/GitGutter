@@ -19,6 +19,7 @@ except (ImportError, ValueError):
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
+
     def __init__(self, *args, **kwargs):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.is_valid_view = self.view.settings().get('is_widget') is not True
@@ -76,44 +77,52 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
 
 class GitGutterShowCompareCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command('git_gutter', {'action': 'show_compare'})
 
 
 class GitGutterCompareHeadCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command('git_gutter', {'action': 'compare_against_head'})
 
 
 class GitGutterCompareOriginCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_origin'})
 
 
 class GitGutterCompareCommitCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_commit'})
 
 
 class GitGutterCompareBranchCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_branch'})
 
 
 class GitGutterCompareTagCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_tag'})
 
 
 class GitGutterNextChangeCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command('git_gutter', {'action': 'jump_to_next_change'})
 
 
 class GitGutterPrevChangeCommand(sublime_plugin.TextCommand):
+
     def run(self, edit):
         self.view.run_command('git_gutter', {'action': 'jump_to_prev_change'})
