@@ -32,6 +32,7 @@ class GitGutterHandler(object):
         self.git_tree = None
         self.git_dir = None
         self.git_path = None
+        self.git_tracked = False
 
         self._last_refresh_time_git_file = 0
 
@@ -82,6 +83,14 @@ class GitGutterHandler(object):
         origin_encoding = self.view.settings().get('origin_encoding')
         return origin_encoding or encoding
 
+    def in_repo(self):
+        """Return true, if the most recent `git show` returned any content.
+
+        If `git show` returns empty content, any diff will result in
+        all lines added state and the view's file is most commonly untracked.
+        """
+        return self.git_tracked
+
     def on_disk(self):
         """Determine, if the view is saved to disk."""
         file_name = self.view.file_name()
@@ -125,6 +134,7 @@ class GitGutterHandler(object):
         def write_file(contents):
             contents = contents.replace(b'\r\n', b'\n')
             contents = contents.replace(b'\r', b'\n')
+            self.git_tracked = bool(contents)
             with open(self.git_temp_file, 'wb') as f:
                 f.write(contents)
 

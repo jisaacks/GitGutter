@@ -22,12 +22,10 @@ _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
 def show_diff_popup(view, point, git_handler, highlight_diff=False, flags=0):
-    if not _MDPOPUPS_INSTALLED:
-        return
-
-    line = view.rowcol(point)[0] + 1
-    git_handler.diff_line_change(line).then(
-        partial(_show_diff_popup_impl, view, point, highlight_diff, flags))
+    if _MDPOPUPS_INSTALLED and git_handler.in_repo():
+        line = view.rowcol(point)[0] + 1
+        git_handler.diff_line_change(line).then(
+            partial(_show_diff_popup_impl, view, point, highlight_diff, flags))
 
 
 def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
