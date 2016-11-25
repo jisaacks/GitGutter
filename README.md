@@ -48,7 +48,7 @@ The most common reason for the icons to not show up is likely a problem with Git
 
 ![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
 
-| symbol | meaning if the symbol                  |
+| symbol | meaning of the symbol                  |
 | ---    | ---                                    |
 | ×      | close the popup                        |
 | ⤒      | jump to first change                   |
