@@ -1,10 +1,11 @@
 import os
-import subprocess
 import re
 import codecs
 import tempfile
 import time
 from functools import partial
+from subprocess import (
+    Popen, TimeoutExpired, PIPE, STARTUPINFO, STARTF_USESHOWWINDOW)
 
 import sublime
 
@@ -399,17 +400,24 @@ class GitGutterHandler(object):
 
         def read_output(resolve):
             """Start git process and forward its output to the Resolver."""
-            startupinfo = None
-            stdin = None
-            if os.name == 'nt':
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                stdin = subprocess.PIPE
-            proc = subprocess.Popen(
-                args, stdout=subprocess.PIPE, startupinfo=startupinfo,
-                stderr=subprocess.PIPE, stdin=stdin)
-            stdout_output = proc.stdout.read()
-            resolve(stdout_output)
+            try:
+                stdout = b''
+                startupinfo = None
+                if os.name == 'nt':
+                    startupinfo = STARTUPINFO()
+                    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
+                proc = Popen(
+                    args=args, stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                    startupinfo=startupinfo)
+                stdout, stderr = proc.communicate(timeout=30)
+            except TimeoutExpired:
+                print("GitGutter: git seems dead, killing it!")
+                proc.kill()
+                stdout, stderr = proc.communicate()
+            except OSError as exception:
+                print("GitGutter: Can't start git!\n" + str(exception))
+            finally:
+                resolve(stdout)
 
         def run_async(resolve):
             if hasattr(sublime, 'set_timeout_async'):
