@@ -149,6 +149,10 @@ You will need to figure out the names of the regions you are trying to protect.
 
 You can turn off the status bar text by changing `"show_status": "default"` to `"show_status": "none"`.
 
+#### Larger Icons (Windows/Linux only)
+Tell GitGutter to render larger icons in the gutter instead of the normal icons by setting `large_gutter_icons` to `true` and restarting Sublime.
+Set to true if your display has a pixel density of 2 or greater.
+
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
 To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.

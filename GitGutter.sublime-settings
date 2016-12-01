@@ -50,6 +50,10 @@
   // Delay update of gutter icons by the following amount (in milliseconds).
   "debounce_delay": 1000,
 
+  // Windows/Linux only: Tell GitGutter to render larger icons.
+  // Set to true if your display has a pixel density of 2 or greater.
+  "large_gutter_icons": false,
+
   // Determines whether GitGutter ignores whitespace in modified files.
   // Set "none" to ensure whitespace is considered in the diff
   // Set "all" to ignore all white space
