@@ -22,13 +22,22 @@ except (ImportError, ValueError):
 
 class GitGutterCommand(TextCommand):
     def __init__(self, *args, **kwargs):
+        """Initialize `git_gutter` command object."""
         TextCommand.__init__(self, *args, **kwargs)
         self.is_valid_view = self.view.settings().get('is_widget') is not True
         self.git_handler = None
         self.show_diff_handler = None
 
     def is_enabled(self, **kwargs):
-        return self.is_valid_view
+        """Determine if `git_gutter` command is enabled to execute."""
+        is_enabled = self.is_valid_view
+        if is_enabled:
+            # Don't handle scratch views
+            is_enabled = self.view.is_scratch() is not True
+        if is_enabled:
+            # Don't handle binary files
+            is_enabled = self.view.encoding() not in ('Hexadecimal')
+        return is_enabled
 
     def run(self, edit, **kwargs):
         if not self.git_handler:
