@@ -115,14 +115,33 @@ class GitGutterSettings:
             self.show_status = 'default'
 
     def get_compare_against(self, git_dir, view):
+        """Return the compare target for a view.
+
+        If interactivly specified a compare target for the view's repository,
+        use it first, then try view's settings, which includes project
+        settings and preferences. Finally try GitGutter.sublime-settings or
+        fall back to HEAD if everything goes wrong to avoid exceptions.
+
+        Arguments:
+            git_dir     - path of the `.git` directory holding the index
+            view        - the view whose settings to query first
+        """
         # Interactively specified compare target overrides settings.
         if git_dir in self._compare_against_mapping:
             return self._compare_against_mapping[git_dir]
-        compare = self.get('compare_against')
-        # Project settings override plugin settings if set.
-        return view.settings().get('git_gutter_compare_against', compare)
+        # Project settings and Preferences override plugin settings if set.
+        compare = view.settings().get('git_gutter_compare_against')
+        if not compare:
+            compare = self.get('compare_against', 'HEAD')
+        return compare
 
     def set_compare_against(self, git_dir, new_compare_against):
+        """Assign a new compare target for current repository.
+
+        Arguments:
+            git_dir             - path of the .git directory holding the index
+            new_compare_against - new branch/tag/commit to cmpare against
+        """
         self._compare_against_mapping[git_dir] = new_compare_against
 
     @property

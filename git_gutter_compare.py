@@ -2,11 +2,6 @@ from functools import partial
 
 import sublime
 
-try:
-    from .git_gutter_settings import settings
-except (ImportError, ValueError):
-    from git_gutter_settings import settings
-
 
 class GitGutterCompareCommit(object):
     def __init__(self, git_handler):
@@ -16,10 +11,14 @@ class GitGutterCompareCommit(object):
         self.commit_list().then(self._show_quick_panel)
 
     def commit_list(self):
-        def decode_and_parse_commit_list(result):
-            commit_lines = result.splitlines()
-            return [r.split('\a', 2) for r in commit_lines]
-        return self.git_handler.git_commits().then(decode_and_parse_commit_list)
+        """Built a list of quick panel items with all commits."""
+        def parse_results(results):
+            """Parse git output and create the quick panel items."""
+            if results:
+                return [r.split('\a') for r in results.splitlines()]
+            sublime.message_dialog('No commits found in repository.')
+            return []
+        return self.git_handler.git_commits().then(parse_results)
 
     def item_to_commit(self, item):
         return item[1].split(' ')[0]
@@ -34,68 +33,70 @@ class GitGutterCompareCommit(object):
             return
         item = results[selected]
         commit = self.item_to_commit(item)
-        settings.set_compare_against(self.git_handler.git_dir, commit)
-        self.git_handler.clear_git_time()
-        self.view.run_command('git_gutter')  # refresh ui
+        self.git_handler.set_compare_against(commit)
 
 
 class GitGutterCompareBranch(GitGutterCompareCommit):
     def commit_list(self):
-        def decode_and_parse_branch_list(result):
-            branch_lines = result.splitlines()
-            return [self._parse_result(r) for r in branch_lines]
-        return self.git_handler.git_branches().then(
-            decode_and_parse_branch_list)
+        """Built a list of quick panel items with all local branches."""
+        def parse_result(result):
+            """Create a quick panel item for one line of git's output."""
+            pieces = result.split('\a')
+            message = pieces[0]
+            branch = pieces[1][11:]   # skip 'refs/heads/'
+            commit = pieces[2][0:7]   # 7-digit commit hash
+            return [branch, '%s %s' % (commit, message)]
 
-    def _parse_result(self, result):
-        pieces = result.split('\a')
-        message = pieces[0]
-        branch  = pieces[1].split("/", 2)[2]
-        commit  = pieces[2][0:7]
-        return [branch, commit + " " + message]
+        def parse_results(results):
+            """Parse git output and create the quick panel items."""
+            if results:
+                return [parse_result(r) for r in results.splitlines()]
+            sublime.message_dialog('No branches found in repository.')
+            return []
+        return self.git_handler.git_branches().then(parse_results)
+
+    def item_to_commit(self, item):
+        return 'refs/heads/%s' % item[0]
 
 
 class GitGutterCompareTag(GitGutterCompareCommit):
     def commit_list(self):
-        def decode_and_parse_tag_list(results):
-            if results:
-                tag_lines = results.splitlines()
-                return [self._parse_result(r) for r in tag_lines]
-            sublime.message_dialog("No tags found in repository")
-            return []
-        return self.git_handler.git_tags().then(decode_and_parse_tag_list)
+        """Built a list of quick panel items with all tags."""
+        def parse_result(result):
+            """Create a quick panel item for one line of git's output."""
+            pieces = result.split(' ')
+            commit = pieces[0]     # 7-digit commit hash
+            tag = pieces[1][10:]   # skip 'refs/tags/'
+            return [tag, commit]
 
-    def _parse_result(self, result):
-        pieces = result.split(' ')
-        commit = pieces[0]
-        tag    = pieces[1].replace("refs/tags/", "")
-        return [tag, commit]
+        def parse_results(results):
+            """Parse git output and create the quick panel items."""
+            if results:
+                return [parse_result(r) for r in results.splitlines()]
+            sublime.message_dialog('No tags found in repository.')
+            return []
+        return self.git_handler.git_tags().then(parse_results)
 
     def item_to_commit(self, item):
-        return item[1]
+        return 'refs/tags/%s' % item[0]
 
 
 class GitGutterCompareHead(GitGutterCompareCommit):
     def run(self):
-        settings.set_compare_against(self.git_handler.git_dir, 'HEAD')
-        self.git_handler.clear_git_time()
-        self.view.run_command('git_gutter')  # refresh ui
+        self.git_handler.set_compare_against('HEAD', True)
 
 
 class GitGutterCompareOrigin(GitGutterCompareCommit):
     def run(self):
         def on_branch_name(branch_name):
             if branch_name:
-                settings.set_compare_against(
-                    self.git_handler.git_dir,
-                    'origin/%s' % branch_name)
-                self.git_handler.clear_git_time()
-                self.view.run_command('git_gutter')  # refresh ui
+                self.git_handler.set_compare_against(
+                    'origin/%s' % branch_name, True)
         self.git_handler.git_current_branch().then(on_branch_name)
 
 
 class GitGutterShowCompare(GitGutterCompareCommit):
     def run(self):
-        comparing = settings.get_compare_against(self.git_handler.git_dir,
-                                                 self.view)
-        sublime.message_dialog('GitGutter is comparing against: %s' % comparing)
+        comparing = self.git_handler.format_compare_against()
+        sublime.message_dialog(
+            'GitGutter is comparing against: %s' % comparing)
