@@ -2,15 +2,9 @@ from functools import partial
 
 import sublime
 
-try:
-    from .promise import Promise
-except (ImportError, ValueError):
-    from promise import Promise
-
 
 class GitGutterCompareCommit(object):
-    def __init__(self, view, git_handler):
-        self.view = view
+    def __init__(self, git_handler):
         self.git_handler = git_handler
 
     def run(self):
@@ -22,8 +16,6 @@ class GitGutterCompareCommit(object):
                 return [r.split('\a', 2) for r in results.splitlines()]
             sublime.message_dialog('No commits found in repository.')
             return []
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_commits().then(parse_commits)
 
     def item_to_commit(self, item):
@@ -31,7 +23,7 @@ class GitGutterCompareCommit(object):
 
     def _show_quick_panel(self, results):
         if results:
-            self.view.window().show_quick_panel(
+            self.git_handler.view.window().show_quick_panel(
                 results, partial(self._on_select, results))
 
     def _on_select(self, results, selected):
@@ -49,8 +41,6 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
                 return [self._parse_result(r) for r in results.splitlines()]
             sublime.message_dialog('No branches found in repository.')
             return []
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_branches().then(parse_branches)
 
     def _parse_result(self, result):
@@ -71,8 +61,6 @@ class GitGutterCompareTag(GitGutterCompareCommit):
                 return [self._parse_result(r) for r in results.splitlines()]
             sublime.message_dialog('No tags found in repository.')
             return []
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_tags().then(parse_tags)
 
     def _parse_result(self, result):
