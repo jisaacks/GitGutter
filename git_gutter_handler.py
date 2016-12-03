@@ -155,7 +155,7 @@ class GitGutterHandler(object):
 
             try:
                 self.update_git_time()
-                return GitGutterHandler.run_command(args).then(write_file)
+                return GitGutterHandler.run_command(args, False).then(write_file)
             except Exception:
                 pass
         return Promise.resolve()
@@ -222,7 +222,7 @@ class GitGutterHandler(object):
                 self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
-            return GitGutterHandler.run_command(args).then(decode_diff)
+            return GitGutterHandler.run_command(args, False).then(decode_diff)
 
         if self.on_disk() and self.git_path:
             return self.update_git_file().then(run_diff)
@@ -395,9 +395,14 @@ class GitGutterHandler(object):
         return GitGutterHandler.run_command(args)
 
     @staticmethod
-    def run_command(args):
-        """Run a git command asynchronously and return a Promise."""
+    def run_command(args, decode=True):
+        """Run a git command asynchronously and return a Promise.
 
+        Arguments:
+            args    - a list of arguments used to create the git subprocess.
+            decode  - if True the git's output is decoded assuming utf-8
+                      which is the default output encoding of git.
+        """
         def read_output(resolve):
             """Start git process and forward its output to the Resolver."""
             try:
@@ -417,7 +422,10 @@ class GitGutterHandler(object):
             except OSError as exception:
                 print("GitGutter: Can't start git!\n" + str(exception))
             finally:
-                resolve(stdout)
+                if decode:
+                    resolve(stdout.decode('utf-8').strip())
+                else:
+                    resolve(stdout)
 
         def run_async(resolve):
             if hasattr(sublime, 'set_timeout_async'):
