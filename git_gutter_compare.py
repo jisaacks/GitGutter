@@ -19,7 +19,7 @@ class GitGutterCompareCommit(object):
         return self.git_handler.git_commits().then(parse_commits)
 
     def item_to_commit(self, item):
-        return item[1].split(' ')[0]
+        return item[0].split(' \u00BB ')[0]
 
     def _show_quick_panel(self, results):
         if results:
@@ -32,6 +32,17 @@ class GitGutterCompareCommit(object):
         item = results[selected]
         commit = self.item_to_commit(item)
         self.git_handler.set_compare_against(commit)
+
+
+class GitGutterCompareFileCommit(GitGutterCompareCommit):
+    def commit_list(self):
+        def parse_file_commits(results):
+            if results:
+                return [r.split('\a', 2) for r in results.splitlines()]
+            sublime.message_dialog(
+               'No commits with reference to the file found in repository.')
+            return []
+        return self.git_handler.git_file_commits().then(parse_file_commits)
 
 
 class GitGutterCompareBranch(GitGutterCompareCommit):

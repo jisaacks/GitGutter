@@ -4,7 +4,8 @@ try:
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
+        GitGutterCompareFileCommit)
     from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
@@ -12,7 +13,8 @@ except (ImportError, ValueError):
     from git_gutter_handler import GitGutterHandler
     from git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
+        GitGutterCompareFileCommit)
     from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from git_gutter_popup import show_diff_popup
     from git_gutter_show_diff import GitGutterShowDiff
@@ -52,6 +54,8 @@ class GitGutterCommand(TextCommand):
             GitGutterJumpToChanges(self.git_handler).jump_to_prev_change()
         elif action == 'compare_against_commit':
             GitGutterCompareCommit(self.git_handler).run()
+        elif action == 'compare_against_file_commit':
+            GitGutterCompareFileCommit(self.git_handler).run()
         elif action == 'compare_against_branch':
             GitGutterCompareBranch(self.git_handler).run()
         elif action == 'compare_against_tag':
@@ -95,6 +99,12 @@ class GitGutterCompareCommitCommand(TextCommand):
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_commit'})
+
+
+class GitGutterCompareFileCommitCommand(TextCommand):
+    def run(self, edit):
+        self.view.run_command(
+            'git_gutter', {'action': 'compare_against_file_commit'})
 
 
 class GitGutterCompareBranchCommand(TextCommand):

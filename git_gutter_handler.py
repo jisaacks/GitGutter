@@ -389,8 +389,20 @@ class GitGutterHandler(object):
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
-            '--pretty=%s\a%h %an <%aE>\a%ad (%ar)',
+            '--pretty=%h \u00BB %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
+        ]
+        return GitGutterHandler.run_command(args)
+
+    def git_file_commits(self):
+        args = [
+            settings.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'log',
+            '--pretty=%h \u00BB %s\a%an <%aE>\a%ad (%ar)',
+            '--date=local', '--max-count=9000',
+            '--', self.git_path
         ]
         return GitGutterHandler.run_command(args)
 

@@ -6,6 +6,7 @@
     { "keys": ["ctrl+shift+alt+c", "h"], "command": "git_gutter_compare_head" },
     { "keys": ["ctrl+shift+alt+c", "o"], "command": "git_gutter_compare_origin" },
     { "keys": ["ctrl+shift+alt+c", "c"], "command": "git_gutter_compare_commit" },
+    { "keys": ["ctrl+shift+alt+c", "f"], "command": "git_gutter_compare_file_commit" },
     { "keys": ["ctrl+shift+alt+c", "b"], "command": "git_gutter_compare_branch" },
     { "keys": ["ctrl+shift+alt+c", "t"], "command": "git_gutter_compare_tag" }
 ]
