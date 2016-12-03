@@ -54,6 +54,9 @@ class GitGutterHandler(object):
         os.close(fd)
         return filepath
 
+    def git_time_cleared(self):
+        return self._last_refresh_time_git_file == 0
+
     def clear_git_time(self):
         self._last_refresh_time_git_file = 0
 
@@ -62,6 +65,37 @@ class GitGutterHandler(object):
 
     def git_time(self):
         return time.time() - self._last_refresh_time_git_file
+
+    def get_compare_against(self):
+        """Return the branch/commit/tag string the view is compared to."""
+        return settings.get_compare_against(self.git_dir, self.view)
+
+    def set_compare_against(self, commit, refresh=False):
+        """Apply a new branch/commit/tag string the view is compared to.
+
+        If one of the settings 'focus_change_mode' or 'live_mode' is true,
+        the view, is automatically compared by 'on_activate' event when
+        returning from a quick panel and therefore the command 'git_gutter'
+        can be ommited. This assumption can be overriden by 'refresh' for
+        commands that do not show a quick panel.
+
+        Arguments:
+            commit  - is either a branch, commit or tag as returned from
+                      git show-ref
+            refresh - always call git_gutter command
+        """
+        settings.set_compare_against(self.git_dir, commit)
+        self.clear_git_time()
+        if refresh or not any(settings.get(key, True) for key in (
+                'focus_change_mode', 'live_mode')):
+            self.view.run_command('git_gutter')  # refresh ui
+
+    def format_compare_against(self):
+        """Format the compare against setting to use for display."""
+        comparing = self.get_compare_against()
+        for repl in ('refs/heads/', 'refs/remotes/', 'refs/tags/'):
+            comparing = comparing.replace(repl, '')
+        return comparing
 
     def _get_view_encoding(self):
         """Get encoding and clean it for python ex: "Western (ISO 8859-1)".
