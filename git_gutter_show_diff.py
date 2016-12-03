@@ -22,6 +22,8 @@ class GitGutterShowDiff(object):
         self.show_untracked = False
 
     def run(self):
+        if self.git_handler.git_time_cleared():
+            self.diff_results = None
         self.git_handler.diff().then(self._check_ignored_or_untracked)
 
     def _check_ignored_or_untracked(self, contents):
@@ -70,8 +72,7 @@ class GitGutterShowDiff(object):
             def update_status_ui(branch_name):
                 self._update_status(
                     len(inserted), len(modified), len(deleted),
-                    settings.get_compare_against(
-                        self.git_handler.git_dir, self.view),
+                    self.git_handler.format_compare_against(),
                     branch_name)
 
             if settings.show_status == 'all':
