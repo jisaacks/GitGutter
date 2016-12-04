@@ -1,0 +1,14 @@
+{
+    "@python": 3,
+    "linters": {
+        "flake8": {
+            "max-line-length": 80
+        },
+        "pep8": {
+            "max-line-length": 120
+        },
+        "pydocstyle": {
+            "add-ignore": "D100,D101,D202,D203"
+        }
+    }
+}
