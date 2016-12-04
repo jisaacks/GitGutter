@@ -7,7 +7,8 @@ except (ImportError, ValueError):
 
 
 class GitGutterJumpToChanges(object):
-    def __init__(self, git_handler):
+    def __init__(self, view, git_handler):
+        self.view = view
         self.git_handler = git_handler
 
     def lines_to_blocks(self, lines):
@@ -25,11 +26,10 @@ class GitGutterJumpToChanges(object):
         modified = self.lines_to_blocks(modified)
         all_changes = sorted(inserted + modified + deleted)
         if all_changes:
-            view = self.git_handler.view
-            row, col = view.rowcol(view.sel()[0].begin())
+            row, col = self.view.rowcol(self.view.sel()[0].begin())
             current_row = row + 1
             line = jump_func(all_changes, current_row)
-            view.run_command("goto_line", {"line": line})
+            self.view.run_command("goto_line", {"line": line})
 
     def jump_to_next_change(self):
         self.git_handler.diff().then(partial(self.goto_line, self.next_jump))

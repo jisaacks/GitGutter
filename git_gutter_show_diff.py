@@ -4,8 +4,10 @@ import sublime
 
 try:
     from .git_gutter_settings import settings
+    from .promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
+    from promise import Promise
 
 ST3 = int(sublime.version()) >= 3000
 
@@ -16,27 +18,19 @@ class GitGutterShowDiff(object):
                     'untracked', 'ignored']
 
     def __init__(self, view, git_handler):
-        """Initialize an object instance."""
         self.view = view
         self.git_handler = git_handler
         self.diff_results = None
         self.show_untracked = False
-        self.file_state = 'committed'
 
     def run(self):
-        """API entry point."""
-
-        # git_time_reset was called recently, maybe branch has changed
-        # Status message needs an update on this run.
-        if self.git_handler.git_time_cleared():
-            self.diff_results = None
         self.git_handler.diff().then(self._check_ignored_or_untracked)
 
     def _check_ignored_or_untracked(self, contents):
         """Check diff result and invoke gutter and status message update.
 
         Arguments:
-            contents - a tuble of ([inserted], [modified], [deleted]) lines
+            contentes - a tuble of ([inserted], [modified], [deleted]) lines
         """
         if self.git_handler.in_repo() is False:
             show_untracked = settings.get(
@@ -58,105 +52,53 @@ class GitGutterShowDiff(object):
 
             # show_untracked was set to false recently so clear gutter
             elif self.show_untracked:
-                # must differ from 'untracked'
-                self.file_state = 'not tracked'
-                self._clear_regions()
-                self._update_status(([], [], []))
+                self._clear_all()
+                self._update_status(0, 0, 0, "", "")
             self.show_untracked = show_untracked
 
-        # update the if lines modified
+        # update the if lines changed
         elif self.diff_results is None or self.diff_results != contents:
             self.diff_results = contents
-            self._update_regions(contents)
-            self._update_status(contents)
+            self._update_ui(contents)
 
-    def _update_regions(self, contents):
-        """Update gutter icons for modified files.
-
-        Arguments:
-            contents - a tuble of ([inserted], [modified], [deleted]) lines
-        """
+    def _update_ui(self, contents):
         inserted, modified, deleted = contents
         self._clear_all()
-        if inserted or modified or deleted:
-            self.file_state = 'modified'
-            self._lines_removed(deleted)
-            self._bind_icons('inserted', inserted)
-            self._bind_icons('changed', modified)
-        else:
-            self.file_state = 'commited'
+        self._lines_removed(deleted)
+        self._bind_icons('inserted', inserted)
+        self._bind_icons('changed', modified)
 
-    def _update_status(self, contents):
-        """Update status message.
-
-        Arguments:
-            contents - a tuble of ([inserted], [modified], [deleted]) lines
-        """
-        if settings.show_status != 'none':
-            def set_status(branch_name):
-                inserted = len(contents[0])
-                modified = len(contents[1])
-                deleted = len(contents[2])
-                self._set_status(
-                    inserted, modified, deleted,
-                    self.git_handler.format_compare_against(),
-                    branch_name,
-                    self.file_state)
+        if settings.show_status != "none":
             if settings.show_status == 'all':
-                self.git_handler.git_current_branch().then(set_status)
+                def decode_and_strip(branch_name):
+                    return branch_name.decode("utf-8").strip()
+                branch_promise = self.git_handler.git_current_branch().then(
+                    decode_and_strip)
             else:
-                set_status('')
-        else:
-            self._set_status(0, 0, 0, '', '', '')
+                branch_promise = Promise.resolve("")
 
-    def _set_status(self, inserted, modified, deleted, compare, branch, state):
-        """Built and print the updated status message.
+            def update_status_ui(branch_name):
+                self._update_status(
+                    len(inserted), len(modified), len(deleted),
+                    settings.get_compare_against(
+                        self.git_handler.git_dir, self.view),
+                    branch_name)
+            branch_promise.then(update_status_ui)
+        else:
+            self._update_status(0, 0, 0, "", "")
 
-        Arguments:
-            inserted    - inserted lines count
-            modified    - modified lines count
-            deleted     - deleted lines count
-            compare     - HEAD or commit name
-            branch      - branch name
-            state       - the state of the whole file
-                          (committed/modified/ignored/untracked)
-        """
-        set_status = self.view.set_status
-        # print the checked out branch
-        set_status('git_gutter_1_branch',
-                   'On : ' + branch if branch else '')
-        # print the branch/tag/commit this file is compared against
-        set_status('git_gutter_2_comparison',
-                   'Comparing against : ' + compare if compare else '')
-        # print the open file's state
-        set_status('git_gutter_3_filestate',
-                   'File is ' + state if state else '')
-        # print deleted regions statistic
-        if deleted:
-            message = 'Deleted : %d region' % deleted
-            if deleted > 1:
-                message += 's'
-        else:
-            message = ''
-        set_status('git_gutter_4_deleted', message)
-        # print inserted regions statistic
-        if inserted:
-            message = 'Inserted : %d line' % inserted
-            if inserted > 1:
-                message += 's'
-        else:
-            message = ''
-        set_status('git_gutter_5_inserted', message)
-        # print modified regions statistic
-        if modified:
-            message = 'Modified : %d' % modified
-            if inserted + deleted == 0:
-                message += ' line'
-                if modified > 1:
-                    message += 's'
-        else:
-            message = ''
-        set_status('git_gutter_6_modified', message)
+    def _update_status(self, inserted, modified, deleted, compare, branch):
+        def set_status_if(test, key, message):
+            if test:
+                self.view.set_status("git_gutter_status_" + key, message)
+            else:
+                self.view.set_status("git_gutter_status_" + key, "")
+
+        set_status_if(inserted > 0, "inserted", "Inserted : %d" % inserted)
+        set_status_if(modified > 0, "modified", "Modified : %d" % modified)
+        set_status_if(deleted > 0, "deleted", "Deleted : %d regions" % deleted)
+        set_status_if(compare, "comparison", "Comparing against : %s" % compare)
+        set_status_if(branch, "branch", "On branch : %s" % branch)
 
     def _clear_all(self):
         for region_name in self.region_names:
@@ -235,15 +177,8 @@ class GitGutterShowDiff(object):
             'git_gutter_%s' % event, regions, scope, icon, flags)
 
     def _bind_files(self, event):
-        """Add gutter icons to each line in the view.
-
-        Arguments:
-            event   - is one of REGION_NAMES
-        """
-        self.file_state = event
         lines = [line + 1 for line in range(self._total_lines())]
         self._bind_icons(event, lines)
-        self._update_status(([], [], []))
 
     def _total_lines(self):
         chars = self.view.size()

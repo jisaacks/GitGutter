@@ -1,7 +1,5 @@
 [
     {
-        "caption": "View",
-        "mnemonic": "V",
         "id": "view",
         "children":
         [
@@ -30,10 +28,6 @@
                                 "command": "git_gutter_compare_commit"
                             },
                             {
-                                "caption": "File Commit",
-                                "command": "git_gutter_compare_file_commit"
-                            },
-                            {
                                 "caption": "Branch",
                                 "command": "git_gutter_compare_branch"
                             },
@@ -48,20 +42,17 @@
         ]
     },
     {
-        "caption": "Goto",
-        "mnemonic": "G",
         "id": "goto",
         "children":
         [
             {
-                "caption": "Goto Previous Change",
+                "caption": "Previous Change",
                 "command": "git_gutter_prev_change"
             },
             {
-                "caption": "Goto Next Change",
+                "caption": "Next Change",
                 "command": "git_gutter_next_change"
-            },
-            { "caption": "-" },
+            }
         ]
     },
     {

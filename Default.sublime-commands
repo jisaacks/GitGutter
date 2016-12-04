@@ -20,10 +20,6 @@
         "command": "git_gutter_compare_commit"
     },
     {
-        "caption": "GitGutter: Compare Against File Commit",
-        "command": "git_gutter_compare_file_commit"
-    },
-    {
         "caption": "GitGutter: Compare Against Branch",
         "command": "git_gutter_compare_branch"
     },

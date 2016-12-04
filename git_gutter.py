@@ -1,11 +1,10 @@
-from sublime_plugin import TextCommand
+import sublime_plugin
 
 try:
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
-        GitGutterCompareFileCommit)
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
     from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
@@ -13,31 +12,21 @@ except (ImportError, ValueError):
     from git_gutter_handler import GitGutterHandler
     from git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
-        GitGutterCompareFileCommit)
+        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare)
     from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from git_gutter_popup import show_diff_popup
     from git_gutter_show_diff import GitGutterShowDiff
 
 
-class GitGutterCommand(TextCommand):
+class GitGutterCommand(sublime_plugin.TextCommand):
     def __init__(self, *args, **kwargs):
-        """Initialize `git_gutter` command object."""
-        TextCommand.__init__(self, *args, **kwargs)
+        sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.is_valid_view = self.view.settings().get('is_widget') is not True
         self.git_handler = None
         self.show_diff_handler = None
 
     def is_enabled(self, **kwargs):
-        """Determine if `git_gutter` command is enabled to execute."""
-        is_enabled = self.is_valid_view
-        if is_enabled:
-            # Don't handle scratch views
-            is_enabled = self.view.is_scratch() is not True
-        if is_enabled:
-            # Don't handle binary files
-            is_enabled = self.view.encoding() not in ('Hexadecimal')
-        return is_enabled
+        return self.is_valid_view
 
     def run(self, edit, **kwargs):
         if not self.git_handler:
@@ -56,85 +45,75 @@ class GitGutterCommand(TextCommand):
         self.show_diff_handler.run()
 
     def _handle_subcommand(self, **kwargs):
+        view = self.view
+        git_handler = self.git_handler
         action = kwargs['action']
         if action == 'jump_to_next_change':
-            GitGutterJumpToChanges(self.git_handler).jump_to_next_change()
+            GitGutterJumpToChanges(view, git_handler).jump_to_next_change()
         elif action == 'jump_to_prev_change':
-            GitGutterJumpToChanges(self.git_handler).jump_to_prev_change()
+            GitGutterJumpToChanges(view, git_handler).jump_to_prev_change()
         elif action == 'compare_against_commit':
-            GitGutterCompareCommit(self.git_handler).run()
-        elif action == 'compare_against_file_commit':
-            GitGutterCompareFileCommit(self.git_handler).run()
+            GitGutterCompareCommit(view, git_handler).run()
         elif action == 'compare_against_branch':
-            GitGutterCompareBranch(self.git_handler).run()
+            GitGutterCompareBranch(view, git_handler).run()
         elif action == 'compare_against_tag':
-            GitGutterCompareTag(self.git_handler).run()
+            GitGutterCompareTag(view, git_handler).run()
         elif action == 'compare_against_head':
-            GitGutterCompareHead(self.git_handler).run()
+            GitGutterCompareHead(view, git_handler).run()
         elif action == 'compare_against_origin':
-            GitGutterCompareOrigin(self.git_handler).run()
+            GitGutterCompareOrigin(view, git_handler).run()
         elif action == 'show_compare':
-            GitGutterShowCompare(self.git_handler).run()
+            GitGutterShowCompare(view, git_handler).run()
         elif action == 'show_diff_popup':
             point = kwargs['point']
             highlight_diff = kwargs['highlight_diff']
             flags = kwargs['flags']
             show_diff_popup(
-                point, self.git_handler,
-                highlight_diff=highlight_diff, flags=flags)
+                view, point, git_handler, highlight_diff=highlight_diff,
+                flags=flags)
         else:
             assert False, 'Unhandled sub command "%s"' % action
 
 
-class GitGutterShowCompareCommand(TextCommand):
+class GitGutterShowCompareCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'show_compare'})
+        self.view.run_command('git_gutter', {'action': 'show_compare'})
 
 
-class GitGutterCompareHeadCommand(TextCommand):
+class GitGutterCompareHeadCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_head'})
+        self.view.run_command('git_gutter', {'action': 'compare_against_head'})
 
 
-class GitGutterCompareOriginCommand(TextCommand):
+class GitGutterCompareOriginCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_origin'})
 
 
-class GitGutterCompareCommitCommand(TextCommand):
+class GitGutterCompareCommitCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_commit'})
 
 
-class GitGutterCompareFileCommitCommand(TextCommand):
-    def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_file_commit'})
-
-
-class GitGutterCompareBranchCommand(TextCommand):
+class GitGutterCompareBranchCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_branch'})
 
 
-class GitGutterCompareTagCommand(TextCommand):
+class GitGutterCompareTagCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         self.view.run_command(
             'git_gutter', {'action': 'compare_against_tag'})
 
 
-class GitGutterNextChangeCommand(TextCommand):
+class GitGutterNextChangeCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'jump_to_next_change'})
+        self.view.run_command('git_gutter', {'action': 'jump_to_next_change'})
 
 
-class GitGutterPrevChangeCommand(TextCommand):
+class GitGutterPrevChangeCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'jump_to_prev_change'})
+        self.view.run_command('git_gutter', {'action': 'jump_to_prev_change'})

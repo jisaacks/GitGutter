@@ -1,11 +1,10 @@
 import os
+import subprocess
 import re
 import codecs
 import tempfile
 import time
 from functools import partial
-from subprocess import (
-    Popen, TimeoutExpired, PIPE, STARTUPINFO, STARTF_USESHOWWINDOW)
 
 import sublime
 
@@ -54,9 +53,6 @@ class GitGutterHandler(object):
         os.close(fd)
         return filepath
 
-    def git_time_cleared(self):
-        return self._last_refresh_time_git_file == 0
-
     def clear_git_time(self):
         self._last_refresh_time_git_file = 0
 
@@ -65,37 +61,6 @@ class GitGutterHandler(object):
 
     def git_time(self):
         return time.time() - self._last_refresh_time_git_file
-
-    def get_compare_against(self):
-        """Return the branch/commit/tag string the view is compared to."""
-        return settings.get_compare_against(self.git_dir, self.view)
-
-    def set_compare_against(self, commit, refresh=False):
-        """Apply a new branch/commit/tag string the view is compared to.
-
-        If one of the settings 'focus_change_mode' or 'live_mode' is true,
-        the view, is automatically compared by 'on_activate' event when
-        returning from a quick panel and therefore the command 'git_gutter'
-        can be ommited. This assumption can be overriden by 'refresh' for
-        commands that do not show a quick panel.
-
-        Arguments:
-            commit  - is either a branch, commit or tag as returned from
-                      git show-ref
-            refresh - always call git_gutter command
-        """
-        settings.set_compare_against(self.git_dir, commit)
-        self.clear_git_time()
-        if refresh or not any(settings.get(key, True) for key in (
-                'focus_change_mode', 'live_mode')):
-            self.view.run_command('git_gutter')  # refresh ui
-
-    def format_compare_against(self):
-        """Format the compare against setting to use for display."""
-        comparing = self.get_compare_against()
-        for repl in ('refs/heads/', 'refs/remotes/', 'refs/tags/'):
-            comparing = comparing.replace(repl, '')
-        return comparing
 
     def _get_view_encoding(self):
         """Get encoding and clean it for python ex: "Western (ISO 8859-1)".
@@ -189,7 +154,7 @@ class GitGutterHandler(object):
 
             try:
                 self.update_git_time()
-                return GitGutterHandler.run_command(args, False).then(write_file)
+                return GitGutterHandler.run_command(args).then(write_file)
             except Exception:
                 pass
         return Promise.resolve()
@@ -256,7 +221,7 @@ class GitGutterHandler(object):
                 self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
-            return GitGutterHandler.run_command(args, False).then(decode_diff)
+            return GitGutterHandler.run_command(args).then(decode_diff)
 
         if self.on_disk() and self.git_path:
             return self.update_git_file().then(run_diff)
@@ -389,20 +354,8 @@ class GitGutterHandler(object):
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
-            '--pretty=%h \u00BB %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty=%s\a%h %an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
-        ]
-        return GitGutterHandler.run_command(args)
-
-    def git_file_commits(self):
-        args = [
-            settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
-            'log',
-            '--pretty=%h \u00BB %s\a%an <%aE>\a%ad (%ar)',
-            '--date=local', '--max-count=9000',
-            '--', self.git_path
         ]
         return GitGutterHandler.run_command(args)
 
@@ -441,37 +394,22 @@ class GitGutterHandler(object):
         return GitGutterHandler.run_command(args)
 
     @staticmethod
-    def run_command(args, decode=True):
-        """Run a git command asynchronously and return a Promise.
+    def run_command(args):
+        """Run a git command asynchronously and return a Promise."""
 
-        Arguments:
-            args    - a list of arguments used to create the git subprocess.
-            decode  - if True the git's output is decoded assuming utf-8
-                      which is the default output encoding of git.
-        """
         def read_output(resolve):
             """Start git process and forward its output to the Resolver."""
-            try:
-                stdout = b''
-                startupinfo = None
-                if os.name == 'nt':
-                    startupinfo = STARTUPINFO()
-                    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
-                proc = Popen(
-                    args=args, stdin=PIPE, stdout=PIPE, stderr=PIPE,
-                    startupinfo=startupinfo)
-                stdout, stderr = proc.communicate(timeout=30)
-            except TimeoutExpired:
-                print("GitGutter: git seems dead, killing it!")
-                proc.kill()
-                stdout, stderr = proc.communicate()
-            except OSError as exception:
-                print("GitGutter: Can't start git!\n" + str(exception))
-            finally:
-                if decode:
-                    resolve(stdout.decode('utf-8').strip())
-                else:
-                    resolve(stdout)
+            startupinfo = None
+            stdin = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                stdin = subprocess.PIPE
+            proc = subprocess.Popen(
+                args, stdout=subprocess.PIPE, startupinfo=startupinfo,
+                stderr=subprocess.PIPE, stdin=stdin)
+            stdout_output = proc.stdout.read()
+            resolve(stdout_output)
 
         def run_async(resolve):
             if hasattr(sublime, 'set_timeout_async'):
