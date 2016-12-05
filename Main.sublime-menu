@@ -1,5 +1,7 @@
 [
     {
+        "caption": "View",
+        "mnemonic": "V",
         "id": "view",
         "children":
         [
@@ -42,17 +44,20 @@
         ]
     },
     {
+        "caption": "Goto",
+        "mnemonic": "G",
         "id": "goto",
         "children":
         [
             {
-                "caption": "Previous Change",
+                "caption": "Goto Previous Git Difference",
                 "command": "git_gutter_prev_change"
             },
             {
-                "caption": "Next Change",
+                "caption": "Goto Next Git Difference",
                 "command": "git_gutter_next_change"
-            }
+            },
+            { "caption": "-" }
         ]
     },
     {
