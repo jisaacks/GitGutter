@@ -118,6 +118,10 @@ class GitGutterEvents(sublime_plugin.EventListener):
 
         Only an active view of a group is visible.
         """
-        w = view.window()
-        return any(view == w.active_view_in_group(g)
-                   for g in range(w.num_groups())) if w is not None else False
+        window = view.window()
+        if window:
+            view_id = view.id()
+            for group in range(window.num_groups()):
+                if view_id == window.active_view_in_group(group).id():
+                    return True
+        return False
