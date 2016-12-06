@@ -122,6 +122,7 @@ class GitGutterEvents(sublime_plugin.EventListener):
         if window:
             view_id = view.id()
             for group in range(window.num_groups()):
-                if view_id == window.active_view_in_group(group).id():
+                active_view = window.active_view_in_group(group)
+                if active_view and active_view.id() == view_id:
                     return True
         return False
