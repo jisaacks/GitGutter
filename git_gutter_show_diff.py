@@ -4,10 +4,8 @@ import sublime
 
 try:
     from .git_gutter_settings import settings
-    from .promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
-    from promise import Promise
 
 ST3 = int(sublime.version()) >= 3000
 _ICON_EXT = '.png' if ST3 else ''
@@ -70,21 +68,17 @@ class GitGutterShowDiff(object):
         self._bind_icons('changed', modified)
 
         if settings.show_status != "none":
-            if settings.show_status == 'all':
-                def decode_and_strip(branch_name):
-                    return branch_name.decode("utf-8").strip()
-                branch_promise = self.git_handler.git_current_branch().then(
-                    decode_and_strip)
-            else:
-                branch_promise = Promise.resolve("")
-
             def update_status_ui(branch_name):
                 self._update_status(
                     len(inserted), len(modified), len(deleted),
                     settings.get_compare_against(
                         self.git_handler.git_dir, self.view),
                     branch_name)
-            branch_promise.then(update_status_ui)
+
+            if settings.show_status == 'all':
+                self.git_handler.git_current_branch().then(update_status_ui)
+            else:
+                update_status_ui('')
         else:
             self._update_status(0, 0, 0, "", "")
 

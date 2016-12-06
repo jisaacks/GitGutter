@@ -20,7 +20,7 @@ class GitGutterCompareCommit(object):
 
     def commit_list(self):
         def decode_and_parse_commit_list(result):
-            commit_lines = result.decode("utf-8").strip().split('\n')
+            commit_lines = result.splitlines()
             return [r.split('\a', 2) for r in commit_lines]
         if not self.git_handler.on_disk():
             return Promise.resolve([])
@@ -47,7 +47,7 @@ class GitGutterCompareCommit(object):
 class GitGutterCompareBranch(GitGutterCompareCommit):
     def commit_list(self):
         def decode_and_parse_branch_list(result):
-            branch_lines = result.decode("utf-8").strip().split('\n')
+            branch_lines = result.splitlines()
             return [self._parse_result(r) for r in branch_lines]
         if not self.git_handler.on_disk():
             return Promise.resolve([])
@@ -66,7 +66,7 @@ class GitGutterCompareTag(GitGutterCompareCommit):
     def commit_list(self):
         def decode_and_parse_tag_list(results):
             if results:
-                tag_lines = results.decode("utf-8").strip().split('\n')
+                tag_lines = results.splitlines()
                 return [self._parse_result(r) for r in tag_lines]
             sublime.message_dialog("No tags found in repository")
             return []
@@ -97,7 +97,7 @@ class GitGutterCompareOrigin(GitGutterCompareCommit):
             if branch_name:
                 settings.set_compare_against(
                     self.git_handler.git_dir,
-                    'origin/%s' % branch_name.decode("utf-8").strip())
+                    'origin/%s' % branch_name)
                 self.git_handler.clear_git_time()
                 self.view.run_command('git_gutter')  # refresh ui
         self.git_handler.git_current_branch().then(on_branch_name)
