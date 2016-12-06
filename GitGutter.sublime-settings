@@ -64,13 +64,30 @@
   // an example of why you might need this.
   "patience": true,
 
-  // Determines whether GitGutter will show informations in the status bar
-  // Set "none" to hide these informations
-  // Set "default" to show in the status bar what you are comparing
-  // against, how many lines have been inserted or modified and how many regions
-  // have been deleted.
-  // Set "all" to also show on what branch you are
-  "show_status": "default",
+  // Determines whether GitGutter shows status information in the status bar.
+  // Set false to disable status information.
+  // Set true to show information using the "status_bar_text" template.
+  "show_status_bar_text": true,
+
+  // STATUS BAR TEXT TEMPLATE
+  // The array is joined to a single string and passed to jinja2 template
+  // engine to render the status message text. The template can be modified using
+  // jinja2 supported syntax. GitGutter provides the following variables:
+  //   {{repo}}     -- repository name / folder name containing the .git directory
+  //   {{branch}}   -- checked out branch you are working on
+  //   {{compare}}  -- commit/branch/HEAD the file is compared to
+  //   {{state}}    -- One of committed/modified/ignored/untracked
+  //   {{deleted}}  -- number of deleted regions
+  //   {{inserted}} -- number of inserted lines
+  //   {{modified}} -- number of modified lines
+  "status_bar_text": [
+    "In {{repo}} on {{branch}}",
+    "{% if compare != 'HEAD' %}, Comparing against {{compare}}{% endif %}",
+    ", File is {{state}}",
+    "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
+    "{% if inserted != 0 %}, {{inserted}}+{% endif %}",
+    "{% if modified != 0 %}, {{modified}}≠{% endif %}"
+  ],
 
   // Show GitGutter information in the minimap
   "show_in_minimap": true,

@@ -1,5 +1,5 @@
 import os
-
+from jinja2.environment import Template as Jinja2Template
 import sublime
 
 try:
@@ -36,70 +36,75 @@ class GitGutterShowDiff(object):
         """Check diff result and invoke gutter and status message update.
 
         Arguments:
-            contentes - a tuble of ([inserted], [modified], [deleted]) lines
+            contents - a tuble of ([inserted], [modified], [deleted]) lines
         """
         if self.git_handler.in_repo() is False:
             show_untracked = settings.get(
                 'show_markers_on_untracked_file', False)
-            # need to check for ignored or untracked file
-            if show_untracked:
-                def bind_ignored_or_untracked(is_ignored):
-                    if is_ignored:
-                        self._bind_files('ignored')
-                    else:
-                        def bind_untracked(is_untracked):
-                            if is_untracked:
-                                self._bind_files('untracked')
-                            else:
-                                # file was staged but empty
-                                self._bind_files('inserted')
-                        self.git_handler.untracked().then(bind_untracked)
-                self.git_handler.ignored().then(bind_ignored_or_untracked)
 
-            # show_untracked was set to false recently so clear gutter
-            elif self.show_untracked:
-                self._clear_all()
-                self._update_status(0, 0, 0, "", "")
-            self.show_untracked = show_untracked
+            def bind_ignored_or_untracked(is_ignored):
+                if is_ignored:
+                    event = 'ignored'
+                    self._update_status(event, ([], [], []))
+                    if show_untracked:
+                        self._bind_files(event)
+                else:
+                    def bind_untracked(is_untracked):
+                        event = 'untracked' if is_untracked else 'inserted'
+                        self._update_status(event, ([], [], []))
+                        if show_untracked:
+                            self._bind_files(event)
+                    self.git_handler.untracked().then(bind_untracked)
+            self.git_handler.ignored().then(bind_ignored_or_untracked)
 
-        # update the if lines changed
+        # update the if lines modified
         elif self.diff_results is None or self.diff_results != contents:
             self.diff_results = contents
             self._update_ui(contents)
 
     def _update_ui(self, contents):
+        """Update gutter icons for modified files.
+
+        Arguments:
+            contents - a tuble of ([inserted], [modified], [deleted]) lines
+        """
         inserted, modified, deleted = contents
         self._clear_all()
-        self._lines_removed(deleted)
-        self._bind_icons('inserted', inserted)
-        self._bind_icons('changed', modified)
-
-        if settings.show_status != "none":
-            def update_status_ui(branch_name):
-                self._update_status(
-                    len(inserted), len(modified), len(deleted),
-                    self.git_handler.format_compare_against(),
-                    branch_name)
-
-            if settings.show_status == 'all':
-                self.git_handler.git_current_branch().then(update_status_ui)
-            else:
-                update_status_ui('')
+        if inserted or modified or deleted:
+            self._update_status('modified', contents)
+            self._lines_removed(deleted)
+            self._bind_icons('inserted', inserted)
+            self._bind_icons('changed', modified)
         else:
-            self._update_status(0, 0, 0, "", "")
+            self._update_status('commited', contents)
 
-    def _update_status(self, inserted, modified, deleted, compare, branch):
-        def set_status_if(test, key, message):
-            if test:
-                self.view.set_status("git_gutter_status_" + key, message)
-            else:
-                self.view.set_status("git_gutter_status_" + key, "")
+    def _update_status(self, file_state, contents):
+        """Update status message.
 
-        set_status_if(inserted > 0, "inserted", "Inserted : %d" % inserted)
-        set_status_if(modified > 0, "modified", "Modified : %d" % modified)
-        set_status_if(deleted > 0, "deleted", "Deleted : %d regions" % deleted)
-        set_status_if(compare, "comparison", "Comparing against : %s" % compare)
-        set_status_if(branch, "branch", "On branch : %s" % branch)
+        The method joins and renders the lines read from 'status_bar_text'
+        setting to the status bar using the jinja2 library to fill in all
+        the state information of the open file.
+
+        Arguments:
+            file_state - the git state of the open file.
+            contents   - a tuble of ([inserted], [modified], [deleted]) lines
+        """
+        template = settings.get('status_bar_text') \
+            if settings.get('show_status_bar_text') else None
+        if template:
+            def set_status(branch_name):
+                inserted, modified, deleted = contents
+                # render the template using jinja2 library
+                text = Jinja2Template(''.join(template)).render(
+                    repo=os.path.basename(self.git_handler.git_tree),
+                    compare=self.git_handler.format_compare_against(),
+                    branch=branch_name, state=file_state, deleted=len(deleted),
+                    inserted=len(inserted), modified=len(modified))
+                # add text and try to be the left most one
+                self.view.set_status('00_git_gutter', text)
+            self.git_handler.git_current_branch().then(set_status)
+        else:
+            self.view.set_status('00_git_gutter', '')
 
     def _clear_all(self):
         for region_name in self.region_names:
@@ -176,6 +181,12 @@ class GitGutterShowDiff(object):
             'git_gutter_%s' % event, regions, scope, icon, flags)
 
     def _bind_files(self, event):
+        """Add gutter icons to each line in the view.
+
+        Arguments:
+            event   - is one of REGION_NAMES
+        """
+        self._update_status(event, ([], [], []))
         lines = [line + 1 for line in range(self._total_lines())]
         self._bind_icons(event, lines)
 

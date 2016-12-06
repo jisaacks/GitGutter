@@ -145,9 +145,39 @@ Is GitGutter blocking SublimeLinter or other icons? You can prevent this by addi
 ```
 You will need to figure out the names of the regions you are trying to protect.
 
+
 #### Status Bar Text
 
-You can turn off the status bar text by changing `"show_status": "default"` to `"show_status": "none"`.
+GitGutter displays status information about open files in the status bar by
+default. To turn this feature off set `"show_status_bar_text": false`.
+
+The *Status Bar Text* is rendered by the powerful *jinja2* engine using the
+template from `"status_bar_text": [...]` setting. The setting is organized as
+an array of strings for better readability. It is joined and then passed to
+*jinja2*. GitGutter provides the following variables to be used in the template.
+
+| Variable     | Description                                                 |
+|--------------|-------------------------------------------------------------|
+| {{repo}}     | repository name / folder name containing the .git directory |
+| {{branch}}   | checked out branch you are working on                       |
+| {{compare}}  | commit/branch/HEAD the file is compared to                  |
+| {{state}}    | One of committed/modified/ignored/untracked                 |
+| {{deleted}}  | number of deleted regions                                   |
+| {{inserted}} | number of inserted lines                                    |
+| {{modified}} | number of modified lines                                    |
+
+##### Example 1 - default template
+
+```javascript
+"status_bar_text": [
+  "In {{repo}} on {{branch}}",
+  "{% if compare != 'HEAD' %}, Comparing against {{compare}}{% endif %}",
+  ", File is {{state}}",
+  "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
+  "{% if inserted != 0 %}, {{inserted}}+{% endif %}",
+  "{% if modified != 0 %}, {{modified}}≠{% endif %}"
+]
+```
 
 
 #### Themes

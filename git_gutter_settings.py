@@ -24,7 +24,6 @@ class GitGutterSettings:
         self.ignore_whitespace = False
         self.patience_switch = ''
         self.show_in_minimap = False
-        self.show_status = 'none'
         # Name of this package (GitGutter or GitGutter-Edge)
         # stored in settings as kind of environment variable
         path = os.path.realpath(__file__)
@@ -106,13 +105,6 @@ class GitGutterSettings:
         self.show_in_minimap = (
             self._user_settings.get('show_in_minimap') or
             self._settings.get('show_in_minimap'))
-
-        # Show information in status bar
-        self.show_status = (
-            self._user_settings.get('show_status') or
-            self._settings.get('show_status'))
-        if self.show_status != 'all' and self.show_status != 'none':
-            self.show_status = 'default'
 
     def get_compare_against(self, git_dir, view):
         """Return the compare target for a view.
