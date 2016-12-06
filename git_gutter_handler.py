@@ -1,11 +1,10 @@
 import os
+import subprocess
 import re
 import codecs
 import tempfile
 import time
 from functools import partial
-from subprocess import (
-    Popen, PIPE, STARTUPINFO, STARTF_USESHOWWINDOW)
 
 import sublime
 
@@ -402,16 +401,16 @@ class GitGutterHandler(object):
             """Start git process and forward its output to the Resolver."""
             try:
                 if os.name == 'nt':
-                    startupinfo = STARTUPINFO()
-                    startupinfo.dwFlags |= STARTF_USESHOWWINDOW
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 else:
                     startupinfo = None
-                proc = Popen(
-                    args=args, stdin=PIPE, stdout=PIPE, stderr=PIPE,
-                    startupinfo=startupinfo)
+                proc = subprocess.Popen(
+                    args=args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE, startupinfo=startupinfo)
                 stdout, stderr = proc.communicate()
             except Exception as exception:
-                print("GitGutter failed to run git: " + str(exception))
+                print('GitGutter failed to run git: %s' % exception)
                 stdout = b''
             finally:
                 resolve(stdout)
