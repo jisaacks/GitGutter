@@ -4,15 +4,12 @@ import sublime
 
 try:
     from .git_gutter_settings import settings
-    from .promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
-    from promise import Promise
 
 
 class GitGutterCompareCommit(object):
-    def __init__(self, view, git_handler):
-        self.view = view
+    def __init__(self, git_handler):
         self.git_handler = git_handler
 
     def run(self):
@@ -22,8 +19,6 @@ class GitGutterCompareCommit(object):
         def decode_and_parse_commit_list(result):
             commit_lines = result.splitlines()
             return [r.split('\a', 2) for r in commit_lines]
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_commits().then(decode_and_parse_commit_list)
 
     def item_to_commit(self, item):
@@ -31,7 +26,7 @@ class GitGutterCompareCommit(object):
 
     def _show_quick_panel(self, results):
         if results:
-            self.view.window().show_quick_panel(
+            self.git_handler.view.window().show_quick_panel(
                 results, partial(self._on_select, results))
 
     def _on_select(self, results, selected):
@@ -49,8 +44,6 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
         def decode_and_parse_branch_list(result):
             branch_lines = result.splitlines()
             return [self._parse_result(r) for r in branch_lines]
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_branches().then(
             decode_and_parse_branch_list)
 
@@ -70,8 +63,6 @@ class GitGutterCompareTag(GitGutterCompareCommit):
                 return [self._parse_result(r) for r in tag_lines]
             sublime.message_dialog("No tags found in repository")
             return []
-        if not self.git_handler.on_disk():
-            return Promise.resolve([])
         return self.git_handler.git_tags().then(decode_and_parse_tag_list)
 
     def _parse_result(self, result):

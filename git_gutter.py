@@ -66,32 +66,30 @@ class GitGutterCommand(TextCommand):
             self.show_diff_handler.run()
 
     def _handle_subcommand(self, **kwargs):
-        view = self.view
-        git_handler = self.git_handler
         action = kwargs['action']
         if action == 'jump_to_next_change':
-            GitGutterJumpToChanges(view, git_handler).jump_to_next_change()
+            GitGutterJumpToChanges(self.git_handler).jump_to_next_change()
         elif action == 'jump_to_prev_change':
-            GitGutterJumpToChanges(view, git_handler).jump_to_prev_change()
+            GitGutterJumpToChanges(self.git_handler).jump_to_prev_change()
         elif action == 'compare_against_commit':
-            GitGutterCompareCommit(view, git_handler).run()
+            GitGutterCompareCommit(self.git_handler).run()
         elif action == 'compare_against_branch':
-            GitGutterCompareBranch(view, git_handler).run()
+            GitGutterCompareBranch(self.git_handler).run()
         elif action == 'compare_against_tag':
-            GitGutterCompareTag(view, git_handler).run()
+            GitGutterCompareTag(self.git_handler).run()
         elif action == 'compare_against_head':
-            GitGutterCompareHead(view, git_handler).run()
+            GitGutterCompareHead(self.git_handler).run()
         elif action == 'compare_against_origin':
-            GitGutterCompareOrigin(view, git_handler).run()
+            GitGutterCompareOrigin(self.git_handler).run()
         elif action == 'show_compare':
-            GitGutterShowCompare(view, git_handler).run()
+            GitGutterShowCompare(self.git_handler).run()
         elif action == 'show_diff_popup':
             point = kwargs['point']
             highlight_diff = kwargs['highlight_diff']
             flags = kwargs['flags']
             show_diff_popup(
-                view, point, git_handler, highlight_diff=highlight_diff,
-                flags=flags)
+                point, self.git_handler,
+                highlight_diff=highlight_diff, flags=flags)
         else:
             assert False, 'Unhandled sub command "%s"' % action
 
