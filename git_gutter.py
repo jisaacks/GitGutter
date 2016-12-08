@@ -1,6 +1,7 @@
 import sublime_plugin
 
 try:
+    from .git_gutter_settings import settings
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
@@ -9,6 +10,7 @@ try:
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
 except (ImportError, ValueError):
+    from git_gutter_settings import settings
     from git_gutter_handler import GitGutterHandler
     from git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
@@ -26,7 +28,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.show_diff_handler = None
 
     def is_enabled(self, **kwargs):
-        return self.is_valid_view
+        return self.is_valid_view and bool(settings.git_binary_path)
 
     def run(self, edit, **kwargs):
         if not self.git_handler:

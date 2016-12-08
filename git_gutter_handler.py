@@ -12,10 +12,19 @@ try:
     from . import git_helper
     from .git_gutter_settings import settings
     from .promise import Promise
+    from subprocess import TimeoutExpired
+
+    _HAVE_TIMEOUT = True
+
 except (ImportError, ValueError):
     import git_helper
     from git_gutter_settings import settings
     from promise import Promise
+
+    class TimeoutExpired():
+        pass
+
+    _HAVE_TIMEOUT = False
 
 
 class GitGutterHandler(object):
@@ -408,10 +417,16 @@ class GitGutterHandler(object):
                 proc = subprocess.Popen(
                     args=args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE, startupinfo=startupinfo)
-                stdout, stderr = proc.communicate()
-            except Exception as exception:
-                print('GitGutter failed to run git: %s' % exception)
+                if _HAVE_TIMEOUT:
+                    stdout, stderr = proc.communicate(timeout=30)
+                else:
+                    stdout, stderr = proc.communicate()
+            except OSError as error:
+                print('GitGutter failed to run git: %s' % error)
                 stdout = b''
+            except TimeoutExpired:
+                proc.kill()
+                stdout, stderr = proc.communicate()
             finally:
                 resolve(stdout)
 
