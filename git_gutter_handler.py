@@ -12,16 +12,18 @@ try:
     from . import git_helper
     from .git_gutter_settings import settings
     from .promise import Promise
-    from subprocess import TimeoutExpired
-
-    _HAVE_TIMEOUT = True
 
 except (ImportError, ValueError):
     import git_helper
     from git_gutter_settings import settings
     from promise import Promise
 
-    class TimeoutExpired():
+try:
+    from subprocess import TimeoutExpired
+    _HAVE_TIMEOUT = True
+
+except:
+    class TimeoutExpired(Exception):
         pass
 
     _HAVE_TIMEOUT = False
