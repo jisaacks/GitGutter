@@ -12,7 +12,6 @@ try:
     from . import git_helper
     from .git_gutter_settings import settings
     from .promise import Promise
-
 except (ImportError, ValueError):
     import git_helper
     from git_gutter_settings import settings
@@ -21,11 +20,9 @@ except (ImportError, ValueError):
 try:
     from subprocess import TimeoutExpired
     _HAVE_TIMEOUT = True
-
 except:
     class TimeoutExpired(Exception):
         pass
-
     _HAVE_TIMEOUT = False
 
 
