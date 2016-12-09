@@ -17,6 +17,14 @@ except (ImportError, ValueError):
     from git_gutter_settings import settings
     from promise import Promise
 
+try:
+    from subprocess import TimeoutExpired
+    _HAVE_TIMEOUT = True
+except:
+    class TimeoutExpired(Exception):
+        pass
+    _HAVE_TIMEOUT = False
+
 
 class GitGutterHandler(object):
     # the git repo won't change that often so we can easily wait few seconds
@@ -399,17 +407,27 @@ class GitGutterHandler(object):
 
         def read_output(resolve):
             """Start git process and forward its output to the Resolver."""
-            startupinfo = None
-            stdin = None
-            if os.name == 'nt':
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                stdin = subprocess.PIPE
-            proc = subprocess.Popen(
-                args, stdout=subprocess.PIPE, startupinfo=startupinfo,
-                stderr=subprocess.PIPE, stdin=stdin)
-            stdout_output = proc.stdout.read()
-            resolve(stdout_output)
+            try:
+                if os.name == 'nt':
+                    startupinfo = subprocess.STARTUPINFO()
+                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                else:
+                    startupinfo = None
+                proc = subprocess.Popen(
+                    args=args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE, startupinfo=startupinfo)
+                if _HAVE_TIMEOUT:
+                    stdout, stderr = proc.communicate(timeout=30)
+                else:
+                    stdout, stderr = proc.communicate()
+            except OSError as error:
+                print('GitGutter failed to run git: %s' % error)
+                stdout = b''
+            except TimeoutExpired:
+                proc.kill()
+                stdout, stderr = proc.communicate()
+            finally:
+                resolve(stdout)
 
         def run_async(resolve):
             if hasattr(sublime, 'set_timeout_async'):
