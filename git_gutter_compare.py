@@ -21,7 +21,7 @@ class GitGutterCompareCommit(object):
         return self.git_handler.git_commits().then(parse_results)
 
     def item_to_commit(self, item):
-        return item[1].split(' ')[0]
+        return item[0].split(' ')[0]
 
     def _show_quick_panel(self, results):
         if results:
@@ -34,6 +34,22 @@ class GitGutterCompareCommit(object):
         item = results[selected]
         commit = self.item_to_commit(item)
         self.git_handler.set_compare_against(commit)
+
+
+class GitGutterCompareFileCommit(GitGutterCompareCommit):
+    def commit_list(self):
+        """Built a list of quick panel items with all file commits."""
+        def parse_results(results):
+            """Parse git output and create the quick panel items."""
+            if results:
+                # sort splitted lines by author date in reversed order
+                sorted_results = sorted(results.splitlines(), reverse=True)
+                # split each line by \a and strip time stamp from beginning
+                return [r.split('\a')[1:] for r in sorted_results]
+            sublime.message_dialog(
+                'No commits of this file found in repository.')
+            return []
+        return self.git_handler.git_file_commits().then(parse_results)
 
 
 class GitGutterCompareBranch(GitGutterCompareCommit):

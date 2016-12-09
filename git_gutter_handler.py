@@ -390,13 +390,40 @@ class GitGutterHandler(object):
         return Promise.resolve(False)
 
     def git_commits(self):
+        r"""Query all commits.
+
+        The git output will have following format splitted by \a:
+            <hash> <title>
+            <name> <email>
+            <date> (<time> ago)
+        """
         args = [
             settings.git_binary_path,
             '--git-dir=' + self.git_dir,
             '--work-tree=' + self.git_tree,
             'log', '--all',
-            '--pretty=%s\a%h %an <%aE>\a%ad (%ar)',
+            '--pretty=%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
+        ]
+        return GitGutterHandler.run_command(args)
+
+    def git_file_commits(self):
+        r"""Query all commits with changes to the attached file.
+
+        The git output will have following format splitted by \a:
+            <timestamp>
+            <hash> <title>
+            <name> <email>
+            <date> (<time> ago)
+        """
+        args = [
+            settings.git_binary_path,
+            '--git-dir=' + self.git_dir,
+            '--work-tree=' + self.git_tree,
+            'log',
+            '--pretty=%at\a%h %s\a%an <%aE>\a%ad (%ar)',
+            '--date=local', '--max-count=9000',
+            '--', self.git_path
         ]
         return GitGutterHandler.run_command(args)
 

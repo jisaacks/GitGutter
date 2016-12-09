@@ -30,6 +30,10 @@
                                 "command": "git_gutter_compare_commit"
                             },
                             {
+                                "caption": "File Commit",
+                                "command": "git_gutter_compare_file_commit"
+                            },
+                            {
                                 "caption": "Branch",
                                 "command": "git_gutter_compare_branch"
                             },

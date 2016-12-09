@@ -68,12 +68,13 @@ By default, Git Gutter compares your working copy against the HEAD. You can chan
 - Compare against particular branch
 - Compare against particular tag
 - Compare against specific commit
+- Compare against specific file commit (current file's history)
 
 To change the compare option:
 
 - Open the command palette (`Ctrl-Shift-P` for Windows/Linux, `Cmd-Shift-P` for Mac)
 - Start typing `GitGutter`
-- You'll see the 4 options listed above, select one with the keyboard.
+- You'll see the 5 options listed above, select one with the keyboard.
 - Choose the branch/tag/commit to compare against.
 
 ### Jumping Between Changes
