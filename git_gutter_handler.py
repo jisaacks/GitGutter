@@ -34,23 +34,27 @@ class GitGutterHandler(object):
     def __init__(self, view):
         self.view = view
 
-        self.git_temp_file = None
         self.buf_temp_file = None
 
         # cached view file name to detect renames
         self._view_file_name = None
+        # path to temporary file with git index content
+        self._git_temp_file = None
+        # timestamp of the last git file update
+        self._git_file_refresh_time = 0
         # real path to current work tree
         self._git_tree = None
         # relative file path in work tree
         self._git_path = None
+        # file is part of the git repository
         self.git_tracked = False
-
-        self._last_refresh_time_git_file = 0
+        # compare target commit hash
+        self._git_compared_commit = None
 
     def __del__(self):
         """Delete temporary files."""
-        if self.git_temp_file:
-            os.unlink(self.git_temp_file)
+        if self._git_temp_file:
+            os.unlink(self._git_temp_file)
         if self.buf_temp_file:
             os.unlink(self.buf_temp_file)
 
@@ -60,8 +64,8 @@ class GitGutterHandler(object):
 
         CAUTION: Caller is responsible for clean up
         """
-        fd, filepath = tempfile.mkstemp(prefix='git_gutter_')
-        os.close(fd)
+        file, filepath = tempfile.mkstemp(prefix='git_gutter_')
+        os.close(file)
         return filepath
 
     @property
@@ -95,16 +99,10 @@ class GitGutterHandler(object):
         return self._git_tree
 
     def git_time_cleared(self):
-        return self._last_refresh_time_git_file == 0
+        return self._git_file_refresh_time == 0
 
     def clear_git_time(self):
-        self._last_refresh_time_git_file = 0
-
-    def update_git_time(self):
-        self._last_refresh_time_git_file = time.time()
-
-    def git_time(self):
-        return time.time() - self._last_refresh_time_git_file
+        self._git_file_refresh_time = 0
 
     def get_compare_against(self):
         """Return the branch/commit/tag string the view is compared to."""
@@ -184,34 +182,59 @@ class GitGutterHandler(object):
             encoded = contents.encode('utf-8')
         # Write the encoded content to file
         if not self.buf_temp_file:
-            self.buf_temp_file = GitGutterHandler.tmp_file()
+            self.buf_temp_file = self.tmp_file()
         with open(self.buf_temp_file, 'wb') as f:
             if self.view.encoding() == "UTF-8 with BOM":
                 f.write(codecs.BOM_UTF8)
             f.write(encoded)
 
     def update_git_file(self):
+        """Update file from git index and store in temp folder.
 
-        def write_file(contents):
-            contents = contents.replace(b'\r\n', b'\n')
-            contents = contents.replace(b'\r', b'\n')
-            self.git_tracked = bool(contents)
-            with open(self.git_temp_file, 'wb') as f:
-                f.write(contents)
+        Returns:
+            Promise resolved with True if the temporary file was updated.
+        """
+        def check_commit(commit):
+            """Check if compare target changed and update git file then.
 
-        if self.git_time() > self.git_file_update_interval_secs:
-            if not self.git_temp_file:
-                self.git_temp_file = GitGutterHandler.tmp_file()
+            If the commit has didn't change since the last run, the temporary
+            file is still up to date and git 'show' can be skipped and the
+            promise is resolved with False.
 
-            args = [
-                settings.git_binary_path,
-                'show',
-                '%s:%s' % (
-                    self.get_compare_against(),
-                    self._git_path),
-            ]
-            return self.run_command(args=args, decode=False).then(write_file)
-        return Promise.resolve()
+            Arguments:
+                commit (string): full hash of the commit the view is currently
+                                 compared against.
+            Returns:
+                bool: True if temporary file was updated, False otherwise.
+            """
+            def write_file(contents):
+                """Write contents to temporary file.
+
+                The function resolves the promise with True to indicate the
+                updated git file.
+                """
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
+                self.git_tracked = bool(contents)
+                if not self._git_temp_file:
+                    self._git_temp_file = self.tmp_file()
+                with open(self._git_temp_file, 'wb') as file:
+                    file.write(contents)
+                # finally update git hash if file was updated
+                self._git_compared_commit = commit
+                return True
+
+            # Read file from git incase the compare target has changed
+            if self._git_compared_commit == commit:
+                return Promise.resolve(False)
+            return self.git_read_file(commit).then(write_file)
+
+        # Check for changed compare target in a 5 second interval
+        age = time.time() - self._git_file_refresh_time
+        if age <= self.git_file_update_interval_secs:
+            return Promise.resolve(False)
+        self._git_file_refresh_time += age
+        return self.git_compare_commit().then(check_commit)
 
     def process_diff(self, diff_str):
         r"""Parse unified diff with 0 lines of context.
@@ -264,14 +287,14 @@ class GitGutterHandler(object):
                     decoded_results = ""
             return decoded_results
 
-        def run_diff(_unused):
+        def run_diff(updated_git_file):
             self.update_buf_file()
             args = [
                 settings.git_binary_path,
                 'diff', '-U0', '--no-color', '--no-index',
                 settings.ignore_whitespace,
                 settings.patience_switch,
-                self.git_temp_file,
+                self._git_temp_file,
                 self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
@@ -457,6 +480,28 @@ class GitGutterHandler(object):
             'HEAD'
         ]
         return self.run_command(args)
+
+    def git_compare_commit(self):
+        """Query the commit hash of the compare target."""
+        args = [
+            settings.git_binary_path,
+            'rev-parse',
+            self.get_compare_against()
+        ]
+        return self.run_command(args)
+
+    def git_read_file(self, commit):
+        """Read the content of the file from specific commit.
+
+        Arguments:
+            commit  - hash of the commit to read file from.
+        """
+        args = [
+            settings.git_binary_path,
+            'show',
+            '%s:%s' % (commit, self._git_path),
+        ]
+        return self.run_command(args=args, decode=False)
 
     def run_command(self, args, decode=True):
         """Run a git command asynchronously and return a Promise.
