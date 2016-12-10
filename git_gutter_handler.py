@@ -71,25 +71,28 @@ class GitGutterHandler(object):
         return time.time() - self._last_refresh_time_git_file
 
     def _get_view_encoding(self):
-        """Get encoding and clean it for python ex: "Western (ISO 8859-1)".
+        """Read view encoding and transform it for use with python.
 
-        NOTE(maelnor): are we need regex here?
+        This method reads `origin_encoding` used by ConvertToUTF8 plugin and
+        goes on with ST's encoding setting if required. The encoding is
+        transformed to work with python's `codecs` module.
+
+        Returns:
+            string: python compatible view encoding
         """
-        pattern = re.compile(r'.+\((.*)\)')
-        encoding = self.view.encoding()
-        if encoding == "Undefined":
-            encoding = self.view.settings().get('default_encoding')
-        if pattern.match(encoding):
-            encoding = pattern.sub(r'\1', encoding)
-
-        encoding = encoding.replace('with BOM', '')
-        encoding = encoding.replace('Windows', 'cp')
-        encoding = encoding.replace('-', '_')
+        encoding = self.view.settings().get('origin_encoding')
+        if not encoding:
+            encoding = self.view.encoding()
+            if encoding == "Undefined":
+                encoding = self.view.settings().get('default_encoding')
+            begin = encoding.find('(')
+            if begin > -1:
+                encoding = encoding[begin + 1:-1]
+            encoding = encoding.replace('with BOM', '')
+            encoding = encoding.replace('Windows', 'cp')
+            encoding = encoding.replace('-', '_')
         encoding = encoding.replace(' ', '')
-
-        # work around with ConvertToUTF8 plugin
-        origin_encoding = self.view.settings().get('origin_encoding')
-        return origin_encoding or encoding
+        return encoding
 
     def in_repo(self):
         """Return true, if the most recent `git show` returned any content.
@@ -112,30 +115,24 @@ class GitGutterHandler(object):
 
     def update_buf_file(self):
         """Write view's content to temporary file as source for git diff."""
+        # Read from view buffer
         chars = self.view.size()
         region = sublime.Region(0, chars)
-
+        contents = self.view.substr(region)
         # Try conversion
         try:
-            contents = self.view.substr(
-                region).encode(self._get_view_encoding())
-        except UnicodeError:
+            encoding = self._get_view_encoding()
+            encoded = contents.encode(encoding)
+        except (LookupError, UnicodeError):
             # Fallback to utf8-encoding
-            contents = self.view.substr(region).encode('utf-8')
-        except LookupError:
-            # May encounter an encoding we don't have a codec for
-            contents = self.view.substr(region).encode('utf-8')
-
-        contents = contents.replace(b'\r\n', b'\n')
-        contents = contents.replace(b'\r', b'\n')
-
+            encoded = contents.encode('utf-8')
+        # Write the encoded content to file
         if not self.buf_temp_file:
             self.buf_temp_file = GitGutterHandler.tmp_file()
-
         with open(self.buf_temp_file, 'wb') as f:
             if self.view.encoding() == "UTF-8 with BOM":
                 f.write(codecs.BOM_UTF8)
-            f.write(contents)
+            f.write(encoded)
 
     def update_git_file(self):
 
@@ -205,7 +202,7 @@ class GitGutterHandler(object):
         def decode_diff(results):
             encoding = self._get_view_encoding()
             try:
-                decoded_results = results.decode(encoding.replace(' ', ''))
+                decoded_results = results.decode(encoding)
             except UnicodeError:
                 try:
                     decoded_results = results.decode("utf-8")
