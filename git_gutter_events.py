@@ -8,34 +8,12 @@ try:
 except (ImportError, ValueError):
     from git_gutter_settings import settings
 
-ST3 = int(sublime.version()) >= 3000
 
-
-def async_event_listener(EventListener):
-    if ST3:
-        async_methods = set([
-            'on_new',
-            'on_clone',
-            'on_load',
-            'on_pre_save',
-            'on_post_save',
-            'on_modified',
-            'on_selection_modified',
-            'on_activated',
-            'on_deactivated',
-        ])
-        for attr_name in dir(EventListener):
-            if attr_name in async_methods:
-                attr = getattr(EventListener, attr_name)
-                setattr(EventListener, attr_name + '_async', attr)
-                delattr(EventListener, attr_name)
-    return EventListener
-
-
-@async_event_listener
 class GitGutterEvents(EventListener):
     def __init__(self):
         self._latest_events = {}
+        self.set_timeout = sublime.set_timeout_async if hasattr(
+            sublime, "set_timeout_async") else sublime.set_timeout
 
     # Synchronous
 
@@ -118,13 +96,7 @@ class GitGutterEvents(EventListener):
         def callback():
             if this_event == self._latest_events.get(key, None):
                 view.run_command('git_gutter')
-
-        if ST3:
-            set_timeout = sublime.set_timeout_async
-        else:
-            set_timeout = sublime.set_timeout
-
-        set_timeout(callback, settings.get("debounce_delay"))
+        self.set_timeout(callback, settings.get("debounce_delay", 1000))
 
     # Settings
 
