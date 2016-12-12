@@ -1,138 +1,151 @@
 import time
 
 import sublime
-from sublime_plugin import EventListener
+import sublime_plugin
 
 try:
     from .git_gutter_settings import settings
 except (ImportError, ValueError):
     from git_gutter_settings import settings
 
-ST3 = int(sublime.version()) >= 3000
+try:
+    set_timeout = sublime.set_timeout_async
+except AttributeError:
+    set_timeout = sublime.set_timeout
 
 
-def async_event_listener(EventListener):
-    if ST3:
-        async_methods = set([
-            'on_new',
-            'on_clone',
-            'on_load',
-            'on_pre_save',
-            'on_post_save',
-            'on_modified',
-            'on_selection_modified',
-            'on_activated',
-            'on_deactivated',
-        ])
-        for attr_name in dir(EventListener):
-            if attr_name in async_methods:
-                attr = getattr(EventListener, attr_name)
-                setattr(EventListener, attr_name + '_async', attr)
-                delattr(EventListener, attr_name)
-    return EventListener
+class GitGutterEvents(sublime_plugin.EventListener):
+    """The EventListener invokes evaluation of changes on certain events.
 
+    GitGutter mainly operates in the background by listening to events sent
+    from Sublime Text. This event listener is the interface to get informed
+    about user interaction to decide when to invoke an evaluation of changes
+    by calling the main `git_gutter` command.
+    """
 
-@async_event_listener
-class GitGutterEvents(EventListener):
     def __init__(self):
-        self._latest_keypresses = {}
-
-    # Synchronous
+        """Initialize GitGutterEvents object."""
+        self._latest_events = {}
 
     def on_load(self, view):
         """Run git_gutter after loading, if view is valid.
 
-        Sublime Text marks views as scratch as long as a file is loading,
-        but already triggeres the `on_activate()`, which will be therefore
-        ignored. The `on_load()` is triggered as soon as the file was loaded.
-        If the `git_gutter_enabled` flag was not yet set run `git_gutter`
-        to check if the view shows a valid file now.
+        Arguments:
+            view (View): The view which received the event.
         """
-        if not view.settings().get('git_gutter_enabled', False):
-            self.debounce(view, 'load')
+        self.debounce(view, 'load')
+
+    def on_close(self, view):
+        """Clean up the debounce dictinary.
+
+        Arguments:
+            view (View): The view which received the event.
+        """
+        key = view.id()
+        if key in self._latest_events:
+            del self._latest_events[key]
 
     def on_modified(self, view):
-        """Run git_gutter for visible view.
+        """Run git_gutter for modified visible view.
 
         The `on_modified()` is called when typing into an active view and
         might be called for inactive views if the file changes on disk.
 
-        If the view is not visible, git_gutter will be triggered
-        by `on_activate()` later. So it's useless here.
+        Arguments:
+            view (View): The view which received the event.
         """
-        if self.live_mode() and self.is_view_visible(view):
+        if self.live_mode():
             self.debounce(view, 'modified')
 
     def on_clone(self, view):
+        """Run git_gutter for a cloned view.
+
+        Arguments:
+            view (View): The view which received the event.
+        """
         self.debounce(view, 'clone')
 
     def on_post_save(self, view):
         """Run git_gutter after saving.
 
-        If the view is not visible git_gutter does not run with
-        `live_mode` or `focus_change_mode` enabled as they would trigger
-        git_gutter with the next `on_activate()` event.
+        Arguments:
+            view (View): The view which received the event.
         """
-        if self.is_view_visible(view) or (
-                not self.live_mode() and not self.focus_change_mode()):
-            self.debounce(view, 'post-save')
+        self.debounce(view, 'post-save')
 
     def on_activated(self, view):
-        """Run git_gutter when the view is activated.
+        """Run git_gutter if the view gets activated.
 
         When opening larger files, this event is received before `on_load()`
         event and content is not yet fully available. So drop the event if
         the view is still loading or marked as scratch.
-        """
-        if view.is_scratch() or view.is_loading():
-            return
 
+        Arguments:
+            view (View): The view which received the event.
+        """
         if self.live_mode() or self.focus_change_mode():
             self.debounce(view, 'activated')
 
-    def on_hover(self, view, point, hover_zone):
+    @staticmethod
+    def on_hover(view, point, hover_zone):
+        """Open diff popup if user hovers the mouse over the gutter area.
+
+        Arguments:
+            view (View): The view which received the event.
+            point (Point): The text position where the mouse hovered
+            hover_zone (int): The context the event was triggered in
+        """
         if hover_zone != sublime.HOVER_GUTTER:
             return
         # don't let the popup flicker / fight with other packages
         if view.is_popup_visible():
             return
-        if not settings.get("enable_hover_diff_popup"):
+        if not settings.get('enable_hover_diff_popup'):
             return
-        view.run_command(
-            'git_gutter_diff_popup',
-            args={'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
-
-    # Asynchronous
+        view.run_command('git_gutter_diff_popup', {
+            'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
 
     def debounce(self, view, event_type):
-        key = (event_type, view.file_name())
-        this_keypress = time.time()
-        self._latest_keypresses[key] = this_keypress
+        """Invoke evaluation of changes after some idle time.
+
+        Arguments:
+            view (View): The view to perform evaluation for
+            event_type (string): The event identifier
+        """
+        key = view.id()
+        this_event = time.time()
+        self._latest_events.setdefault(key, {})[event_type] = this_event
 
         def callback():
-            latest_keypress = self._latest_keypresses.get(key, None)
-            if this_keypress == latest_keypress:
-                view.run_command('git_gutter', {'event_type': [event_type]})
+            """Run git_gutter command for most recent event."""
+            if not self.is_view_visible(view):
+                return
+            view_events = self._latest_events.get(key, {})
+            if this_event == view_events.get(event_type, None):
+                view.run_command('git_gutter', {
+                    'event_type': list(view_events.keys())})
+                self._latest_events[key] = {}
+        # Run command delayed and asynchronous if supported.
+        set_timeout(callback, max(300, settings.get('debounce_delay', 1000)))
 
-        if ST3:
-            set_timeout = sublime.set_timeout_async
-        else:
-            set_timeout = sublime.set_timeout
+    @staticmethod
+    def live_mode():
+        """Evaluate changes every time the view is modified."""
+        return settings.get('live_mode', True)
 
-        set_timeout(callback, settings.get("debounce_delay"))
+    @staticmethod
+    def focus_change_mode():
+        """Evaluate changes every time a view gets the focus."""
+        return settings.get('focus_change_mode', True)
 
-    # Settings
-
-    def live_mode(self, default=True):
-        return settings.get('live_mode', default)
-
-    def focus_change_mode(self, default=True):
-        return settings.get('focus_change_mode', default)
-
-    def is_view_visible(self, view):
-        """Return true if the view is visible.
+    @staticmethod
+    def is_view_visible(view):
+        """Determine if the view is visible.
 
         Only an active view of a group is visible.
+
+        Returns:
+            bool: True if the view is visible in any window.
         """
         window = view.window()
         if window:
