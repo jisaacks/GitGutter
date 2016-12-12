@@ -1,4 +1,4 @@
-import time
+from time import time
 
 import sublime
 from sublime_plugin import EventListener
@@ -35,7 +35,7 @@ def async_event_listener(EventListener):
 @async_event_listener
 class GitGutterEvents(EventListener):
     def __init__(self):
-        self._latest_keypresses = {}
+        self._latest_events = {}
 
     # Synchronous
 
@@ -50,6 +50,12 @@ class GitGutterEvents(EventListener):
         """
         if not view.settings().get('git_gutter_enabled', False):
             self.debounce(view, 'load')
+
+    def on_close(self, view):
+        """Clean up the debounce dictinary."""
+        key = view.id()
+        if key in self._latest_events:
+            del(self._latest_events[key])
 
     def on_modified(self, view):
         """Run git_gutter for visible view.
@@ -105,13 +111,12 @@ class GitGutterEvents(EventListener):
     # Asynchronous
 
     def debounce(self, view, event_type):
-        key = (event_type, view.file_name())
-        this_keypress = time.time()
-        self._latest_keypresses[key] = this_keypress
+        key = view.id()
+        this_event = time()
+        self._latest_events[key] = this_event
 
         def callback():
-            latest_keypress = self._latest_keypresses.get(key, None)
-            if this_keypress == latest_keypress:
+            if this_event == self._latest_events.get(key, None):
                 view.run_command('git_gutter')
 
         if ST3:
