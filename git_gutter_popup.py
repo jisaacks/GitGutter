@@ -298,7 +298,9 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
 
 class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
-        return _MDPOPUPS_INSTALLED
+        return (
+            _MDPOPUPS_INSTALLED and
+            self.view.settings().get('git_gutter_enabled', False))
 
     def run(self, edit, point=None, highlight_diff=None, flags=0):
         if not point:

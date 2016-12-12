@@ -1,7 +1,7 @@
 import time
 
 import sublime
-import sublime_plugin
+from sublime_plugin import EventListener
 
 try:
     from .git_gutter_settings import settings
@@ -33,20 +33,32 @@ def async_event_listener(EventListener):
 
 
 @async_event_listener
-class GitGutterEvents(sublime_plugin.EventListener):
+class GitGutterEvents(EventListener):
     def __init__(self):
-        self.latest_keypresses = {}
+        self._latest_keypresses = {}
 
     # Synchronous
+
+    def on_load(self, view):
+        """Run git_gutter after loading, if view is valid.
+
+        Sublime Text marks views as scratch as long as a file is loading,
+        but already triggeres the `on_activate()`, which will be therefore
+        ignored. The `on_load()` is triggered as soon as the file was loaded.
+        If the `git_gutter_enabled` flag was not yet set run `git_gutter`
+        to check if the view shows a valid file now.
+        """
+        if not view.settings().get('git_gutter_enabled', False):
+            self.debounce(view, 'load')
 
     def on_modified(self, view):
         """Run git_gutter for visible view.
 
-        The on_modified() is called when typing into an active view
+        The `on_modified()` is called when typing into an active view
         and might be called for inactive views if the file changes on disk.
 
         If the view is not visible, git_gutter will be triggered
-        by on_activate() later. So it's useless here.
+        by `on_activate()` later. So it's useless here.
         """
         if self.live_mode() and self.is_view_visible(view):
             self.debounce(view, 'modified')
@@ -58,19 +70,23 @@ class GitGutterEvents(sublime_plugin.EventListener):
         """Run git_gutter after saving.
 
         If the view is not visible git_gutter does not run with
-        live_mode or focus_change_mode enabled as they would trigger
-        git_gutter with the next on_activate() event.
+        `live_mode` or `focus_change_mode` enabled as they would trigger
+        git_gutter with the next `on_activate()` event.
         """
-        if self.is_view_visible(view) or not (
-                self.live_mode() or self.focus_change_mode()):
+        if self.is_view_visible(view) or (
+                not self.live_mode() and not self.focus_change_mode()):
             self.debounce(view, 'post-save')
 
     def on_activated(self, view):
         """Run git_gutter when the view is activated.
 
-        This event is also called after a file is opened into an
-        active view.
+        When opening larger files, this event is received before `on_load()`
+        event and content is not yet fully available. So drop the event if
+        the view is still loading or marked as scratch.
         """
+        if view.is_scratch() or view.is_loading():
+            return
+
         if self.live_mode() or self.focus_change_mode():
             self.debounce(view, 'activated')
 
@@ -91,10 +107,10 @@ class GitGutterEvents(sublime_plugin.EventListener):
     def debounce(self, view, event_type):
         key = (event_type, view.file_name())
         this_keypress = time.time()
-        self.latest_keypresses[key] = this_keypress
+        self._latest_keypresses[key] = this_keypress
 
         def callback():
-            latest_keypress = self.latest_keypresses.get(key, None)
+            latest_keypress = self._latest_keypresses.get(key, None)
             if this_keypress == latest_keypress:
                 view.run_command('git_gutter')
 
