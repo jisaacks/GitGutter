@@ -29,6 +29,11 @@ class GitGutterShowDiff(object):
         self.diff_results = None
         self.show_untracked = False
 
+    def clear(self):
+        """Remove all gutter icons and status messages."""
+        self.view.erase_status('00_git_gutter')
+        self._clear_all()
+
     def run(self):
         """Run diff and update gutter icons and status message."""
 
@@ -108,7 +113,7 @@ class GitGutterShowDiff(object):
             if template:
                 # render the template using jinja2 library
                 text = jinja2.environment.Template(''.join(template)).render(
-                    repo=os.path.basename(self.git_handler.git_tree),
+                    repo=self.git_handler.repository_name,
                     compare=self.git_handler.format_compare_against(),
                     branch=branch_name, state=file_state, deleted=len(deleted),
                     inserted=len(inserted), modified=len(modified))

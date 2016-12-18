@@ -9,11 +9,9 @@ from functools import partial
 import sublime
 
 try:
-    from . import git_helper
     from .git_gutter_settings import settings
     from .promise import Promise
 except (ImportError, ValueError):
-    import git_helper
     from git_gutter_settings import settings
     from promise import Promise
 
@@ -37,9 +35,12 @@ class GitGutterHandler(object):
         self.git_temp_file = None
         self.buf_temp_file = None
 
-        self.git_tree = None
-        self.git_dir = None
-        self.git_path = None
+        # cached view file name to detect renames
+        self._view_file_name = None
+        # real path to current work tree
+        self._git_tree = None
+        # relative file path in work tree
+        self._git_path = None
         self.git_tracked = False
 
         self._last_refresh_time_git_file = 0
@@ -61,6 +62,67 @@ class GitGutterHandler(object):
         os.close(fd)
         return filepath
 
+    @property
+    def repository_name(self):
+        """Return the folder name of the working tree as repository name."""
+        return os.path.basename(
+            self._git_tree) if self._git_tree else '(None)'
+
+    def work_tree(self, validate=False):
+        """Return the real path of a valid work-tree or None.
+
+        Arguments:
+            validate (bool): If True check whether the file is part of a valid
+                             git repository or return the cached working tree
+                             path only on False.
+        """
+        def is_work_tree(path):
+            """Return True if `path` contains a `.git` directory or file."""
+            return path and os.path.exists(os.path.join(path, '.git'))
+
+        def split_work_tree(file_path):
+            """Split the `file_path` into working tree and relative path.
+
+            The file_path is converted to a absolute real path and split into
+            the working tree part and relative path part.
+
+            Note:
+                This is a local alternitive to calling the git command:
+
+                    git rev-parse --show-toplevel
+
+            Arguments:
+                file_path (string): full path to a file.
+
+            Returns:
+                A tuble of two the elements (working tree, file path).
+            """
+            if file_path:
+                path, name = os.path.split(os.path.realpath(file_path))
+                # files within '.git' path are not part of a work tree
+                while path and name and name != '.git':
+                    if is_work_tree(path):
+                        return (path, os.path.relpath(
+                            file_path, path).replace('\\', '/'))
+                    path, name = os.path.split(path)
+            return (None, None)
+
+        if validate:
+            # Check if file exists
+            file_name = self.view.file_name()
+            if not file_name or not os.path.isfile(file_name):
+                self._view_file_name = None
+                self._git_tree = None
+                self._git_path = None
+                return None
+            # Check if file was renamed
+            is_renamed = file_name != self._view_file_name
+            if is_renamed or not is_work_tree(self._git_tree):
+                self._view_file_name = file_name
+                self._git_tree, self._git_path = split_work_tree(file_name)
+                self.clear_git_time()
+        return self._git_tree
+
     def git_time_cleared(self):
         return self._last_refresh_time_git_file == 0
 
@@ -75,7 +137,7 @@ class GitGutterHandler(object):
 
     def get_compare_against(self):
         """Return the branch/commit/tag string the view is compared to."""
-        return settings.get_compare_against(self.git_dir, self.view)
+        return settings.get_compare_against(self._git_tree, self.view)
 
     def set_compare_against(self, commit, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
@@ -91,7 +153,7 @@ class GitGutterHandler(object):
                       git show-ref
             refresh - always call git_gutter command
         """
-        settings.set_compare_against(self.git_dir, commit)
+        settings.set_compare_against(self._git_tree, commit)
         self.clear_git_time()
         if refresh or not any(settings.get(key, True) for key in (
                 'focus_change_mode', 'live_mode')):
@@ -136,17 +198,6 @@ class GitGutterHandler(object):
         """
         return self.git_tracked
 
-    def on_disk(self):
-        """Determine, if the view is saved to disk."""
-        file_name = self.view.file_name()
-        on_disk = file_name is not None and os.path.isfile(file_name)
-        if on_disk:
-            self.git_tree = self.git_tree or git_helper.git_tree(self.view)
-            self.git_dir = self.git_dir or git_helper.git_dir(self.git_tree)
-            self.git_path = self.git_path or git_helper.git_file_path(
-                self.view, self.git_tree)
-        return on_disk
-
     def update_buf_file(self):
         """Write view's content to temporary file as source for git diff."""
         # Read from view buffer
@@ -183,20 +234,12 @@ class GitGutterHandler(object):
 
             args = [
                 settings.git_binary_path,
-                '--git-dir=' + self.git_dir,
-                '--work-tree=' + self.git_tree,
                 'show',
                 '%s:%s' % (
                     self.get_compare_against(),
-                    self.git_path),
+                    self._git_path),
             ]
-
-            try:
-                self.update_git_time()
-                return GitGutterHandler.run_command(
-                    args=args, decode=False).then(write_file)
-            except Exception:
-                pass
+            return self.run_command(args=args, decode=False).then(write_file)
         return Promise.resolve()
 
     def process_diff(self, diff_str):
@@ -261,13 +304,8 @@ class GitGutterHandler(object):
                 self.buf_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
-            return GitGutterHandler.run_command(
-                args=args, decode=False).then(decode_diff)
-
-        if self.on_disk() and self.git_path:
-            return self.update_git_file().then(run_diff)
-        else:
-            return Promise.resolve("")
+            return self.run_command(args=args, decode=False).then(decode_diff)
+        return self.update_git_file().then(run_diff)
 
     def process_diff_line_change(self, line_nr, diff_str):
         hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
@@ -368,7 +406,7 @@ class GitGutterHandler(object):
 
     def handle_files(self, additional_args):
         """Run git ls-files to check for untracked or ignored file."""
-        if self.on_disk() and self.git_path:
+        if self._git_tree:
             def is_nonempty(results):
                 """Determine if view's file is in git's index.
 
@@ -379,14 +417,12 @@ class GitGutterHandler(object):
 
             args = [
                 settings.git_binary_path,
-                '--git-dir=' + self.git_dir,
-                '--work-tree=' + self.git_tree,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
-                os.path.join(self.git_tree, self.git_path),
+                os.path.join(self._git_tree, self._git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            return GitGutterHandler.run_command(args).then(is_nonempty)
+            return self.run_command(args).then(is_nonempty)
         return Promise.resolve(False)
 
     def git_commits(self):
@@ -399,13 +435,11 @@ class GitGutterHandler(object):
         """
         args = [
             settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
             'log', '--all',
             '--pretty=%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
         ]
-        return GitGutterHandler.run_command(args)
+        return self.run_command(args)
 
     def git_file_commits(self):
         r"""Query all commits with changes to the attached file.
@@ -418,51 +452,42 @@ class GitGutterHandler(object):
         """
         args = [
             settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
             'log',
             '--pretty=%at\a%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000',
-            '--', self.git_path
+            '--', self._git_path
         ]
-        return GitGutterHandler.run_command(args)
+        return self.run_command(args)
 
     def git_branches(self):
         args = [
             settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
             'for-each-ref',
             '--sort=-committerdate',
             '--format=%(subject)\a%(refname)\a%(objectname)',
             'refs/heads/'
         ]
-        return GitGutterHandler.run_command(args)
+        return self.run_command(args)
 
     def git_tags(self):
         args = [
             settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
             'show-ref',
             '--tags',
             '--abbrev=7'
         ]
-        return GitGutterHandler.run_command(args)
+        return self.run_command(args)
 
     def git_current_branch(self):
         args = [
             settings.git_binary_path,
-            '--git-dir=' + self.git_dir,
-            '--work-tree=' + self.git_tree,
             'rev-parse',
             '--abbrev-ref',
             'HEAD'
         ]
-        return GitGutterHandler.run_command(args)
+        return self.run_command(args)
 
-    @staticmethod
-    def run_command(args, decode=True):
+    def run_command(self, args, decode=True):
         """Run a git command asynchronously and return a Promise.
 
         Arguments:
@@ -479,8 +504,9 @@ class GitGutterHandler(object):
                 else:
                     startupinfo = None
                 proc = subprocess.Popen(
-                    args=args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE, startupinfo=startupinfo)
+                    args=args, cwd=self._git_tree, startupinfo=startupinfo,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    stdin=subprocess.PIPE)
                 if _HAVE_TIMEOUT:
                     stdout, stderr = proc.communicate(timeout=30)
                 else:

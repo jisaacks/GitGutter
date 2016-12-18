@@ -27,6 +27,8 @@ class GitGutterCommand(TextCommand):
         TextCommand.__init__(self, *args, **kwargs)
         self.git_handler = GitGutterHandler(self.view)
         self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler)
+        # Last enabled state for change detection
+        self._enabled = False
 
     def is_enabled(self, **kwargs):
         """Determine if `git_gutter` command is _enabled to execute."""
@@ -50,14 +52,18 @@ class GitGutterCommand(TextCommand):
         # Don't handle binary files
         elif view.encoding() in ('Hexadecimal'):
             valid = False
-        # Don't handle views without valid file
-        elif not self.git_handler.on_disk():
-            valid = False
         # Don't handle files outside a repository
-        elif not self.git_handler.git_dir:
+        elif not self.git_handler.work_tree(validate=True):
             valid = False
-        # Save state for use in other modules
-        view.settings().set('git_gutter_enabled', valid)
+        # Handle changed state
+        if valid != self._enabled:
+            # File moved out of work-tree or repository gone
+            if not valid:
+                self.show_diff_handler.clear()
+            # Save state for use in other modules
+            view.settings().set('git_gutter_enabled', valid)
+            # Save state for internal use
+            self._enabled = valid
         return valid
 
     def run(self, edit, **kwargs):

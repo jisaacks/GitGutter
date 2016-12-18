@@ -106,7 +106,7 @@ class GitGutterSettings:
             self._user_settings.get('show_in_minimap') or
             self._settings.get('show_in_minimap'))
 
-    def get_compare_against(self, git_dir, view):
+    def get_compare_against(self, git_tree, view):
         """Return the compare target for a view.
 
         If interactivly specified a compare target for the view's repository,
@@ -115,26 +115,26 @@ class GitGutterSettings:
         fall back to HEAD if everything goes wrong to avoid exceptions.
 
         Arguments:
-            git_dir     - path of the `.git` directory holding the index
+            git_tree    - real root path of the current work-tree
             view        - the view whose settings to query first
         """
         # Interactively specified compare target overrides settings.
-        if git_dir in self._compare_against_mapping:
-            return self._compare_against_mapping[git_dir]
+        if git_tree in self._compare_against_mapping:
+            return self._compare_against_mapping[git_tree]
         # Project settings and Preferences override plugin settings if set.
         compare = view.settings().get('git_gutter_compare_against')
         if not compare:
             compare = self.get('compare_against', 'HEAD')
         return compare
 
-    def set_compare_against(self, git_dir, new_compare_against):
+    def set_compare_against(self, git_tree, new_compare_against):
         """Assign a new compare target for current repository.
 
         Arguments:
-            git_dir             - path of the .git directory holding the index
+            git_tree            - real root path of the current work-tree
             new_compare_against - new branch/tag/commit to cmpare against
         """
-        self._compare_against_mapping[git_dir] = new_compare_against
+        self._compare_against_mapping[git_tree] = new_compare_against
 
     @property
     def default_theme_path(self):
