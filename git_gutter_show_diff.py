@@ -153,6 +153,10 @@ class GitGutterShowDiff(object):
             if self.view.line_height() > 15:
                 icon_name = icon_name + "_arrow"
 
+        if (sublime.platform() in ['linux', 'windows'] and
+            settings.dpi_scale and settings.dpi_scale >= 2):
+            icon_name = icon_name + '@2x'
+
         if int(sublime.version()) < 3014:
             path = '../GitGutter'
             extn = ''
