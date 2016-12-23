@@ -10,12 +10,19 @@ except (ImportError, ValueError):
 
 
 class GitGutterEvents(EventListener):
+    """The EventListener invokes evaluation of changes on certain events.
+
+    GitGutter mainly operates in the background by listening to events sent
+    from Sublime Text. This event listener is the interface to get informed
+    about user interaction to decide when to invoke an evaluation of changes
+    by calling the main `git_gutter` command.
+    """
+
     def __init__(self):
+        """Initialize GitGutterEvents object."""
         self._latest_events = {}
         self.set_timeout = sublime.set_timeout_async if hasattr(
             sublime, "set_timeout_async") else sublime.set_timeout
-
-    # Synchronous
 
     def on_load(self, view):
         """Run git_gutter after loading, if view is valid.
@@ -36,7 +43,7 @@ class GitGutterEvents(EventListener):
             del(self._latest_events[key])
 
     def on_modified(self, view):
-        """Run git_gutter for visible view.
+        """Run git_gutter for modified visible view.
 
         The `on_modified()` is called when typing into an active view
         and might be called for inactive views if the file changes on disk.
@@ -48,6 +55,7 @@ class GitGutterEvents(EventListener):
             self.debounce(view, 'modified')
 
     def on_clone(self, view):
+        """Run git_gutter for a cloned view."""
         self.debounce(view, 'clone')
 
     def on_post_save(self, view):
@@ -62,7 +70,7 @@ class GitGutterEvents(EventListener):
             self.debounce(view, 'post-save')
 
     def on_activated(self, view):
-        """Run git_gutter when the view is activated.
+        """Run git_gutter if the view gets activated.
 
         When opening larger files, this event is received before `on_load()`
         event and content is not yet fully available. So drop the event if
@@ -75,6 +83,13 @@ class GitGutterEvents(EventListener):
             self.debounce(view, 'activated')
 
     def on_hover(self, view, point, hover_zone):
+        """Open diff popup if user hovers the mouse over the gutter area.
+
+        Arguments:
+            view        - object of the view which detected the mouse movement
+            point       - provides the position where the mouse pointer is
+            hover_zone  - defines the context the event was triggered in
+        """
         if hover_zone != sublime.HOVER_GUTTER:
             return
         # don't let the popup flicker / fight with other packages
@@ -86,9 +101,13 @@ class GitGutterEvents(EventListener):
             'git_gutter_diff_popup',
             args={'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
 
-    # Asynchronous
-
     def debounce(self, view, event_type):
+        """Invoke evaluation of changes after some idle time.
+
+        Arguments:
+            view        - object of the view to perform evaluation for
+            event_type  - a string identifying the event
+        """
         key = view.id()
         this_event = time()
         self._latest_events[key] = this_event
@@ -98,13 +117,13 @@ class GitGutterEvents(EventListener):
                 view.run_command('git_gutter')
         self.set_timeout(callback, settings.get("debounce_delay", 1000))
 
-    # Settings
+    def live_mode(self):
+        """Evaluate changes every time the view is modified."""
+        return settings.get('live_mode', True)
 
-    def live_mode(self, default=True):
-        return settings.get('live_mode', default)
-
-    def focus_change_mode(self, default=True):
-        return settings.get('focus_change_mode', default)
+    def focus_change_mode(self):
+        """Evaluate changes every time a view gets the focus."""
+        return settings.get('focus_change_mode', True)
 
     def is_view_visible(self, view):
         """Return true if the view is visible.
