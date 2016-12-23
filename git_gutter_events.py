@@ -76,9 +76,6 @@ class GitGutterEvents(EventListener):
         event and content is not yet fully available. So drop the event if
         the view is still loading or marked as scratch.
         """
-        if view.is_scratch() or view.is_loading():
-            return
-
         if self.live_mode() or self.focus_change_mode():
             self.debounce(view, 'activated')
 
