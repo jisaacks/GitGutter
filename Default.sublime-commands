@@ -30,5 +30,59 @@
     {
         "caption": "GitGutter: Compare Against Tag",
         "command": "git_gutter_compare_tag"
+    },
+    {
+        "caption": "Preferences: GitGutter Settings",
+        "command": "git_gutter_edit_settings",
+        "args": {
+            "base_file": "${packages}/GitGutter/GitGutter.sublime-settings",
+            "default": "// GitGutter Settings - User\n{\n\t$0\n}\n"
+        }
+    },
+    {
+        "caption": "Preferences: GitGutter Settings - Default",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/GitGutter/GitGutter.sublime-settings"}
+    },
+    {
+        "caption": "Preferences: GitGutter Settings - User",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/User/GitGutter.sublime-settings"}
+    },
+    {
+        "caption": "Preferences: GitGutter Key Bindings",
+        "command": "git_gutter_edit_settings",
+        "args": {
+            "base_file": "${packages}/GitGutter/Default (${platform}).sublime-keymap",
+            "default": "// GitGutter Key Bindings - User\n{\n\t$0\n}\n"
+        }
+    },
+    {
+        "caption": "Preferences: GitGutter Key Bindings - Default",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/GitGutter/Default (${platform}).sublime-keymap"}
+    },
+    {
+        "caption": "Preferences: GitGutter Key Bindings - User",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/User/Default (${platform}).sublime-keymap"}
+    },
+    {
+        "caption": "Preferences: GitGutter Popup Stylesheet",
+        "command": "git_gutter_edit_settings",
+        "args": {
+            "base_file": "${packages}/GitGutter/gitgutter_popup.css",
+            "default": "/* GitGutter Popup Stylesheet - User */\n\n"
+        }
+    },
+    {
+        "caption": "Preferences: GitGutter Popup Stylesheet - Default",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/GitGutter/gitgutter_popup.css"}
+    },
+    {
+        "caption": "Preferences: GitGutter Popup Stylesheet - User",
+        "command": "git_gutter_open_file",
+        "args": {"file": "${packages}/User/gitgutter_popup.css"}
     }
 ]
