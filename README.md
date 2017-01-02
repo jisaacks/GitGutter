@@ -58,7 +58,7 @@ The most common reason for the icons to not show up is likely a problem with Git
 | ⎘      | copy the content of the git state      |
 | ⟲      | revert changes to the state in git     |
 
-The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer *(which is currently only in the dev builds)*. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
+The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
 
 ### Comparing against different commits/branches/tags
 
