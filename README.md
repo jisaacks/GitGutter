@@ -149,6 +149,23 @@ You will need to figure out the names of the regions you are trying to protect.
 
 You can turn off the status bar text by changing `"show_status": "default"` to `"show_status": "none"`.
 
+
+#### Themes
+
+GitGutter provides support for custom gutter icons and diff popup stylesheets
+comming with theme packages. You can select a custom theme by changing the
+setting `"theme": "Default.gitgutter-theme"` to the desired name.
+
+GitGutter includes 2 themes:
+- Default.gitgutter-theme
+- Default HiDPI.gitgutter-theme
+
+To add a custom GitGutter Theme developers need to add a folder with all
+required icons and an optional `gitgutter_popup.css` file to their package. An
+empty JSON file `<ThemName>.gitgutter-theme` must exist to mark this folder as
+resource for GitGutter icons. For short: Copy the structure of the Default theme
+folder and you'll be ok.
+
 #### Per-project Settings
 Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
 To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.

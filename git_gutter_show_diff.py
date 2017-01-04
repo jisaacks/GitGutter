@@ -10,6 +10,7 @@ except (ImportError, ValueError):
     from promise import Promise
 
 ST3 = int(sublime.version()) >= 3000
+_ICON_EXT = '.png' if ST3 else ''
 
 
 class GitGutterShowDiff(object):
@@ -148,19 +149,17 @@ class GitGutterShowDiff(object):
         root = os.path.split(os.path.dirname(path))[1]
         return os.path.splitext(root)[0]
 
-    def _icon_path(self, icon_name):
-        if icon_name in ['deleted_top', 'deleted_bottom', 'deleted_dual']:
-            if self.view.line_height() > 15:
-                icon_name = icon_name + "_arrow"
+    def _icon_path(self, event):
+        """Built the full path to the icon to show for the event.
 
-        if int(sublime.version()) < 3014:
-            path = '../GitGutter'
-            extn = ''
+        Arguments:
+            event   - is one of self.region_names
+        """
+        if self.view.line_height() > 15 and event.startswith('del'):
+            arrow = '_arrow'
         else:
-            path = 'Packages/' + self._plugin_dir()
-            extn = '.png'
-
-        return "/".join([path, 'icons', icon_name + extn])
+            arrow = ''
+        return ''.join((settings.theme_path, '/', event, arrow, _ICON_EXT))
 
     def _bind_icons(self, event, lines):
         regions = self._lines_to_regions(lines)

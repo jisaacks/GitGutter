@@ -25,6 +25,16 @@ class GitGutterSettings:
         self.patience_switch = ''
         self.show_in_minimap = False
         self.show_status = 'none'
+        # Name of this package (GitGutter or GitGutter-Edge)
+        # stored in settings as kind of environment variable
+        path = os.path.realpath(__file__)
+        root = os.path.split(os.path.dirname(path))[1]
+        self.package_name = os.path.splitext(root)[0]
+        # built-in themes location
+        self._builtin_theme_path = '%s/%s/themes' % (
+            'Packages' if ST3 else '..', self.package_name)
+        # cached theme path to reduce calls of find_resources
+        self._theme_path = ''
 
     def get(self, key, default=None):
         if self._settings is None or not self._settings.has(key):
@@ -114,6 +124,28 @@ class GitGutterSettings:
 
     def set_compare_against(self, git_dir, new_compare_against):
         self._compare_against_mapping[git_dir] = new_compare_against
+
+    @property
+    def default_theme_path(self):
+        """Return the default theme path."""
+        return self._builtin_theme_path + '/Default'
+
+    @property
+    def theme_path(self):
+        """Read 'theme' setting and return path to gutter icons."""
+        theme = self.get('theme', 'Default.gitgutter-theme')
+        # rebuilt path if setting changed
+        if theme != os.path.basename(self._theme_path):
+            if ST3:
+                themes = sublime.find_resources(theme)
+                self._theme_path = os.path.dirname(themes[-1]) \
+                    if themes else self.default_theme_path
+            else:
+                # ST2 doesn't support find_resource so use built-in themes only
+                theme, _ = os.path.splitext(theme)
+                self._theme_path = '/'.join((self._builtin_theme_path, theme))
+        return self._theme_path
+
 
 if 'settings' not in globals():
     settings = GitGutterSettings()

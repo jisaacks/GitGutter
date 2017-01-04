@@ -195,28 +195,32 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
             .format(**buttons)
         )
         content = button_line
-    css = ''
+
     if _MD_POPUPS_USE_WRAPPER_CLASS:
         wrapper_class = ".git-gutter"
     else:
         wrapper_class = ""
 
-    # load the css files
-    css_contents = []
-    css_files = sublime.find_resources("gitgutter_popup.css")
-    for css_file in css_files:
+    # load and join popup stylesheets
+    css = []
+    theme_paths = (
+        "Packages/" + settings.package_name,
+        settings.theme_path,
+        "Packages/User"
+    )
+    for path in theme_paths:
         try:
-            css_contents.append(sublime.load_resource(css_file))
-        except OSError:
-            print("Error while loading '{0}'.".format(css_file))
-    css = "\n".join(css_contents)
+            resource_name = path + "/gitgutter_popup.css"
+            css.append(sublime.load_resource(resource_name))
+        except IOError:
+            pass
 
     # apply the jinja template
     jinja_kwargs = {
         "wrapper_class": wrapper_class,
         "use_icons": use_icons
     }
-    tmpl = jinja2.environment.Template(css)
+    tmpl = jinja2.environment.Template("\n".join(css))
     css = tmpl.render(**jinja_kwargs)
 
     # create the popup

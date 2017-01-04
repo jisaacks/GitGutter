@@ -86,5 +86,8 @@
     "sublimelinter-warning-gutter-marks",
     "sublimelinter-error-gutter-marks",
     "bookmarks"
-  ]
+  ],
+
+  // The gutter theme defines the icons to show for the different events.
+  "theme": "Default.gitgutter-theme"
 }
