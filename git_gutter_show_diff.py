@@ -37,9 +37,9 @@ class GitGutterShowDiff(object):
     def run(self):
         """Run diff and update gutter icons and status message."""
 
-        # git_time_reset was called recently, maybe branch has changed
+        # invalidate_git_file() was called recently, maybe branch has changed
         # Status message needs an update on this run.
-        if self.git_handler.git_time_cleared():
+        if not self.git_handler.is_git_file_valid():
             self.diff_results = None
         self.git_handler.diff().then(self._check_ignored_or_untracked)
 

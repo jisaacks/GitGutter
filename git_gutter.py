@@ -34,6 +34,7 @@ class GitGutterCommand(TextCommand):
         """Determine if `git_gutter` command is _enabled to execute."""
         view = self.view
         valid = True
+
         # Keep idle, if git binary is not set
         if not settings.git_binary_path:
             valid = False
@@ -52,9 +53,14 @@ class GitGutterCommand(TextCommand):
         # Don't handle binary files
         elif view.encoding() in ('Hexadecimal'):
             valid = False
-        # Don't handle files outside a repository
-        elif not self.git_handler.work_tree(validate=True):
-            valid = False
+        else:
+            # Validate work tree on certain events only
+            validate = any(event in ('load', 'activated', 'post-save')
+                for event in kwargs.get('event_type', []))
+            # Don't handle files outside a repository
+            if not self.git_handler.work_tree(validate):
+                valid = False
+
         # Handle changed state
         if valid != self._enabled:
             # File moved out of work-tree or repository gone
@@ -68,10 +74,19 @@ class GitGutterCommand(TextCommand):
 
     def run(self, edit, **kwargs):
         """API entry point to run the `git_gutter` command."""
-        if kwargs:
+        if 'action' in kwargs:
             self._handle_subcommand(**kwargs)
         else:
-            self.show_diff_handler.run()
+            self._handle_event(**kwargs)
+
+    def _handle_event(self, **kwargs):
+        events = kwargs.get('event_type', [])
+        if any(event not in ('load', 'modified') for event in events):
+            # On 'load' the git file is not yet valid anyway.
+            # On 'modified' is sent when user is typing.
+            # The git repository will most likely not change then.
+            self.git_handler.invalidate_git_file()
+        self.show_diff_handler.run()
 
     def _handle_subcommand(self, **kwargs):
         action = kwargs['action']

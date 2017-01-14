@@ -112,7 +112,7 @@ class GitGutterEvents(EventListener):
         def callback():
             latest_keypress = self._latest_keypresses.get(key, None)
             if this_keypress == latest_keypress:
-                view.run_command('git_gutter')
+                view.run_command('git_gutter', {'event_type': [event_type]})
 
         if ST3:
             set_timeout = sublime.set_timeout_async

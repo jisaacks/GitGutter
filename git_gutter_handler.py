@@ -3,7 +3,6 @@ import subprocess
 import re
 import codecs
 import tempfile
-import time
 from functools import partial
 
 import sublime
@@ -27,11 +26,10 @@ except:
 
 
 class GitGutterHandler(object):
-    # the git repo won't change that often so we can easily wait few seconds
-    # between updates for performance
-    git_file_update_interval_secs = 5
 
     def __init__(self, view):
+        """Initialize GitGutterHandler object."""
+        # attached view being tracked
         self.view = view
 
         self.buf_temp_file = None
@@ -40,8 +38,8 @@ class GitGutterHandler(object):
         self._view_file_name = None
         # path to temporary file with git index content
         self._git_temp_file = None
-        # timestamp of the last git file update
-        self._git_file_refresh_time = 0
+        # temporary file contains up to date information
+        self._git_temp_file_valid = False
         # real path to current work tree
         self._git_tree = None
         # relative file path in work tree
@@ -95,14 +93,8 @@ class GitGutterHandler(object):
             if is_renamed or not path.is_work_tree(self._git_tree):
                 self._view_file_name = file_name
                 self._git_tree, self._git_path = path.split_work_tree(file_name)
-                self.clear_git_time()
+                self.invalidate_git_file()
         return self._git_tree
-
-    def git_time_cleared(self):
-        return self._git_file_refresh_time == 0
-
-    def clear_git_time(self):
-        self._git_file_refresh_time = 0
 
     def get_compare_against(self):
         """Return the branch/commit/tag string the view is compared to."""
@@ -123,7 +115,7 @@ class GitGutterHandler(object):
             refresh - always call git_gutter command
         """
         settings.set_compare_against(self._git_tree, commit)
-        self.clear_git_time()
+        self.invalidate_git_file()
         if refresh or not any(settings.get(key, True) for key in (
                 'focus_change_mode', 'live_mode')):
             self.view.run_command('git_gutter')  # refresh ui
@@ -188,6 +180,14 @@ class GitGutterHandler(object):
                 f.write(codecs.BOM_UTF8)
             f.write(encoded)
 
+    def is_git_file_valid(self):
+        """Return True if temporary file is marked up to date."""
+        return self._git_temp_file_valid
+
+    def invalidate_git_file(self):
+        """Invalidate all cached results of recent git commands."""
+        self._git_temp_file_valid = False
+
     def update_git_file(self):
         """Update file from git index and store in temp folder.
 
@@ -229,11 +229,9 @@ class GitGutterHandler(object):
                 return Promise.resolve(False)
             return self.git_read_file(commit).then(write_file)
 
-        # Check for changed compare target in a 5 second interval
-        age = time.time() - self._git_file_refresh_time
-        if age <= self.git_file_update_interval_secs:
+        # Always resolve with False if temporary file is marked up to date.
+        if self._git_temp_file_valid:
             return Promise.resolve(False)
-        self._git_file_refresh_time += age
         return self.git_compare_commit().then(check_commit)
 
     def process_diff(self, diff_str):
