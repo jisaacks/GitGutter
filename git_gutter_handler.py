@@ -24,6 +24,9 @@ except:
         pass
     _HAVE_TIMEOUT = False
 
+# The view class has a method called 'change_count()'
+_HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
+
 
 class GitGutterHandler(object):
 
@@ -31,11 +34,12 @@ class GitGutterHandler(object):
         """Initialize GitGutterHandler object."""
         # attached view being tracked
         self.view = view
-
-        self.buf_temp_file = None
-
         # cached view file name to detect renames
         self._view_file_name = None
+        # path to temporary file with view content
+        self._view_temp_file = None
+        # last view change count
+        self._view_change_count = -1
         # path to temporary file with git index content
         self._git_temp_file = None
         # temporary file contains up to date information
@@ -53,8 +57,8 @@ class GitGutterHandler(object):
         """Delete temporary files."""
         if self._git_temp_file:
             os.unlink(self._git_temp_file)
-        if self.buf_temp_file:
-            os.unlink(self.buf_temp_file)
+        if self._view_temp_file:
+            os.unlink(self._view_temp_file)
 
     @staticmethod
     def tmp_file():
@@ -159,8 +163,31 @@ class GitGutterHandler(object):
         """
         return self.git_tracked
 
-    def update_buf_file(self):
-        """Write view's content to temporary file as source for git diff."""
+    def invalidate_view_file(self):
+        """Reset change_count and force writing the view cache file.
+
+        The view content is written to a temporary file for use with git diff,
+        if the view.change_count() has changed. This method forces the update
+        on the next call of update_view_file().
+        """
+        self._view_change_count = -1
+
+    def update_view_file(self):
+        """Write view's content to a temporary file as source for git diff.
+
+        The file is updated only if the view.change_count() has changed to
+        reduce the number of required disk writes.
+
+        Returns:
+            bool: True indicates updated file.
+                  False is returned if file is up to date.
+        """
+        change_count = 0
+        if _HAVE_VIEW_CHANGE_COUNT:
+            # write view buffer to file only, if changed
+            change_count = self.view.change_count()
+            if self._view_change_count == change_count:
+                return False
         # Read from view buffer
         chars = self.view.size()
         region = sublime.Region(0, chars)
@@ -173,12 +200,15 @@ class GitGutterHandler(object):
             # Fallback to utf8-encoding
             encoded = contents.encode('utf-8')
         # Write the encoded content to file
-        if not self.buf_temp_file:
-            self.buf_temp_file = self.tmp_file()
-        with open(self.buf_temp_file, 'wb') as f:
+        if not self._view_temp_file:
+            self._view_temp_file = self.tmp_file()
+        with open(self._view_temp_file, 'wb') as file:
             if self.view.encoding() == "UTF-8 with BOM":
-                f.write(codecs.BOM_UTF8)
-            f.write(encoded)
+                file.write(codecs.BOM_UTF8)
+            file.write(encoded)
+        # Update internal change counter after job is done
+        self._view_change_count = change_count
+        return True
 
     def is_git_file_valid(self):
         """Return True if temporary file is marked up to date."""
@@ -286,14 +316,14 @@ class GitGutterHandler(object):
             return decoded_results
 
         def run_diff(updated_git_file):
-            self.update_buf_file()
+            self.update_view_file()
             args = [
                 settings.git_binary_path,
                 'diff', '-U0', '--no-color', '--no-index',
                 settings.ignore_whitespace,
                 settings.patience_switch,
                 self._git_temp_file,
-                self.buf_temp_file,
+                self._view_temp_file,
             ]
             args = list(filter(None, args))  # Remove empty args
             return self.run_command(args=args, decode=False).then(decode_diff)
