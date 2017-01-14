@@ -26,7 +26,6 @@ class GitGutterShowDiff(object):
         """Initialize an object instance."""
         self.view = view
         self.git_handler = git_handler
-        self.diff_results = None
         self.show_untracked = False
 
     def clear(self):
@@ -36,11 +35,6 @@ class GitGutterShowDiff(object):
 
     def run(self):
         """Run diff and update gutter icons and status message."""
-
-        # invalidate_git_file() was called recently, maybe branch has changed
-        # Status message needs an update on this run.
-        if not self.git_handler.is_git_file_valid():
-            self.diff_results = None
         self.git_handler.diff().then(self._check_ignored_or_untracked)
 
     def _check_ignored_or_untracked(self, contents):
@@ -49,7 +43,11 @@ class GitGutterShowDiff(object):
         Arguments:
             contents - a tuble of ([inserted], [modified], [deleted]) lines
         """
-        if self.git_handler.in_repo() is False:
+        # nothing to update
+        if contents is None:
+            return
+
+        if not self.git_handler.in_repo():
             show_untracked = settings.get(
                 'show_markers_on_untracked_file', False)
 
@@ -67,10 +65,7 @@ class GitGutterShowDiff(object):
                             self._bind_files(event)
                     self.git_handler.untracked().then(bind_untracked)
             self.git_handler.ignored().then(bind_ignored_or_untracked)
-
-        # update the if lines modified
-        elif self.diff_results is None or self.diff_results != contents:
-            self.diff_results = contents
+        else:
             self._update_ui(contents)
 
     def _update_ui(self, contents):

@@ -2,8 +2,8 @@ import os.path
 import subprocess
 import re
 import codecs
+import functools
 import tempfile
-from functools import partial
 
 import sublime
 
@@ -52,6 +52,8 @@ class GitGutterHandler(object):
         self.git_tracked = False
         # compare target commit hash
         self._git_compared_commit = None
+        # cached git diff result for diff popup
+        self._git_diff_cache = None
 
     def __del__(self):
         """Delete temporary files."""
@@ -267,6 +269,11 @@ class GitGutterHandler(object):
     def process_diff(self, diff_str):
         r"""Parse unified diff with 0 lines of context.
 
+        Returns:
+            - `None` to indicate nothing to update
+            - A tuble with information about the diff result of the form
+              (first, last, [inserted], [modified], [deleted])
+
         Hunk range info format:
           @@ -3,2 +4,0 @@
             Hunk originally starting at line 3, and occupying 2 lines, now
@@ -279,6 +286,9 @@ class GitGutterHandler(object):
           Or both deleted? To minimize confusion, let's simply mark the
           hunk as modified.
         """
+        # go on with None if diff_str is empty
+        if diff_str is None:
+            return None
         inserted = []
         modified = []
         deleted = []
@@ -313,10 +323,17 @@ class GitGutterHandler(object):
                     decoded_results = codecs.decode(results)
                 except UnicodeDecodeError:
                     decoded_results = ""
+            # cache the diff result for reuse with diff_popup.
+            self._git_diff_cache = decoded_results
             return decoded_results
 
         def run_diff(updated_git_file):
-            self.update_view_file()
+            # if both temp files were not updated, diff is not necessary.
+            # Resolve with None to indicate this special situation.
+            updated_view_file = self.update_view_file()
+            if not updated_view_file and not updated_git_file:
+                return Promise.resolve(None)
+
             args = [
                 settings.git_binary_path,
                 'diff', '-U0', '--no-color', '--no-index',
@@ -330,6 +347,10 @@ class GitGutterHandler(object):
         return self.update_git_file().then(run_diff)
 
     def process_diff_line_change(self, line_nr, diff_str):
+        # use cached diff result
+        if diff_str is None:
+            diff_str = self._git_diff_cache or ''
+
         hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
 
@@ -409,7 +430,7 @@ class GitGutterHandler(object):
         NOTE: This method is used for diff popup.
         """
         return self.diff_str().then(
-            partial(self.process_diff_line_change, line))
+            functools.partial(self.process_diff_line_change, line))
 
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
