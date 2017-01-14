@@ -25,6 +25,7 @@ class GitGutterShowDiff(object):
         """Initialize an object instance."""
         self.git_handler = git_handler
         self._line_height = 0
+        self._minimap_size = 1
 
     def clear(self):
         """Remove all gutter icons and status messages."""
@@ -78,7 +79,9 @@ class GitGutterShowDiff(object):
         """
         self._update_status(
             'modified' if contents[0] else 'commited', contents)
-        self._line_height = self.git_handler.view.line_height()
+        view = self.git_handler.view
+        self._line_height = view.line_height()
+        self._minimap_size = settings.get_show_in_minimap(view)
         regions = self._contents_to_regions(contents)
         for name, region in zip(self.region_names, regions):
             self._bind_regions(name, region)
@@ -195,6 +198,9 @@ class GitGutterShowDiff(object):
         for line in view.substr(region).splitlines():
             start += len(line) + 1
             lines.append(start)
+        # Add one more dummy line to avoid IndexError due to deleted_bottom
+        # regions at the end of file.
+        lines.append(start + 1)
         return lines
 
     def _get_protected_regions(self):
@@ -228,7 +234,9 @@ class GitGutterShowDiff(object):
                 index = line - first_line
                 start = lines_regions[index]
                 if start not in protected:
-                    region = sublime.Region(start, start + 1)
+                    end = lines_regions[index + 1]
+                    region = sublime.Region(
+                        start, min(end, start + self._minimap_size))
                     if line in bottom_lines:
                         deleted_dual.append(region)
                         bottom_lines.remove(line)
@@ -249,9 +257,13 @@ class GitGutterShowDiff(object):
         """
         regions = []
         for line in lines:
-            start = lines_regions[line - first_line]
+            index = line - first_line
+            start = lines_regions[index]
             if start not in protected:
-                regions.append(sublime.Region(start, start + 1))
+                end = lines_regions[index + 1]
+                region = sublime.Region(
+                    start, min(end, start + self._minimap_size))
+                regions.append(region)
         return regions
 
     def _bind_files(self, event):
@@ -272,9 +284,13 @@ class GitGutterShowDiff(object):
         region = sublime.Region(start, chars)
         for line in view.substr(region).splitlines():
             if start not in protected:
-                regions.append(sublime.Region(start, start + 1))
-                start += len(line) + 1
-        self._line_height = self.git_handler.view.line_height()
+                end = start + len(line)
+                region = sublime.Region(
+                    start, min(end, start + self._minimap_size))
+                regions.append(region)
+                start = end + 1
+        self._line_height = view.line_height()
+        self._minimap_size = settings.get_show_in_minimap(view)
         self._bind_regions(event, regions)
         self._clear_regions(event)
 
@@ -292,7 +308,7 @@ class GitGutterShowDiff(object):
             else:
                 scope = 'markup.%s.git_gutter' % event
             icon = self._icon_path(event)
-            if ST3 and settings.show_in_minimap:
+            if self._minimap_size:
                 flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
             else:
                 flags = sublime.HIDDEN

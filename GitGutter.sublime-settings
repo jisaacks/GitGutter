@@ -90,7 +90,10 @@
   ],
 
   // Show GitGutter information in the minimap
-  "show_in_minimap": true,
+  // =0: hide markers
+  // >0: width of markers
+  // -1: highlight full line
+  "show_in_minimap": 1,
 
   // Determines whether the git_gutter_next_change and git_gutter_prev_change
   // commands wrap around on reaching the beginning/ending of the file.

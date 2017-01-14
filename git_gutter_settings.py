@@ -65,7 +65,6 @@ class GitGutterSettings:
         self.git_binary_path = None
         self.ignore_whitespace = False
         self.patience_switch = ''
-        self.show_in_minimap = False
         # Name of this package (GitGutter or GitGutter-Edge)
         # stored in settings as kind of environment variable
         path = os.path.realpath(__file__)
@@ -143,11 +142,6 @@ class GitGutterSettings:
         if self._settings.get('patience'):
             self.patience_switch = '--patience'
 
-        # Show in minimap
-        self.show_in_minimap = (
-            self._user_settings.get('show_in_minimap') or
-            self._settings.get('show_in_minimap'))
-
     def get_compare_against(self, git_tree, view):
         """Return the compare target for a view.
 
@@ -177,6 +171,15 @@ class GitGutterSettings:
             new_compare_against - new branch/tag/commit to cmpare against
         """
         self._compare_against_mapping[git_tree] = new_compare_against
+
+    def get_show_in_minimap(self, view):
+        """Read 'show_in_minimap' setting and apply appropiate limits."""
+        if not ST3:
+            return 0
+        width = view.settings().get('git_gutter_show_in_minimap')
+        if width is None:
+            width = self.get('show_in_minimap', 1)
+        return width if 0 <= width else 100000
 
     @property
     def default_theme_path(self):

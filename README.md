@@ -116,7 +116,17 @@ In addition the popup loads the css file `gitgutter_popup.css`, which can be mod
 GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
 
 #### Minimap
-GitGutter will show diffs in the minimap on Sublime Text 3. This can be disabled by setting `show_in_minimap` to `false`.
+
+`"show_in_minimap": 1`
+
+GitGutter shows diffs in the minimap on Sublime Text 3 by default. Change `show_in_minimap` to one of the following values to disable this feature or change the width of the markers.
+
+ value  | description
+--------|-----------------
+ =0     | hide markers
+ &gt;1  | width of markers
+ -1     | highlight full line
+
 
 #### Git path
 If `git` is not found by GitGutter you may need to set the `git_binary` setting to the location of the git binary.  The value may be either a direct string to a git binary:
