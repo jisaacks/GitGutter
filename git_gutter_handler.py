@@ -4,6 +4,12 @@ import re
 import codecs
 import functools
 import tempfile
+import zipfile
+
+try:
+    from io import BytesIO
+except (ImportError, ValueError):
+    from cStringIO import StringIO as BytesIO
 
 import sublime
 
@@ -233,27 +239,38 @@ class GitGutterHandler(object):
             file is still up to date and git 'show' can be skipped and the
             promise is resolved with False.
 
+            This method uses `git archive` to read the file content from git
+            repository to enable support of smudge filters (fixes Issue #74).
+            Git applies those smudge filters to some commands like `archive`,
+            `diff` and `checkout` only, but not to commands like `show`.
+
             Arguments:
                 commit (string): full hash of the commit the view is currently
                                  compared against.
             Returns:
                 bool: True if temporary file was updated, False otherwise.
             """
-            def write_file(contents):
-                """Write contents to temporary file.
+            def write_file(output):
+                """Extract output and write it to a temporary file.
 
                 The function resolves the promise with True to indicate the
                 updated git file.
                 """
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-                self.git_tracked = bool(contents)
+                contents = b''
+                if output:
+                    # Extract file contents from zipped archive.
+                    # The `filelist` contains numberous directories finalized
+                    # by exactly one file whose content we are interested in.
+                    archive = zipfile.ZipFile(BytesIO(output))
+                    contents = archive.read(archive.filelist[-1])
+                # Write the content to file
                 if not self._git_temp_file:
                     self._git_temp_file = self.tmp_file()
                 with open(self._git_temp_file, 'wb') as file:
                     file.write(contents)
                 # finally update git hash if file was updated
                 self._git_compared_commit = commit
+                self.git_tracked = bool(contents)
                 return True
 
             # Read file from git incase the compare target has changed
@@ -554,8 +571,8 @@ class GitGutterHandler(object):
         """
         args = [
             settings.git_binary_path,
-            'show',
-            '%s:%s' % (commit, self._git_path),
+            'archive', '--format=zip',
+            commit, self._git_path
         ]
         return self.run_command(args=args, decode=False)
 
