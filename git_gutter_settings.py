@@ -22,6 +22,7 @@ class GitGutterSettings:
         # complex initialization than just getting the value from settings.
         self.git_binary_path = None
         self.ignore_whitespace = False
+        self.large_gutter_icons = False
         self.patience_switch = ''
         self.show_in_minimap = False
         self.show_status = 'none'
@@ -86,6 +87,12 @@ class GitGutterSettings:
             self.ignore_whitespace = '--ignore-space-at-eol'
         else:
             self.ignore_whitespace = ''
+
+        # Larger Gutter Icons setting
+        if sublime.platform() in ['linux', 'windows']:
+            self.large_gutter_icons = (
+                self._user_settings.get('large_gutter_icons') or
+                self._settings.get('large_gutter_icons'))
 
         # Patience Setting
         self.patience_switch = ''
