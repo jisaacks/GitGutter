@@ -60,7 +60,8 @@ class GitGutterShowDiff(object):
         # update the if lines changed
         elif self.diff_results is None or self.diff_results != contents:
             self.diff_results = contents
-            self._update_ui(contents)
+            # move to the main thread and update the ui
+            sublime.set_timeout(lambda: self._update_ui(contents), 0)
 
     def _update_ui(self, contents):
         inserted, modified, deleted = contents
@@ -79,11 +80,14 @@ class GitGutterShowDiff(object):
                 branch_promise = Promise.resolve("")
 
             def update_status_ui(branch_name):
-                self._update_status(
-                    len(inserted), len(modified), len(deleted),
-                    settings.get_compare_against(
-                        self.git_handler.git_dir, self.view),
-                    branch_name)
+                # move to the main thread and update the status
+                sublime.set_timeout(
+                    lambda: self._update_status(
+                        len(inserted), len(modified), len(deleted),
+                        settings.get_compare_against(
+                            self.git_handler.git_dir, self.view),
+                        branch_name),
+                    0)
             branch_promise.then(update_status_ui)
         else:
             self._update_status(0, 0, 0, "", "")
