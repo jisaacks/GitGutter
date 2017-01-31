@@ -20,6 +20,7 @@ class GitGutterSettings:
         self._compare_against_mapping = {}
         # These settings have public getters as they go through more
         # complex initialization than just getting the value from settings.
+        self.dpi_scale = None
         self.git_binary_path = None
         self.ignore_whitespace = False
         self.patience_switch = ''
@@ -67,6 +68,11 @@ class GitGutterSettings:
                     self.git_binary_path = path
                     self._git_binary_path_fallback = path
                     break
+
+        if not self.dpi_scale:
+            self.dpi_scale = (
+                self._settings.get('dpi_scale') or
+                self._user_settings.get('dpi_scale'))
 
         if not self.git_binary_path:
             if not self._git_binary_path_error_shown:
