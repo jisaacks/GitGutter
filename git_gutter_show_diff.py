@@ -1,6 +1,13 @@
 import os
-from jinja2.environment import Template as Jinja2Template
 import sublime
+
+try:
+    # avoid exceptions if dependency is not yet satisfied
+    from jinja2.environment import Template as Jinja2Template
+    _HAVE_JINJA2 = True
+except:
+    print('GitGutter: Missing jinja2 dependency!')
+    _HAVE_JINJA2 = False
 
 try:
     from .git_gutter_settings import settings
@@ -89,8 +96,8 @@ class GitGutterShowDiff(object):
             file_state - the git state of the open file.
             contents   - a tuble of ([inserted], [modified], [deleted]) lines
         """
-        template = settings.get('status_bar_text') \
-            if settings.get('show_status_bar_text') else None
+        template = settings.get('status_bar_text') if _HAVE_JINJA2 and \
+            settings.get('show_status_bar_text') else None
         if template:
             def set_status(branch_name):
                 inserted, modified, deleted = contents
