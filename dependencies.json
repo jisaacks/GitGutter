@@ -7,7 +7,9 @@
         ">=3080": [
             "pygments",
             "python-markdown",
-            "mdpopups"
+            "mdpopups",
+            "python-jinja2",
+            "markupsafe"
         ]
     }
 }
