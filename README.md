@@ -1,119 +1,251 @@
 # Git Gutter
 
-A sublime text 2/3 plugin to show an icon in the gutter area indicating whether a line has been inserted, modified or deleted.
+A [Sublime Text 2/3](http://www.sublimetext.com) plug-in to show information about files in a git repository.
 
-### Screenshot:
+
+##### Main Features
+
+1. _Gutter Icons_ indicating inserted, modified or deleted lines
+2. _Diff Popup_ with details about modified lines
+3. _Status Bar Text_ with information about file and repository
+4. _Jumping Between Changes_ to easily navigate between modified lines
 
 ![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
 
-### Installation
+ Icon          | Description
+:-------------:|-------------------------
+![inserted][]  | inserted line
+![changed][]   | modified line
+![deleted][]   | deleted region borders
+![ignored][]   | ignored file
+![untracked][] | untracked file
 
-You can install via [Sublime Package Control](http://wbond.net/sublime_packages/package_control):
+[changed]: <https://cloud.githubusercontent.com/assets/16542113/23225773/6a0204ac-f933-11e6-9213-c75a33795fec.png>
+[deleted]: <https://cloud.githubusercontent.com/assets/16542113/23225777/6a04baf8-f933-11e6-9ce4-2a17fd604f37.png>
+[ignored]: <https://cloud.githubusercontent.com/assets/16542113/23225774/6a02719e-f933-11e6-9376-059044379246.png>
+[inserted]: <https://cloud.githubusercontent.com/assets/16542113/23225775/6a02a5a6-f933-11e6-8def-a95d6a2bf448.png>
+[untracked]: <https://cloud.githubusercontent.com/assets/16542113/23225776/6a0379fe-f933-11e6-8c60-cd751c8ca094.png>
 
-  * [GitGutter](https://sublime.wbond.net/packages/GitGutter) - Release based
-  * [GitGutter-Edge](https://sublime.wbond.net/packages/GitGutter-Edge) - Stick with master branch (at your own peril)
 
-Or you can clone this repo into your *Sublime Text x/Packages*:
+## 💾 Installation
 
-*OSX*
+### Package Control
+
+It is highly recommended to install GitGutter with [Package Control](https://packagecontrol.io) as it automatically installs required [dependencies](#dependencies) and keeps all packages up to date.
+
+1. [Install Package Control](https://packagecontrol.io/installation) if you haven't yet.
+2. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+3. Search for _Package Control: Install Package_ and hit <kbd>Enter</kbd>.
+4. Type `GitGutter` and press <kbd>Enter</kbd> to install it.
+
+
+##### Pre-Releases
+
+If you are interested in testing bleeding edge features you can set up Package Control to install pre-releases by adding GitGutter to `install_prereleases` key in the `Package Control.sublime-settings`.
+
+```JavaScript
+"install_prereleases":
+[
+  "GitGutter"
+],
+```
+
+
+##### GitGutter-Edge
+
+The _GitGutter-Edge_ package is replaced by [Pre-Releases](#pre-releases).
+
+This change was made ...
+
+1. to avoid issues with functions which depend on the package name.
+2. because branch based packages are deprecated by Package Control.
+3. to have more control about when to publish new features for testing.
+
+👉 If you don't want to wait for [Pre-Releases](#pre-releases) you can pull from master branch directly.
+
+
+### Manual Installation
+
+You can clone this repository into your _Sublime Text x/Packages_
+
+
+##### OSX
+
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
-*Ubuntu*
+
+##### Linux
+
 ```shell
 cd ~/.config/sublime-text-2/Packages
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
-*Windows*
 
-GitGutter assumes that the `git` command is available on the command line. If it's not, add the directory containing `git.exe` to your `PATH` environment variable. Then clone the repo:
+##### Windows
 
 ```shell
 cd "%APPDATA%\Sublime Text 2\Packages"
 git clone git://github.com/jisaacks/GitGutter.git
 ```
 
-On OS X you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
+👉 The `git` command must be available on the command line.
 
-## It's not working!?
+👉 You may need to add the directory containing `git.exe` to your `PATH` environment variable.
 
-The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on your [path](https://en.wikipedia.org/wiki/PATH_(variable)). Please read the section on the [git_binary](#git-path) setting for how to fix that.  
 
-## Advanced Features
+### Dependencies
+
+Some functions of GitGutter depend on the following external libraries to work properly. They are installed automatically for you by Package Control, so normally don't need to care about. But on setups without Package Control you need to make sure they are installed and available in the global namespace of Sublime Text's python interpreter on your own.
+
+- [markupsafe](https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-markupsafe)
+- [mdpopups](https://github.com/facelessuser/sublime-markdown-popups)
+- [pygments](https://github.com/packagecontrol/pygments)
+- [python-jinja2](https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-jinja2)
+- [python-markdown](https://github.com/facelessuser/sublime-markdown)
+
+👉 On OSX you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
+
+👉 To manually install pull from the linked repos into ST's Packages folder.
+
+
+## 🔫 Troubleshooting
+
+The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)). Please read the section on the [git_binary](#git-path) setting for how to fix that.
+
+
+## 🚀 Advanced Features
 
 ### Diff Popup
 
+The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from command palette by `GitGutter: Show Diff Popup` or via a key binding.
+
+ⓘ _popups require Sublime Text 3 Build 3070+_
+
+ⓘ _mouse hover feature requires Sublime Text 3 Build 3116+_
+
 ![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
 
-| symbol | meaning of the symbol                  |
-| ---    | ---                                    |
-| ×      | close the popup                        |
-| ⤒      | jump to first change                   |
-| ↑      | jump to previous change                |
-| ↓      | jump to next change                    |
-| ≈, ≉   | enable/disable difference highlighting |
-| ⎘      | copy the content of the git state      |
-| ⟲      | revert changes to the state in git     |
+ symbol | meaning of the symbol
+ -------| ---------------------------------------
+ ×      | close the popup
+ ⤒      | jump to first change
+ ↑      | jump to previous change
+ ↓      | jump to next change
+ ≈, ≉   | enable/disable difference highlighting
+ ⎘      | copy the content of the git state
+ ⟲      | revert changes to the state in git
 
-The diff popup appears if you hover the mouse of the gutter changes. However this functionality is only enabled in Build `3116` or newer. If you are using an older Sublime Text 3 version you can also show the diff popup from the command palette or via a keybinding.
 
 ### Comparing against different commits/branches/tags
 
-By default, Git Gutter compares your working copy against the HEAD. You can change this behaviour through the ST command palette. The following options are available:
+GitGutter compares the working copy against the HEAD by default. This behavior can be changed through the command palette.
+
+The following options are available:
 
 - Compare against HEAD
 - Compare against particular branch
 - Compare against particular tag
 - Compare against specific commit
 - Compare against specific file commit (current file's history)
+- Compare against origin
 
 To change the compare option:
 
-- Open the command palette (`Ctrl-Shift-P` for Windows/Linux, `Cmd-Shift-P` for Mac)
-- Start typing `GitGutter`
-- You'll see the 5 options listed above, select one with the keyboard.
-- Choose the branch/tag/commit to compare against.
+1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+2. Start typing `GitGutter: Compare against`
+3. You'll see the 5 options listed above, select one with the keyboard and press <kbd>Enter</kbd>.
+4. Choose the branch/tag/commit to compare against.
+
+👉 The changes apply temporarily to the whole repository.
+
 
 ### Jumping Between Changes
 
-There are commands to jump between modifications. The default keybindings for these commands are:
+There are commands to jump between modifications. The default key bindings for these commands are:
 
-| OS X | Windows / Linux | Description |
-|------|-----------------|-------------|
-| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>k</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>k</kbd> | Previous |
-| <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Option</kbd>+<kbd>j</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>j</kbd> | Next |
+ OS X                          | Windows / Linux             | Description
+-------------------------------|-----------------------------|-------------
+ <kbd>Cmd+Shift+Option+k</kbd> | <kbd>Ctrl+Shift+Alt+k</kbd> | Previous
+ <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Next
 
 
-## Settings
+## ⚙ Settings
+
 Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kbd> > <kbd>GitGutter</kbd> menu.
 
-Default settings should not be modified, as they are overwritten when GitGutter updates. Instead, you should copy the relevant settings into GitGutter's user settings file.
+Default settings should not be modified, as they are overwritten when GitGutter updates. Copy the relevant settings into GitGutter's user settings file instead.
+
 
 #### Debounce Delay
+
+`"debounce_delay": 1000`
+
 Delays update of gutter icons by the following amount (in milliseconds). Useful for performance issues. Default 1000 (1 second).
 
+
+#### Focus Change Mode
+
+`"focus_change_mode": true`
+
+GitGutter evaluates changes every time a view gets the focus by default. Set `false` to disable evaluation when changing views.
+
+👉 This setting has effect with `"live_mode": false` only.
+
+👉 GitGutter always evaluates changes after _loading_ and _saving_ a document.
+
+
 #### Live Mode
-By default, GitGutter detects changes every time the file is modified. If you experience performance issues you can set it to only run on save by setting `live_mode` to `false`.
+
+`"live_mode": true`
+
+GitGutter evaluates changes every time the file is modified by default. Set `false` to disable evaluation after each input.
+
+👉 GitGutter always evaluates changes after _loading_ and _saving_ a document.
+
 
 #### Hover Diff Popup
-*This hover feature is only available in Build 3116 and newer.*
-GitGutter shows a diff popup, when hovering over changes in the gutter. Set `enable_hover_diff_popup` to `false`, if you want to disable this popup. You can still open it with a keybinding and from the command panel.
+
+`"enable_hover_diff_popup": true`
+
+ⓘ _requires Sublime Text 3 Build 3116+_
+
+GitGutter shows a diff popup, when hovering over changes in the gutter. Set `false` to disable this popup. You can still open it with a key binding and from the command palette.
+
 
 #### Diff Popup Default Mode
-*The diff popup is only available in Sublime Text 3*
-The diff popup has two modes: The default mode to show the previous git state with code highlighting and the diff mode to highlight the differences between the git state and the editor state.
-You can set `diff_popup_default_mode` to `"default"` or `"diff"` to change the mode in which the popup opens.
+
+`"diff_popup_default_mode": "default"`
+
+ⓘ _requires Sublime Text 3 Build 3070+_
+
+The popup displays the previous state of the content under the cursor by `"default"` but can be set to `"diff"` to highlight the differences between the git state and the editor state.
+
 
 #### Diff Popup Appearance
-*The diff popup is only available in Sublime Text 3*
-The popup uses the [mdpopups library](https://github.com/facelessuser/sublime-markdown-popups) and the corresponding settings are global and not only for GitGutter. You can change the syntax highlighting style to the same as Sublime Text by adding `"mdpopups.use_sublime_highlighter": true` to your User settings. Other settings can be found [here](http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings).
-In addition the popup loads the css file `gitgutter_popup.css`, which can be modified by the user and is also accessible via the settings menu.
+
+ⓘ _requires Sublime Text 3 Build 3070+_
+
+The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-popups) library and the corresponding settings are global and not only for GitGutter. Syntax highlighting can be set to match the active color scheme by adding `"mdpopups.use_sublime_highlighter": true` to the User settings.
+
+👉 Other settings can be found at [mdpopups settings](http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings) homepage.
+
+👉 User style settings by adding a `gitgutter_popup.css` the User directory.
+
+👉 User style settings are accessible via the settings menu.
+
 
 #### Untracked Files
-GitGutter shows icons for new files and ignored files. These icons will be on every line. You can toggle the setting `show_markers_on_untracked_file` to turn this feature off. Defaults to true (shows icons). You may need to add scopes to your color scheme (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to color the icons.
+
+`"show_markers_on_untracked_file": true`
+
+GitGutter shows icons on each line for untracked and ignored files by default. Set to `false` to hide those icons.
+
+You may need to add scopes (`markup.ignored.git_gutter` and `markup.untracked.git_gutter`) to your color scheme to color the icons.
+
 
 #### Minimap
 
@@ -129,15 +261,18 @@ GitGutter shows diffs in the minimap on Sublime Text 3 by default. Change `show_
 
 
 #### Git path
-If `git` is not found by GitGutter you may need to set the `git_binary` setting to the location of the git binary.  The value may be either a direct string to a git binary:
-```javascript
-{
-  "git_binary": "E:\\Portable\\git\\bin\\git.exe"
-}
+
+`"git_binary": ""`
+
+If `git` is not found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) by GitGutter the `git_binary` setting can be set to the location of the git binary. The value may be either a direct string to a git binary:
+
+```JavaScript
+"git_binary": "E:\\Portable\\git\\bin\\git.exe"
 ```
 
-Or it may be a dictionary keyed off what sublime.platform() returns, so it may be customized on a per-platform basis:
-```javascript
+or it may be a dictionary keyed off what sublime.platform() returns, so it may be customized on a per-platform basis:
+
+```JavaScript
 "git_binary": {
   "default": "",
   "linux": "/usr/bin/git",
@@ -149,37 +284,32 @@ It is valid to use environment variables in the setting value, and they will be 
 
 In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
+
 #### Protected Regions
-Is GitGutter blocking SublimeLinter or other icons? You can prevent this by adding which regions you would like GitGutter to not override:
-```javascript
-"protected_regions": ["region", "names"]
+
 ```
-You will need to figure out the names of the regions you are trying to protect.
+"protected_regions": [
+  "sublimelinter-warning-gutter-marks",
+  "sublimelinter-error-gutter-marks",
+  "bookmarks"
+],
+```
+
+To avoid GitGutter from overriding more important gutter icons a list of protected regions can be created, which GitGutter won't add gutter icons to.
+
+👉 You will need to figure out the names of the regions to protect.
 
 
-#### Status Bar Text
+#### Show Status Bar Text
 
-GitGutter displays status information about open files in the status bar by
-default. To turn this feature off set `"show_status_bar_text": false`.
+`"show_status_bar_text": true`
 
-The *Status Bar Text* is rendered by the powerful *jinja2* engine using the
-template from `"status_bar_text": [...]` setting. The setting is organized as
-an array of strings for better readability. It is joined and then passed to
-*jinja2*. GitGutter provides the following variables to be used in the template.
+GitGutter displays status information about open files in the status bar by default. Set to `false` to hide the information.
 
-| Variable     | Description                                                 |
-|--------------|-------------------------------------------------------------|
-| {{repo}}     | repository name / folder name containing the .git directory |
-| {{branch}}   | checked out branch you are working on                       |
-| {{compare}}  | commit/branch/HEAD the file is compared to                  |
-| {{state}}    | One of committed/modified/ignored/untracked                 |
-| {{deleted}}  | number of deleted regions                                   |
-| {{inserted}} | number of inserted lines                                    |
-| {{modified}} | number of modified lines                                    |
 
-##### Example 1 - default template
+#### Status Bar Text Template
 
-```javascript
+```
 "status_bar_text": [
   "In {{repo}} on {{branch}}",
   "{% if compare != 'HEAD' %}, Comparing against {{compare}}{% endif %}",
@@ -190,27 +320,40 @@ an array of strings for better readability. It is joined and then passed to
 ]
 ```
 
+The _Status Bar Text_ is rendered using a fully customizable template from `status_bar_text`. The setting is organized as an array of strings for better readability. It is joined and then passed to [jinja2](http://jinja.pocoo.org/docs/).
+
+GitGutter provides the following variables to be used in the template.
+
+ Variable     | Description
+--------------|-------------------------------------------------------------
+ {{repo}}     | repository name / folder name containing the .git directory
+ {{branch}}   | checked out branch you are working on
+ {{compare}}  | commit/branch/HEAD the file is compared to
+ {{state}}    | One of committed/modified/ignored/untracked
+ {{deleted}}  | number of deleted regions
+ {{inserted}} | number of inserted lines
+ {{modified}} | number of modified lines
+
 
 #### Themes
 
-GitGutter provides support for custom gutter icons and diff popup stylesheets
-comming with theme packages. You can select a custom theme by changing the
-setting `"theme": "Default.gitgutter-theme"` to the desired name.
+`"theme": "Default.gitgutter-theme"`
+
+GitGutter provides support for custom gutter icons and diff popup style sheets coming with theme packages. Set `theme` to a valid theme file name to activate a different icon set.
 
 GitGutter includes 2 themes:
+
 - Default.gitgutter-theme
 - Default HiDPI.gitgutter-theme
 
-To add a custom GitGutter Theme developers need to add a folder with all
-required icons and an optional `gitgutter_popup.css` file to their package. An
-empty JSON file `<ThemName>.gitgutter-theme` must exist to mark this folder as
-resource for GitGutter icons. For short: Copy the structure of the Default theme
-folder and you'll be ok.
+To provide a custom theme developers need to add a folder with all required icons and an optional `gitgutter_popup.css` file to their package. An empty JSON file `<ThemName>.gitgutter-theme` must exist to mark this folder a resource for GitGutter icons.
+
 
 #### Per-project Settings
-Sublime Text supports project-specific settings, allowing `live_mode` to be set differently for different repositories.
-To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
-```javascript
+
+Sublime Text supports project-specific settings, allowing `live_mode` to be enabled or disabled for certain repositories. To make use of this feature just open <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
+
+```JavaScript
 {
     "folders":
     [
@@ -225,35 +368,13 @@ To implement, use the <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add 
 }
 ```
 
-#### Icon Coloring
 
-The colors come from your *color scheme* **.tmTheme** file.
+## 🖌 Icon Coloring
 
-Color schemes that already have support for GitGutter include:
+The colors come from your _color scheme_ **.tmTheme** file.
 
-* [Afterglow](https://github.com/YabataDesign/afterglow-theme)
-* [Baara Dark](https://github.com/jobedom/sublime-baara-dark)
-* [Brackets Color Scheme](https://github.com/jwortmann/brackets-color-scheme)
-* [Cobalt2](https://github.com/wesbos/cobalt2)
-* [Dark Room](https://github.com/NeilCresswell/themes)
-* [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
-* [Desert Night](https://github.com/fgb/desert_night)
-* [Flatland](https://github.com/thinkpixellab/flatland)
-* [Fox](https://github.com/karelvuong/fox)
-* [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
-* [Hitoshi](https://github.com/runxel/hitoshi)
-* [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
-* [Neon Color Scheme](https://github.com/MattDMo/Neon-color-scheme)
-* [Neon](https://github.com/farzher/Sublime-Text-Themes)
-* [Oblivion](https://github.com/jbrooksuk/Oblivion)
-* [Perv](https://github.com/jisaacks/Perv-ColorScheme)
-* [Solarized Colour Theme](https://github.com/SublimeColors/Solarized)
-* [Spacegray](https://github.com/kkga/spacegray)
-* [Specials Board](https://github.com/lamotta/specialsboard)
-* [Tomorrow Theme](https://github.com/chriskempson/tomorrow-theme)
-* [Underscore Colour Theme](https://github.com/channingwalton/sublime_underscore)
-* [Wildlife](https://github.com/tushortz/wildlife)
-* _Contact me if you want your color scheme listed here. Or do a pull request._
+
+### Required Color Scheme Entries
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
 
@@ -315,6 +436,36 @@ If your color scheme file does not define the appropriate colors (or you want to
 </dict>
 ```
 
-## Alternatives
+
+### Supported Color Schemes
+
+Color schemes that already have support for GitGutter include:
+
+- [Afterglow](https://github.com/YabataDesign/afterglow-theme)
+- [Baara Dark](https://github.com/jobedom/sublime-baara-dark)
+- [Brackets Color Scheme](https://github.com/jwortmann/brackets-color-scheme)
+- [Cobalt2](https://github.com/wesbos/cobalt2)
+- [Dark Room](https://github.com/NeilCresswell/themes)
+- [Deep Blue See](https://github.com/jisaacks/DeepBlueSee)
+- [Desert Night](https://github.com/fgb/desert_night)
+- [Flatland](https://github.com/thinkpixellab/flatland)
+- [Fox](https://github.com/karelvuong/fox)
+- [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
+- [Hitoshi](https://github.com/runxel/hitoshi)
+- [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
+- [Neon Color Scheme](https://github.com/MattDMo/Neon-color-scheme)
+- [Neon](https://github.com/farzher/Sublime-Text-Themes)
+- [Oblivion](https://github.com/jbrooksuk/Oblivion)
+- [Perv](https://github.com/jisaacks/Perv-ColorScheme)
+- [Solarized Colour Theme](https://github.com/SublimeColors/Solarized)
+- [Spacegray](https://github.com/kkga/spacegray)
+- [Specials Board](https://github.com/lamotta/specialsboard)
+- [Tomorrow Theme](https://github.com/chriskempson/tomorrow-theme)
+- [Underscore Colour Theme](https://github.com/channingwalton/sublime_underscore)
+- [Wildlife](https://github.com/tushortz/wildlife)
+- _Contact me if you want your color scheme listed here. Or do a pull request._
+
+
+## ⮱ Alternatives
 
 Check out the [collection of GitGutter(ish) packages for various editors](https://github.com/gitgutter)
