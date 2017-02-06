@@ -3,10 +3,9 @@ import sublime
 
 try:
     # avoid exceptions if dependency is not yet satisfied
-    from jinja2.environment import Template as Jinja2Template
+    import jinja2.environment
     _HAVE_JINJA2 = True
 except:
-    print('GitGutter: Missing jinja2 dependency!')
     _HAVE_JINJA2 = False
 
 try:
@@ -96,22 +95,44 @@ class GitGutterShowDiff(object):
             file_state - the git state of the open file.
             contents   - a tuble of ([inserted], [modified], [deleted]) lines
         """
-        template = settings.get('status_bar_text') if _HAVE_JINJA2 and \
-            settings.get('show_status_bar_text') else None
-        if template:
-            def set_status(branch_name):
-                inserted, modified, deleted = contents
+        if not settings.get('show_status_bar_text', False):
+            self.view.erase_status('00_git_gutter')
+            return
+
+        def set_status(branch_name):
+            inserted, modified, deleted = contents
+            template = (
+                settings.get('status_bar_text')
+                if _HAVE_JINJA2 else None
+            )
+            if template:
                 # render the template using jinja2 library
-                text = Jinja2Template(''.join(template)).render(
+                text = jinja2.environment.Template(''.join(template)).render(
                     repo=os.path.basename(self.git_handler.git_tree),
                     compare=self.git_handler.format_compare_against(),
                     branch=branch_name, state=file_state, deleted=len(deleted),
                     inserted=len(inserted), modified=len(modified))
-                # add text and try to be the left most one
-                self.view.set_status('00_git_gutter', text)
-            self.git_handler.git_current_branch().then(set_status)
-        else:
-            self.view.set_status('00_git_gutter', '')
+            else:
+                # Render hardcoded text if jinja is not available.
+                parts = []
+                parts.append('On %s' % branch_name)
+                compare = self.git_handler.format_compare_against()
+                if compare != 'HEAD':
+                    parts.append('Comparing against %s' % compare)
+                count = len(inserted)
+                if count:
+                    parts.append('%d+' % count)
+                count = len(deleted)
+                if count:
+                    parts.append('%d-' % count)
+                count = len(modified)
+                if count:
+                    parts.append('%d*' % count)
+                text = ', '.join(parts)
+            # add text and try to be the left most one
+            self.view.set_status('00_git_gutter', text)
+
+        self.git_handler.git_current_branch().then(set_status)
 
     def _clear_all(self):
         for region_name in self.region_names:
