@@ -21,15 +21,14 @@ class GitGutterShowDiff(object):
     region_names = ('deleted_top', 'deleted_bottom', 'deleted_dual',
                     'inserted', 'changed', 'untracked', 'ignored')
 
-    def __init__(self, view, git_handler):
+    def __init__(self, git_handler):
         """Initialize an object instance."""
-        self.view = view
         self.git_handler = git_handler
         self._line_height = 0
 
     def clear(self):
         """Remove all gutter icons and status messages."""
-        self.view.erase_status('00_git_gutter')
+        self.git_handler.view.erase_status('00_git_gutter')
         self._clear_regions()
 
     def run(self):
@@ -79,7 +78,7 @@ class GitGutterShowDiff(object):
         """
         self._update_status(
             'modified' if contents[0] else 'commited', contents)
-        self._line_height = self.view.line_height()
+        self._line_height = self.git_handler.view.line_height()
         regions = self._contents_to_regions(contents)
         for name, region in zip(self.region_names, regions):
             self._bind_regions(name, region)
@@ -98,7 +97,7 @@ class GitGutterShowDiff(object):
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """
         if not settings.get('show_status_bar_text', False):
-            self.view.erase_status('00_git_gutter')
+            self.git_handler.view.erase_status('00_git_gutter')
             return
 
         def set_status(branch_name):
@@ -132,7 +131,7 @@ class GitGutterShowDiff(object):
                     parts.append('%d*' % count)
                 text = ', '.join(parts)
             # add text and try to be the left most one
-            self.view.set_status('00_git_gutter', text)
+            self.git_handler.view.set_status('00_git_gutter', text)
 
         self.git_handler.git_current_branch().then(set_status)
 
@@ -188,7 +187,7 @@ class GitGutterShowDiff(object):
         Returns:
             list: The list of text positions of each line start
         """
-        view = self.view
+        view = self.git_handler.view
         start = view.text_point(first_line - 1, 0)
         end = view.text_point(last_line, 0)
         region = sublime.Region(start, end)
@@ -207,7 +206,7 @@ class GitGutterShowDiff(object):
         Returns:
             frozenset: A list of protected lines' start points.
         """
-        view = self.view
+        view = self.git_handler.view
         keys = settings.get('protected_regions', [])
         return frozenset(
             view.line(reg).a for key in keys for reg in view.get_regions(key))
@@ -265,7 +264,7 @@ class GitGutterShowDiff(object):
         Arguments:
             event (string): The element of self.region_names to bind
         """
-        view = self.view
+        view = self.git_handler.view
         start = 0
         regions = []
         protected = self._get_protected_regions()
@@ -275,7 +274,7 @@ class GitGutterShowDiff(object):
             if start not in protected:
                 regions.append(sublime.Region(start, start + 1))
                 start += len(line) + 1
-        self._line_height = self.view.line_height()
+        self._line_height = self.git_handler.view.line_height()
         self._bind_regions(event, regions)
         self._clear_regions(event)
 
@@ -297,10 +296,10 @@ class GitGutterShowDiff(object):
                 flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
             else:
                 flags = sublime.HIDDEN
-            self.view.add_regions(
+            self.git_handler.view.add_regions(
                 region_name, regions, scope, icon, flags)
         else:
-            self.view.erase_regions(region_name)
+            self.git_handler.view.erase_regions(region_name)
 
     def _clear_regions(self, exclude=[]):
         """Remove all gutter icons.
@@ -310,7 +309,7 @@ class GitGutterShowDiff(object):
         """
         for name in self.region_names:
             if name not in exclude:
-                self.view.erase_regions('git_gutter_%s' % name)
+                self.git_handler.view.erase_regions('git_gutter_%s' % name)
 
     def _icon_path(self, event):
         """Built the full path to the icon to show for the event.

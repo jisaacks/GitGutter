@@ -26,7 +26,7 @@ class GitGutterCommand(TextCommand):
     def __init__(self, *args, **kwargs):
         TextCommand.__init__(self, *args, **kwargs)
         self.git_handler = GitGutterHandler(self.view)
-        self.show_diff_handler = GitGutterShowDiff(self.view, self.git_handler)
+        self.show_diff_handler = GitGutterShowDiff(self.git_handler)
         # Last enabled state for change detection
         self._enabled = False
 
