@@ -227,6 +227,9 @@ class GitGutterHandler(object):
                 inserted += range(start, start + new_size)
             elif not new_size:
                 deleted += [start + 1]
+            elif old_size:
+                modified += range(start, start + old_size)
+                inserted += range(start, start + new_size)
             else:
                 modified += range(start, start + new_size)
         return (inserted, modified, deleted)
