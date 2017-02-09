@@ -289,22 +289,28 @@ class GitGutterHandler(object):
         # go on with None if diff_str is empty
         if diff_str is None:
             return None
-        inserted = []
-        modified = []
-        deleted = []
-        hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
-        hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
-        for hunk in hunks:
-            start = int(hunk.group(3))
-            old_size = int(hunk.group(2) or 1)
-            new_size = int(hunk.group(4) or 1)
+        # first and last changed line in the view
+        first, last = 0, 0
+        # lists with inserted, modified and deleted lines
+        inserted, modified, deleted = [], [], []
+        hunk_re = r'^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
+        for hunk in re.finditer(hunk_re, diff_str, re.MULTILINE):
+            _, old_size, start, new_size = hunk.groups()
+            start = int(start)
+            old_size = int(old_size or 1)
+            new_size = int(new_size or 1)
+            if first == 0:
+                first = max(1, start)
             if not old_size:
-                inserted += range(start, start + new_size)
+                last = start + new_size
+                inserted += range(start, last)
             elif not new_size:
-                deleted += [start + 1]
+                last = start + 1
+                deleted.append(last)
             else:
-                modified += range(start, start + new_size)
-        return (inserted, modified, deleted)
+                last = start + new_size
+                modified += range(start, last)
+        return (first, last, inserted, modified, deleted)
 
     def diff_str(self):
         """Run git diff against view and decode the result then."""
@@ -351,15 +357,16 @@ class GitGutterHandler(object):
         if diff_str is None:
             diff_str = self._git_diff_cache or ''
 
-        hunk_re = '^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
+        hunk_re = r'^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
 
         # we also want to extract the position of the surrounding changes
         first_change = prev_change = next_change = None
 
         for hunk in hunks:
-            start = int(hunk.group(3))
-            size = int(hunk.group(4) or 1)
+            _, _, start, size = hunk.groups()
+            start = int(start)
+            size = int(size or 1)
             if first_change is None:
                 first_change = start
             # special handling to also match the line below deleted

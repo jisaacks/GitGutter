@@ -20,7 +20,7 @@ class GitGutterJumpToChanges(object):
         return blocks
 
     def goto_line(self, jump_func, diff_results):
-        inserted, modified, deleted = diff_results
+        _, _, inserted, modified, deleted = diff_results
         inserted = self.lines_to_blocks(inserted)
         modified = self.lines_to_blocks(modified)
         all_changes = sorted(inserted + modified + deleted)

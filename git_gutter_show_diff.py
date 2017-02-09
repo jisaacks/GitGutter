@@ -5,7 +5,7 @@ try:
     # avoid exceptions if dependency is not yet satisfied
     import jinja2.environment
     _HAVE_JINJA2 = True
-except:
+except (ImportError, ValueError):
     _HAVE_JINJA2 = False
 
 try:
@@ -18,20 +18,19 @@ _ICON_EXT = '.png' if ST3 else ''
 
 
 class GitGutterShowDiff(object):
-    region_names = ['deleted_top', 'deleted_bottom',
-                    'deleted_dual', 'inserted', 'changed',
-                    'untracked', 'ignored']
+    region_names = ('deleted_top', 'deleted_bottom', 'deleted_dual',
+                    'inserted', 'changed', 'untracked', 'ignored')
 
     def __init__(self, view, git_handler):
         """Initialize an object instance."""
         self.view = view
         self.git_handler = git_handler
-        self.show_untracked = False
+        self._line_height = 0
 
     def clear(self):
         """Remove all gutter icons and status messages."""
         self.view.erase_status('00_git_gutter')
-        self._clear_all()
+        self._clear_regions()
 
     def run(self):
         """Run diff and update gutter icons and status message."""
@@ -41,7 +40,9 @@ class GitGutterShowDiff(object):
         """Check diff result and invoke gutter and status message update.
 
         Arguments:
-            contents - a tuble of ([inserted], [modified], [deleted]) lines
+            contents (tuble): The result of git_handler.diff(), with the
+                information about the modifications of the file.
+                Scheme: (first, last, [inserted], [modified], [deleted])
         """
         # nothing to update
         if contents is None:
@@ -54,13 +55,13 @@ class GitGutterShowDiff(object):
             def bind_ignored_or_untracked(is_ignored):
                 if is_ignored:
                     event = 'ignored'
-                    self._update_status(event, ([], [], []))
+                    self._update_status(event, (0, 0, [], [], []))
                     if show_untracked:
                         self._bind_files(event)
                 else:
                     def bind_untracked(is_untracked):
                         event = 'untracked' if is_untracked else 'inserted'
-                        self._update_status(event, ([], [], []))
+                        self._update_status(event, (0, 0, [], [], []))
                         if show_untracked:
                             self._bind_files(event)
                     self.git_handler.untracked().then(bind_untracked)
@@ -72,17 +73,16 @@ class GitGutterShowDiff(object):
         """Update gutter icons for modified files.
 
         Arguments:
-            contents - a tuble of ([inserted], [modified], [deleted]) lines
+            contents (tuble): The result of git_handler.diff(), with the
+                information about the modifications of the file.
+                Scheme: (first, last, [inserted], [modified], [deleted])
         """
-        inserted, modified, deleted = contents
-        self._clear_all()
-        if inserted or modified or deleted:
-            self._update_status('modified', contents)
-            self._lines_removed(deleted)
-            self._bind_icons('inserted', inserted)
-            self._bind_icons('changed', modified)
-        else:
-            self._update_status('commited', contents)
+        self._update_status(
+            'modified' if contents[0] else 'commited', contents)
+        self._line_height = self.view.line_height()
+        regions = self._contents_to_regions(contents)
+        for name, region in zip(self.region_names, regions):
+            self._bind_regions(name, region)
 
     def _update_status(self, file_state, contents):
         """Update status message.
@@ -92,15 +92,17 @@ class GitGutterShowDiff(object):
         the state information of the open file.
 
         Arguments:
-            file_state - the git state of the open file.
-            contents   - a tuble of ([inserted], [modified], [deleted]) lines
+            file_state (string): The git status of the open file.
+            contents (tuble): The result of git_handler.diff(), with the
+                information about the modifications of the file.
+                Scheme: (first, last, [inserted], [modified], [deleted])
         """
         if not settings.get('show_status_bar_text', False):
             self.view.erase_status('00_git_gutter')
             return
 
         def set_status(branch_name):
-            inserted, modified, deleted = contents
+            _, _, inserted, modified, deleted = contents
             template = (
                 settings.get('status_bar_text')
                 if _HAVE_JINJA2 else None
@@ -134,92 +136,190 @@ class GitGutterShowDiff(object):
 
         self.git_handler.git_current_branch().then(set_status)
 
-    def _clear_all(self):
-        for region_name in self.region_names:
-            self.view.erase_regions('git_gutter_%s' % region_name)
+    def _contents_to_regions(self, contents):
+        """Convert the diff contents to gutter regions.
 
-    def _is_region_protected(self, region):
-        # Load protected Regions from Settings
-        protected_regions = settings.get('protected_regions', [])
-        # List of Lists of Regions
-        sets = [self.view.get_regions(r) for r in protected_regions]
-        # List of Regions
-        regions = [r for rs in sets for r in rs]
-        # get the line of the region (gutter icon applies to whole line)
-        region_line = self.view.line(region)
-        for r in regions:
-            if r.contains(region) or region_line.contains(r):
-                return True
+        The returned tuble has the same format as `region_names`.
 
-        return False
+        As a line can hold only on gutter icon the 'deleted' lines are split
+        into three different regions depending on the surrounding line states,
+        first. All other lines are mapped normally.
 
-    def _lines_to_regions(self, lines):
+        Arguments:
+            contents (tuble): The result of git_handler.diff(), with the
+                information about the modifications of the file.
+                Scheme: (first, last, [inserted], [modified], [deleted])
+        """
+        first_line, last_line, ins_lines, mod_lines, del_lines = contents
+        # Return empty regions, if diff result is empty
+        if first_line == 0:
+            return ([], [], [], [], [], [], [])
+        # initiate the lines to regions map
+        lines_regions = self._get_modified_region(first_line, last_line)
+        protected = self._get_protected_regions()
+        return (
+            # deleted regions
+            self._deleted_lines_to_regions(
+                first_line, del_lines, lines_regions, protected)
+            # inserted regions
+            + [self._lines_to_regions(
+                first_line, ins_lines, lines_regions, protected)]
+            # modified regions
+            + [self._lines_to_regions(
+                first_line, mod_lines, lines_regions, protected)]
+            # untracked / ignored regions
+            + [] + [])
+
+    def _get_modified_region(self, first_line, last_line):
+        """Create a list of all line start points in the modified Region.
+
+        A modified region contains all lines from the first found diff up to
+        the last one.
+
+        Note:
+            The points are calculated directly on the buffer string as
+            view.lines(...) takes up to 3 times longer, what hurts especially
+            with larger files.
+
+        Arguments:
+            first_line(int): The line to start reading with
+            last_line(int): The line to stop reading with
+
+        Returns:
+            list: The list of text positions of each line start
+        """
+        view = self.view
+        start = view.text_point(first_line - 1, 0)
+        end = view.text_point(last_line, 0)
+        region = sublime.Region(start, end)
+        lines = [start]
+        for line in view.substr(region).splitlines():
+            start += len(line) + 1
+            lines.append(start)
+        return lines
+
+    def _get_protected_regions(self):
+        """Create a list of line start points of all protected lines.
+
+        A protected region describes a line which is occupied by a higher prior
+        gutter icon which must not be overwritten by GitGutter.
+
+        Returns:
+            frozenset: A list of protected lines' start points.
+        """
+        view = self.view
+        keys = settings.get('protected_regions', [])
+        return frozenset(
+            view.line(reg).a for key in keys for reg in view.get_regions(key))
+
+    def _deleted_lines_to_regions(self, first_line, lines, lines_regions, protected):
+        """Convert the list of deleted lines' numbers to three deleted regions.
+
+        Arguments:
+            first_line (int): The line number hold by lines_region[0]
+            lines (list): The list of line numbers to add gutter icons to
+            lines_regions(dict): A map used to translate lines to regions
+            protected(list): The list of line start points to exclude
+        """
+        deleted_top, deleted_dual, deleted_bottom = [], [], []
+        # convert deleted lines to regions
+        if lines:
+            bottom_lines = [line - 1 for line in lines if line > 1]
+            for line in lines:
+                index = line - first_line
+                start = lines_regions[index]
+                if start not in protected:
+                    region = sublime.Region(start, start + 1)
+                    if line in bottom_lines:
+                        deleted_dual.append(region)
+                        bottom_lines.remove(line)
+                    else:
+                        deleted_top.append(region)
+            deleted_bottom = self._lines_to_regions(
+                first_line, bottom_lines, lines_regions, protected)
+        return [deleted_top, deleted_bottom, deleted_dual]
+
+    def _lines_to_regions(self, first_line, lines, lines_regions, protected):
+        """Convert the list of line numbers to regions.
+
+        Arguments:
+            first_line (int): The line number hold by lines_region[0]
+            lines (list): The list of line numbers to add gutter icons to
+            lines_regions(dict): A map used to translate lines to regions
+            protected(list): The list of line start points to exclude
+        """
         regions = []
         for line in lines:
-            position = self.view.text_point(line - 1, 0)
-            region = sublime.Region(position, position + 1)
-            if not self._is_region_protected(region):
-                regions.append(region)
+            start = lines_regions[line - first_line]
+            if start not in protected:
+                regions.append(sublime.Region(start, start + 1))
         return regions
 
-    def _lines_removed(self, lines):
-        top_lines = lines
-        bottom_lines = [line - 1 for line in lines if line > 1]
-        dual_lines = []
-        for line in top_lines:
-            if line in bottom_lines:
-                dual_lines.append(line)
-        for line in dual_lines:
-            bottom_lines.remove(line)
-            top_lines.remove(line)
+    def _bind_files(self, event):
+        """Add gutter icons to each line in the view.
 
-        self._bind_icons('deleted_top', top_lines)
-        self._bind_icons('deleted_bottom', bottom_lines)
-        self._bind_icons('deleted_dual', dual_lines)
+        The regions are calculated directly on the buffer string as
+        view.lines(...) takes up to 3 times longer, what hurts especially
+        with larger files.
 
-    def _plugin_dir(self):
-        path = os.path.realpath(__file__)
-        root = os.path.split(os.path.dirname(path))[1]
-        return os.path.splitext(root)[0]
+        Arguments:
+            event (string): The element of self.region_names to bind
+        """
+        view = self.view
+        start = 0
+        regions = []
+        protected = self._get_protected_regions()
+        chars = view.size()
+        region = sublime.Region(start, chars)
+        for line in view.substr(region).splitlines():
+            if start not in protected:
+                regions.append(sublime.Region(start, start + 1))
+                start += len(line) + 1
+        self._line_height = self.view.line_height()
+        self._bind_regions(event, regions)
+        self._clear_regions(event)
+
+    def _bind_regions(self, event, regions):
+        """Add gutter icons to all lines defined by their regions.
+
+        Arguments:
+            event (string): The element of self.region_names to bind
+            regions(list): A list of sublime.Region objects to add icons to.
+        """
+        region_name = 'git_gutter_%s' % event
+        if regions:
+            if event.startswith('del'):
+                scope = 'markup.deleted.git_gutter'
+            else:
+                scope = 'markup.%s.git_gutter' % event
+            icon = self._icon_path(event)
+            if ST3 and settings.show_in_minimap:
+                flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
+            else:
+                flags = sublime.HIDDEN
+            self.view.add_regions(
+                region_name, regions, scope, icon, flags)
+        else:
+            self.view.erase_regions(region_name)
+
+    def _clear_regions(self, exclude=[]):
+        """Remove all gutter icons.
+
+        Arguments:
+            exclude (string): The self.region_name not to clear.
+        """
+        for name in self.region_names:
+            if name not in exclude:
+                self.view.erase_regions('git_gutter_%s' % name)
 
     def _icon_path(self, event):
         """Built the full path to the icon to show for the event.
 
         Arguments:
-            event   - is one of self.region_names
+            event (string): The element of self.region_names to bind
         """
-        if self.view.line_height() > 15 and event.startswith('del'):
+        if self._line_height > 15 and event.startswith('del'):
             arrow = '_arrow'
         else:
             arrow = ''
         return ''.join((settings.theme_path, '/', event, arrow, _ICON_EXT))
-
-    def _bind_icons(self, event, lines):
-        regions = self._lines_to_regions(lines)
-        event_scope = event
-        if event.startswith('deleted'):
-            event_scope = 'deleted'
-        scope = 'markup.%s.git_gutter' % event_scope
-        icon = self._icon_path(event)
-        if ST3 and settings.show_in_minimap:
-            flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
-        else:
-            flags = sublime.HIDDEN
-        self.view.add_regions(
-            'git_gutter_%s' % event, regions, scope, icon, flags)
-
-    def _bind_files(self, event):
-        """Add gutter icons to each line in the view.
-
-        Arguments:
-            event   - is one of REGION_NAMES
-        """
-        self._update_status(event, ([], [], []))
-        lines = [line + 1 for line in range(self._total_lines())]
-        self._bind_icons(event, lines)
-
-    def _total_lines(self):
-        chars = self.view.size()
-        region = sublime.Region(0, chars)
-        lines = self.view.lines(region)
-        return len(lines)
