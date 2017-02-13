@@ -98,12 +98,13 @@ class GitGutterHandler(object):
                 A tuble of two the elements (working tree, file path).
             """
             if file_path:
-                path, name = os.path.split(os.path.realpath(file_path))
+                real_path = os.path.realpath(file_path)
+                path, name = os.path.split(real_path)
                 # files within '.git' path are not part of a work tree
                 while path and name and name != '.git':
                     if is_work_tree(path):
                         return (path, os.path.relpath(
-                            file_path, path).replace('\\', '/'))
+                            real_path, path).replace('\\', '/'))
                     path, name = os.path.split(path)
             return (None, None)
 
