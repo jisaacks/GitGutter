@@ -1,4 +1,4 @@
-import os
+import os.path
 import subprocess
 import re
 import codecs
@@ -10,9 +10,11 @@ import sublime
 
 try:
     from .git_gutter_settings import settings
+    from .modules import path
     from .promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
+    from modules import path
     from promise import Promise
 
 try:
@@ -76,41 +78,9 @@ class GitGutterHandler(object):
                              git repository or return the cached working tree
                              path only on False.
         """
-        def is_work_tree(path):
-            """Return True if `path` contains a `.git` directory or file."""
-            return path and os.path.exists(os.path.join(path, '.git'))
-
-        def split_work_tree(file_path):
-            """Split the `file_path` into working tree and relative path.
-
-            The file_path is converted to a absolute real path and split into
-            the working tree part and relative path part.
-
-            Note:
-                This is a local alternitive to calling the git command:
-
-                    git rev-parse --show-toplevel
-
-            Arguments:
-                file_path (string): full path to a file.
-
-            Returns:
-                A tuble of two the elements (working tree, file path).
-            """
-            if file_path:
-                real_path = os.path.realpath(file_path)
-                path, name = os.path.split(real_path)
-                # files within '.git' path are not part of a work tree
-                while path and name and name != '.git':
-                    if is_work_tree(path):
-                        return (path, os.path.relpath(
-                            real_path, path).replace('\\', '/'))
-                    path, name = os.path.split(path)
-            return (None, None)
-
         if validate:
             # Check if file exists
-            file_name = self.view.file_name()
+            file_name = path.realpath(self.view.file_name())
             if not file_name or not os.path.isfile(file_name):
                 self._view_file_name = None
                 self._git_tree = None
@@ -118,9 +88,9 @@ class GitGutterHandler(object):
                 return None
             # Check if file was renamed
             is_renamed = file_name != self._view_file_name
-            if is_renamed or not is_work_tree(self._git_tree):
+            if is_renamed or not path.is_work_tree(self._git_tree):
                 self._view_file_name = file_name
-                self._git_tree, self._git_path = split_work_tree(file_name)
+                self._git_tree, self._git_path = path.split_work_tree(file_name)
                 self.clear_git_time()
         return self._git_tree
 
