@@ -112,7 +112,7 @@ class GitGutterHandler(object):
         """Return the branch/commit/tag string the view is compared to."""
         return settings.get_compare_against(self._git_tree, self.view)
 
-    def set_compare_against(self, commit, refresh=False):
+    def set_compare_against(self, compare_against, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
 
         If one of the settings 'focus_change_mode' or 'live_mode' is true,
@@ -122,11 +122,11 @@ class GitGutterHandler(object):
         commands that do not show a quick panel.
 
         Arguments:
-            commit  - is either a branch, commit or tag as returned from
-                      git show-ref
-            refresh - always call git_gutter command
+            compare_against (string): The branch, commit or tag as returned
+                from 'git show-ref' to compare the view against
+            refresh (bool): True to force git diff and update gui
         """
-        settings.set_compare_against(self._git_tree, commit)
+        settings.set_compare_against(self._git_tree, compare_against)
         self.invalidate_git_file()
         if refresh or not any(settings.get(key, True) for key in (
                 'focus_change_mode', 'live_mode')):
@@ -281,7 +281,12 @@ class GitGutterHandler(object):
         # Always resolve with False if temporary file is marked up to date.
         if self._git_temp_file_valid:
             return Promise.resolve(False)
-        return self.git_compare_commit().then(check_commit)
+
+        # Read commit hash from git if compare target is a reference.
+        refs = self.get_compare_against()
+        if any(ref in refs for ref in ('HEAD', '/')):
+            return self.git_compare_commit(refs).then(check_commit)
+        return check_commit(refs)
 
     def process_diff(self, diff_str):
         r"""Parse unified diff with 0 lines of context.
@@ -554,12 +559,16 @@ class GitGutterHandler(object):
         ]
         return self.run_command(args)
 
-    def git_compare_commit(self):
-        """Query the commit hash of the compare target."""
+    def git_compare_commit(self, compare_against):
+        """Query the commit hash of the compare target.
+
+        Arguments:
+            compare_against  - The reference to compare against if not a hash.
+        """
         args = [
             settings.git_binary_path,
             'rev-parse',
-            self.get_compare_against()
+            compare_against
         ]
         return self.run_command(args)
 
