@@ -54,8 +54,8 @@ class GitGutterEvents(EventListener):
     def on_modified(self, view):
         """Run git_gutter for visible view.
 
-        The `on_modified()` is called when typing into an active view
-        and might be called for inactive views if the file changes on disk.
+        The `on_modified()` is called when typing into an active view and
+        might be called for inactive views if the file changes on disk.
 
         If the view is not visible, git_gutter will be triggered
         by `on_activate()` later. So it's useless here.

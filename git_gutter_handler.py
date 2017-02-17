@@ -59,7 +59,7 @@ class GitGutterHandler(object):
         # compare target commit hash
         self._git_compared_commit = None
         # cached git diff result for diff popup
-        self._git_diff_cache = None
+        self._git_diff_cache = ''
 
     def __del__(self):
         """Delete temporary files."""
@@ -374,13 +374,26 @@ class GitGutterHandler(object):
             return self.run_command(args=args, decode=False).then(decode_diff)
         return self.update_git_file().then(run_diff)
 
-    def process_diff_line_change(self, line_nr, diff_str):
-        # use cached diff result
-        if diff_str is None:
-            diff_str = self._git_diff_cache or ''
+    def diff(self):
+        """Run git diff to check for inserted, modified and deleted lines.
 
+        Returns:
+            Promise: The Promise object containing the processed git diff.
+        """
+        return self.diff_str().then(self.process_diff)
+
+    def diff_line_change(self, row):
+        """Use cached diff result to extract the changes of a certain line.
+
+        Arguments:
+            row (int): The row to find the changes for
+
+        Returns:
+            tuple: The tuple contains 4 items of information about changes
+                around the row with (deleted_lines, start, size, meta).
+        """
         hunk_re = r'^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
-        hunks = re.finditer(hunk_re, diff_str, re.MULTILINE)
+        hunks = re.finditer(hunk_re, self._git_diff_cache, re.MULTILINE)
 
         # we also want to extract the position of the surrounding changes
         first_change = prev_change = next_change = None
@@ -393,14 +406,14 @@ class GitGutterHandler(object):
                 first_change = start
             # special handling to also match the line below deleted
             # content
-            if size == 0 and line_nr == start + 1:
+            if size == 0 and row == start + 1:
                 pass
             # continue if the hunk is before the line
-            elif start + size < line_nr:
+            elif start + size < row:
                 prev_change = start
                 continue
             # break if the hunk is after the line
-            elif line_nr < start:
+            elif row < start:
                 break
             # in the following the line is inside the hunk
             try:
@@ -408,7 +421,7 @@ class GitGutterHandler(object):
                 hunk_end = next_hunk.start()
                 next_change = int(next_hunk.group(3))
             except:
-                hunk_end = len(diff_str)
+                hunk_end = len(self._git_diff_cache)
 
             # if wrap is disable avoid wrapping
             wrap = settings.get('next_prev_change_wrap', True)
@@ -436,7 +449,7 @@ class GitGutterHandler(object):
                 next_change = first_change
 
             # extract the content of the hunk
-            hunk_content = diff_str[hunk.start():hunk_end]
+            hunk_content = self._git_diff_cache[hunk.start():hunk_end]
             # store all deleted lines (starting with -)
             hunk_lines = hunk_content.splitlines()[1:]
             deleted_lines = [
@@ -452,21 +465,6 @@ class GitGutterHandler(object):
             }
             return (deleted_lines, start, size, meta)
         return ([], -1, -1, {})
-
-    def diff_line_change(self, line):
-        """Run git diff and extract the changes of a certain line.
-
-        NOTE: This method is used for diff popup.
-        """
-        return self.diff_str().then(
-            functools.partial(self.process_diff_line_change, line))
-
-    def diff(self):
-        """Run git diff to check for inserted, modified and deleted lines.
-
-        NOTE: This method is used to update the gutter markers.
-        """
-        return self.diff_str().then(self.process_diff)
 
     def untracked(self):
         """Determine whether the view shows an untracked file."""

@@ -25,16 +25,16 @@ def show_diff_popup(point, git_handler, highlight_diff=False, flags=0):
     if _MDPOPUPS_INSTALLED and git_handler.in_repo():
         view = git_handler.view
         line = view.rowcol(point)[0] + 1
-        git_handler.diff_line_change(line).then(
-            partial(_show_diff_popup_impl, view, point, highlight_diff, flags))
+        diff_info = git_handler.diff_line_change(line)
+        _show_diff_popup_impl(
+            view, point, line, highlight_diff, flags, diff_info)
 
 
-def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
+def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
     (deleted_lines, start, size, meta) = diff_info
     if start == -1:
         return
 
-    line = view.rowcol(point)[0] + 1
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
     is_modified = not is_removed and bool(deleted_lines)
@@ -87,7 +87,7 @@ def _show_diff_popup_impl(view, point, highlight_diff, flags, diff_info):
             }.get(href)
             # show a diff popup with the same diff info
             _show_diff_popup_impl(
-                view, point, highlight_diff=do_diff, flags=0,
+                view, point, line, highlight_diff=do_diff, flags=0,
                 diff_info=diff_info)
         elif href == "copy":
             sublime.set_clipboard("\n".join(deleted_lines))
