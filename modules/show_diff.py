@@ -23,6 +23,10 @@ class GitGutterShowDiff(object):
         # True if diff is running
         self._busy = False
 
+        self._num_inserted = 0
+        self._num_modified = 0
+        self._num_deleted = 0
+
     def __del__(self):
         """Delete GitGutterShowDiff object.
 
@@ -37,62 +41,28 @@ class GitGutterShowDiff(object):
 
     def run(self):
         """Run diff and update gutter icons and status message."""
-        if not self._busy:
-            self._busy = True
-            self.git_handler.diff().then(self._check_ignored_or_untracked)
-
-    def _check_ignored_or_untracked(self, contents):
-        """Check diff result and invoke gutter and status message update.
-
-        Arguments:
-            contents (tuble): The result of git_handler.diff(), with the
-                information about the modifications of the file.
-                Scheme: (first, last, [inserted], [modified], [deleted])
-        """
-        # nothing to update
-        if contents is None:
-            self._busy = False
+        if self._busy:
             return
+        self._busy = True
+        # Query git status and then check if git diff is required.
+        self.git_handler.diff().then(self._update_ui)
 
-        if not self.git_handler.in_repo():
-            show_untracked = self.git_handler.settings.get(
-                'show_markers_on_untracked_file', False)
-
-            def bind_ignored_or_untracked(is_ignored):
-                if is_ignored:
-                    event = 'ignored'
-                    self._update_status(event, (0, 0, [], [], []))
-                    if show_untracked:
-                        self._bind_files(event)
-                else:
-                    def bind_untracked(is_untracked):
-                        event = 'untracked' if is_untracked else 'inserted'
-                        self._update_status(event, (0, 0, [], [], []))
-                        if show_untracked:
-                            self._bind_files(event)
-                    self.git_handler.untracked().then(bind_untracked)
-            self.git_handler.ignored().then(bind_ignored_or_untracked)
-        else:
-            self._update_ui(contents)
-
-    def _update_ui(self, contents):
-        """Update gutter icons for modified files.
+    def _update_ui(self, diff_results):
+        """Use the diff result to show gutter and status message.
 
         Arguments:
-            contents (tuble): The result of git_handler.diff(), with the
-                information about the modifications of the file.
-                Scheme: (first, last, [inserted], [modified], [deleted])
+            diff_results: (tuple): (status, contents)
+                The information about state and changes returned from diff.
+                status (namedtuple): GitFileStatus with all meta information
+                    about the repository and file status
+                contents (tuple): The processed result of git diff with
+                    (first_line, last_line, [inserted], [modified], [deleted])
+                    If `None` git diff was skipped due to unchanged input.
         """
         try:
-            view = self.git_handler.view
-            self._line_height = view.line_height()
-            self._minimap_size = self.git_handler.settings.show_in_minimap
-            regions = self._contents_to_regions(contents)
-            if not self.git_handler.view_file_changed():
-                for name, region in zip(self.region_names, regions):
-                    self._bind_regions(name, region)
-            self._update_status(
-                'modified' if contents[0] else 'committed', contents)
+            if diff_results:
+                self._update_status(diff_results)
+                self._update_regions(diff_results)
         except IndexError:
             # Fail silently and don't update ui if _content_to_regions raises
             # index error as the result wouldn't be valid anyway.
@@ -100,7 +70,7 @@ class GitGutterShowDiff(object):
         finally:
             self._busy = False
 
-    def _update_status(self, file_state, contents):
+    def _update_status(self, diff_results):
         """Update status message.
 
         The method joins and renders the lines read from 'status_bar_text'
@@ -108,12 +78,15 @@ class GitGutterShowDiff(object):
         the state information of the open file.
 
         Arguments:
-            file_state (string): The git status of the open file.
-            contents (tuble): The result of git_handler.diff(), with the
-                information about the modifications of the file.
-                Scheme: (first, last, [inserted], [modified], [deleted])
+            diff_results: (tuple): (status, contents)
+                The information about state and changes returned from diff.
+                status (namedtuple): GitFileStatus with all meta information
+                    about the repository and file status
+                contents (tuple): The processed result of git diff with
+                    (first_line, last_line, [inserted], [modified], [deleted])
+                    If `None` git diff was skipped due to unchanged input.
         """
-        if not self.git_handler.settings.get('show_status_bar_text', False):
+        if not self.git_handler.settings.get('show_status_bar_text'):
             self.git_handler.view.erase_status('00_git_gutter')
             return
 
@@ -122,40 +95,73 @@ class GitGutterShowDiff(object):
         if window and window.active_view().id() != self.git_handler.view.id():
             return
 
-        def set_status(branch_name):
+        status, contents = diff_results
+        if contents:
             _, _, inserted, modified, deleted = contents
-            template = (
-                self.git_handler.settings.get('status_bar_text')
-                if _HAVE_JINJA2 else None
-            )
-            if template:
-                # render the template using jinja2 library
-                text = jinja2.environment.Template(''.join(template)).render(
-                    repo=self.git_handler.repository_name,
-                    compare=self.git_handler.format_compare_against(),
-                    branch=branch_name, state=file_state, deleted=len(deleted),
-                    inserted=len(inserted), modified=len(modified))
-            else:
-                # Render hardcoded text if jinja is not available.
-                parts = []
-                parts.append('On %s' % branch_name)
-                compare = self.git_handler.format_compare_against()
-                if compare not in ('HEAD', branch_name):
-                    parts.append('Comparing against %s' % compare)
-                count = len(inserted)
-                if count:
-                    parts.append('%d+' % count)
-                count = len(deleted)
-                if count:
-                    parts.append('%d-' % count)
-                count = len(modified)
-                if count:
-                    parts.append(u'%d≠' % count)
-                text = ', '.join(parts)
-            # add text and try to be the left most one
-            self.git_handler.view.set_status('00_git_gutter', text)
+            self._num_inserted = len(inserted)
+            self._num_modified = len(modified)
+            self._num_deleted = len(deleted)
 
-        self.git_handler.git_current_branch().then(set_status)
+        template = (
+            self.git_handler.settings.get('status_bar_text')
+            if _HAVE_JINJA2 else None
+        )
+        if template:
+            # render the template using jinja2 library
+            text = jinja2.environment.Template(''.join(template)).render(
+                repo=self.git_handler.repository_name,
+                compare=self.git_handler.format_compare_against(),
+                branch=status.branch, upstream=status.upstream,
+                ahead=status.ahead, behind=status.behind,
+                state=status.status_text(), deleted=self._num_deleted,
+                inserted=self._num_inserted, modified=self._num_modified)
+        else:
+            # Render hardcoded text if jinja is not available.
+            parts = []
+            parts.append('On %s' % status.branch)
+            compare = self.git_handler.format_compare_against()
+            if compare not in ('HEAD', status.branch):
+                parts.append('Comparing against %s' % compare)
+            if self._num_inserted:
+                parts.append('%d+' % self._num_inserted)
+            if self._num_deleted:
+                parts.append('%d-' % self._num_deleted)
+            if self._num_modified:
+                parts.append(u'%d≠' % self._num_modified)
+            text = ', '.join(parts)
+        # add text and try to be the left most one
+        self.git_handler.view.set_status('00_git_gutter', text)
+
+    def _update_regions(self, diff_results):
+        """Update gutter icons and minimap.
+
+        Arguments:
+            diff_results: (tuple): (status, contents)
+                The information about state and changes returned from diff.
+                status (namedtuple): GitFileStatus with all meta information
+                    about the repository and file status
+                contents (tuple): The processed result of git diff with
+                    (first_line, last_line, [inserted], [modified], [deleted])
+                    If `None` git diff was skipped due to unchanged input.
+        """
+        status, contents = diff_results
+        if status.is_ignored_or_untracked():
+            if self.git_handler.settings.get('show_markers_on_untracked_file'):
+                self._bind_files(status.status_text())
+            else:
+                self._clear_regions()
+
+        elif status.is_committed():
+            self._clear_regions()
+
+        elif contents:
+            view = self.git_handler.view
+            self._line_height = view.line_height()
+            self._minimap_size = self.git_handler.settings.show_in_minimap
+            regions = self._contents_to_regions(contents)
+            if not self.git_handler.view_file_changed():
+                for name, region in zip(self.region_names, regions):
+                    self._bind_regions(name, region)
 
     def _contents_to_regions(self, contents):
         """Convert the diff contents to gutter regions.

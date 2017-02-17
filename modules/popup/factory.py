@@ -24,8 +24,6 @@ def show_diff_popup(git_gutter, **kwargs):
             The arguments passed from GitGutterDiffPopupCommand
             to GitGutterCommand.
     """
-    if not git_gutter.git_handler.in_repo():
-        return
     # validate highlighting argument
     highlight_diff = kwargs.get('highlight_diff')
     if highlight_diff is None:

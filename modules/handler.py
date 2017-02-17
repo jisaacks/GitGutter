@@ -16,6 +16,7 @@ except ImportError:
 
 import sublime
 
+from . import git
 from . import path
 from . import utils
 from .promise import Promise
@@ -60,10 +61,10 @@ class GitGutterHandler(object):
         self._git_tree = None
         # relative file path in work tree
         self._git_path = None
+        # cached git status result
+        self._git_status = git.GitStatus()
         # cached branch name
         self._git_branch = None
-        # file is part of the git repository
-        self.git_tracked = False
         # compare target commit hash
         self._git_compared_commit = None
         # cached git diff result for diff popup
@@ -230,14 +231,6 @@ class GitGutterHandler(object):
         encoding = encoding.replace(' ', '')
         return encoding
 
-    def in_repo(self):
-        """Return true, if the most recent `git show` returned any content.
-
-        If `git show` returns empty content, any diff will result in
-        all lines added state and the view's file is most commonly untracked.
-        """
-        return self.git_tracked
-
     def view_file_changed(self):
         """Check whether the content of the view changed."""
         return (
@@ -302,6 +295,7 @@ class GitGutterHandler(object):
 
     def invalidate_git_file(self):
         """Invalidate all cached results of recent git commands."""
+        self._git_status.valid = False
         self._git_temp_file_valid = False
         # cached branch name
         self._git_branch = None
@@ -322,11 +316,15 @@ class GitGutterHandler(object):
             return Promise.resolve(False)
         self._git_temp_file_valid = True
 
-        # Read commit hash from git if compare target is a reference.
         refs = self.get_compare_against()
-        if 'HEAD' in refs or '/' in refs:
-            return self.git_compare_commit(refs).then(self._update_from_commit)
-        return self._update_from_commit(refs)
+        # Use git status result to track changes on current branch.
+        if refs in ('HEAD', self._git_status.branch):
+            return self._update_from_commit(self._git_status.head)
+        # The compare target is a valid commit or object id
+        if '/' not in refs:
+            return self._update_from_commit(refs)
+        # Read commit hash from git if compare target is a reference.
+        return self.git_compare_commit(refs).then(self._update_from_commit)
 
     def _update_from_commit(self, compared_id):
         """Update git file from commit, if the commit id changed.
@@ -360,8 +358,8 @@ class GitGutterHandler(object):
             bool: True if file was written to disc successfully.
         """
         try:
-            self.git_tracked = bool(contents)
-            if self.git_tracked:
+            is_tracked = bool(contents)
+            if is_tracked:
                 # Mangle end of lines
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
@@ -373,7 +371,7 @@ class GitGutterHandler(object):
                     file.write(contents)
             # Indicate success.
             self._git_compared_commit = compared_id
-            return self.git_tracked
+            return is_tracked
         except OSError as error:
             print('GitGutter failed to create git cache: %s' % error)
             return False
@@ -381,10 +379,52 @@ class GitGutterHandler(object):
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
 
+        This is the main method to gather information about the repository and
+        modifications off the view file. The required information are built in
+        several steps. Each of them decides whether to use cached information
+        or call a git command for update.
+
+        Steps:
+            1. Update git status information (done here)
+            2. Update git file and view file
+            3. Run git diff
+            4. Decode and parse results
+            5. Return merged status and diff results.
+
         Returns:
-            Promise: The Promise object containing the processed git diff.
+            Promise: The Promise to return a tuple with status information and
+                processed diff results.
         """
-        return self.update_git_file().then(self._run_diff)
+        if self._git_status.valid:
+            return self._built_diff(self._git_status)
+        return self.git_status().then(
+            self._git_status.from_bytes).then(self._built_diff)
+
+    def _built_diff(self, status):
+        """Check the git status, run diff and built result to return.
+
+        Returns:
+            Promise: The Promise to built a tuple containing the git status
+                and processed git diff result.
+        """
+        def built_result(contents):
+            """Merge status and diff result."""
+            # mark modified if diff returned changes
+            if contents and contents[0]:
+                status.set_modified()
+            return (status, contents)
+
+        # Return status only for untracked/ignored files
+        if status.is_ignored_or_untracked():
+            return Promise.resolve(built_result((0, 0, [], [], [])))
+        # Return status and empty diff for committed file
+        # Don't need to create temporary files
+        elif status.is_committed() and not self.view.is_dirty():
+            refs = self.get_compare_against()
+            if refs in ('HEAD', self._git_status.branch):
+                return Promise.resolve(built_result((0, 0, [], [], [])))
+        # Update temporary files and then run diff
+        return self.update_git_file().then(self._run_diff).then(built_result)
 
     def _run_diff(self, updated_git_file):
         """Call git diff and return the decoded unified diff string.
@@ -574,34 +614,16 @@ class GitGutterHandler(object):
             return (deleted_lines, start, size, meta)
         return ([], -1, -1, {})
 
-    def untracked(self):
-        """Determine whether the view shows an untracked file."""
-        return self.handle_files([])
-
-    def ignored(self):
-        """Determine whether the view shows an ignored file."""
-        return self.handle_files(['-i'])
-
-    def handle_files(self, additional_args):
-        """Run git ls-files to check for untracked or ignored file."""
-        if self._git_tree:
-            def is_nonempty(results):
-                """Determine if view's file is in git's index.
-
-                If the view's file is not part of the index
-                git returns empty output to stdout.
-                """
-                return bool(results)
-
-            args = [
-                self.settings.git_binary,
-                'ls-files', '--other', '--exclude-standard',
-            ] + additional_args + [
-                os.path.join(self._git_tree, self._git_path),
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            return self.execute_async(args).then(is_nonempty)
-        return Promise.resolve(False)
+    def git_status(self):
+        """Call git status to receive information of the view file."""
+        args = [
+            self.settings.git_binary,
+            '--icase-pathspecs',
+            'status',
+            '--porcelain=2', '-b', '-u', '-z', '--ignored', '--no-lock-index',
+            self._git_path
+        ]
+        return self.execute_async(args, decode=False)
 
     def git_commits(self):
         r"""Query all commits.
