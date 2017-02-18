@@ -26,6 +26,8 @@ class GitGutterShowDiff(object):
         self.git_handler = git_handler
         self._line_height = 0
         self._minimap_size = 1
+        # True if diff is running
+        self._busy = False
 
     def clear(self):
         """Remove all gutter icons and status messages."""
@@ -34,7 +36,9 @@ class GitGutterShowDiff(object):
 
     def run(self):
         """Run diff and update gutter icons and status message."""
-        self.git_handler.diff().then(self._check_ignored_or_untracked)
+        if not self._busy:
+            self._busy = True
+            self.git_handler.diff().then(self._check_ignored_or_untracked)
 
     def _check_ignored_or_untracked(self, contents):
         """Check diff result and invoke gutter and status message update.
@@ -46,6 +50,7 @@ class GitGutterShowDiff(object):
         """
         # nothing to update
         if contents is None:
+            self._busy = False
             return
 
         if not self.git_handler.in_repo():
@@ -85,6 +90,7 @@ class GitGutterShowDiff(object):
         regions = self._contents_to_regions(contents)
         for name, region in zip(self.region_names, regions):
             self._bind_regions(name, region)
+        self._busy = False
 
     def _update_status(self, file_state, contents):
         """Update status message.
@@ -293,6 +299,7 @@ class GitGutterShowDiff(object):
         self._minimap_size = settings.get_show_in_minimap(view)
         self._bind_regions(event, regions)
         self._clear_regions(event)
+        self._busy = False
 
     def _bind_regions(self, event, regions):
         """Add gutter icons to all lines defined by their regions.
