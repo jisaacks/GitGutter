@@ -13,7 +13,7 @@ from unittest import TestCase
 import sublime
 
 sys.path.append(path.dirname(path.dirname(__file__)))
-from promise import Promise
+from modules.promise import Promise
 
 
 class test_promise(TestCase):

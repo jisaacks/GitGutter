@@ -16,11 +16,11 @@ import sublime
 try:
     from .git_gutter_settings import settings
     from .modules import path
-    from .promise import Promise
+    from .modules.promise import Promise
 except (ImportError, ValueError):
     from git_gutter_settings import settings
     from modules import path
-    from promise import Promise
+    from modules.promise import Promise
 
 try:
     from subprocess import TimeoutExpired
