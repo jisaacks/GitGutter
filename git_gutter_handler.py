@@ -382,6 +382,16 @@ class GitGutterHandler(object):
         """
         return self.diff_str().then(self.process_diff)
 
+    def diff_changed_blocks(self):
+        """Create a list of all changed code blocks from cached diff result.
+
+        Returns:
+            list: A list with the row numbers of all changed code blocks.
+        """
+        hunk_re = r'^@@ \-\d+,?\d* \+(\d+),?\d* @@'
+        hunks = re.finditer(hunk_re, self._git_diff_cache, re.MULTILINE)
+        return [int(hunk.group(1)) for hunk in hunks]
+
     def diff_line_change(self, row):
         """Use cached diff result to extract the changes of a certain line.
 
