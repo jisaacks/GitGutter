@@ -14,10 +14,14 @@ try:
             path (string): The path to resolve.
 
         Returns:
-            string: The resolved absolute path.
+            string: The resolved absolute path if exists or path as provided
+                otherwise.
         """
-        final_path = _getfinalpathname(path)
-        return final_path.replace('\\\\?\\', '')
+        try:
+            return _getfinalpathname(
+                path).replace('\\\\?\\', '') if path else None
+        except FileNotFoundError:
+            return path
 
 except (AttributeError, ImportError):
     def realpath(path):
@@ -29,7 +33,7 @@ except (AttributeError, ImportError):
         Returns:
             string: The resolved absolute path.
         """
-        return os.path.realpath(path)
+        return os.path.realpath(path) if path else None
 
 
 def is_work_tree(path):
