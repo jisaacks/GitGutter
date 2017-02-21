@@ -33,6 +33,11 @@ except:
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 
+try:
+    set_timeout = sublime.set_timeout_async
+except AttributeError:
+    set_timeout = sublime.set_timeout
+
 
 class GitGutterHandler(object):
 
@@ -630,9 +635,6 @@ class GitGutterHandler(object):
                     resolve(stdout)
 
         def run_async(resolve):
-            if hasattr(sublime, 'set_timeout_async'):
-                sublime.set_timeout_async(lambda: read_output(resolve), 0)
-            else:
-                read_output(resolve)
+            set_timeout(lambda: read_output(resolve), 10)
 
         return Promise(run_async)
