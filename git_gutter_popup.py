@@ -197,10 +197,7 @@ def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
         )
         content = button_line
 
-    if _MD_POPUPS_USE_WRAPPER_CLASS:
-        wrapper_class = ".git-gutter"
-    else:
-        wrapper_class = ""
+    wrapper_class = ".git-gutter" if _MD_POPUPS_USE_WRAPPER_CLASS else ""
 
     # load and join popup stylesheets
     css = []
@@ -218,11 +215,15 @@ def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
 
     # apply the jinja template
     jinja_kwargs = {
+        "st_version": sublime.version(),
         "wrapper_class": wrapper_class,
         "use_icons": use_icons
     }
     tmpl = jinja2.environment.Template("\n".join(css))
     css = tmpl.render(**jinja_kwargs)
+    # if the ST version does not support the wrapper class, remove it
+    if not _MD_POPUPS_USE_WRAPPER_CLASS:
+        css = css.replace(".git-gutter", "")
 
     # create the popup
     location = view.line(point).a
