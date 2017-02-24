@@ -2,6 +2,7 @@ import os.path
 
 try:
     from nt import _getfinalpathname
+
     def realpath(path):
         """Resolve symlinks and return real path to file.
 

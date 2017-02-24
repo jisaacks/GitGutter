@@ -1,15 +1,22 @@
-import os.path
-import subprocess
-import re
 import codecs
-import functools
+import os.path
+import re
+import subprocess
 import tempfile
 import zipfile
 
 try:
     from io import BytesIO
-except (ImportError, ValueError):
+except ImportError:
     from cStringIO import StringIO as BytesIO
+
+try:
+    from subprocess import TimeoutExpired
+    _HAVE_TIMEOUT = True
+except ImportError:
+    class TimeoutExpired(Exception):
+        pass
+    _HAVE_TIMEOUT = False
 
 import sublime
 
@@ -17,18 +24,10 @@ try:
     from .git_gutter_settings import settings
     from .modules import path
     from .modules.promise import Promise
-except (ImportError, ValueError):
+except ValueError:
     from git_gutter_settings import settings
     from modules import path
     from modules.promise import Promise
-
-try:
-    from subprocess import TimeoutExpired
-    _HAVE_TIMEOUT = True
-except:
-    class TimeoutExpired(Exception):
-        pass
-    _HAVE_TIMEOUT = False
 
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
@@ -293,7 +292,8 @@ class GitGutterHandler(object):
             return self.git_compare_commit(refs).then(check_commit)
         return check_commit(refs)
 
-    def process_diff(self, diff_str):
+    @staticmethod
+    def process_diff(diff_str):
         r"""Parse unified diff with 0 lines of context.
 
         Returns:
@@ -341,7 +341,6 @@ class GitGutterHandler(object):
 
     def diff_str(self):
         """Run git diff against view and decode the result then."""
-
         def decode_diff(results):
             encoding = self._get_view_encoding()
             try:
@@ -545,6 +544,7 @@ class GitGutterHandler(object):
         return self.run_command(args)
 
     def git_branches(self):
+        """Query all branches of the file's repository."""
         args = [
             settings.git_binary_path,
             'for-each-ref',
@@ -555,6 +555,7 @@ class GitGutterHandler(object):
         return self.run_command(args)
 
     def git_tags(self):
+        """Query all tags of the file's repository."""
         args = [
             settings.git_binary_path,
             'show-ref',
@@ -564,6 +565,7 @@ class GitGutterHandler(object):
         return self.run_command(args)
 
     def git_current_branch(self):
+        """Query the current branch of the file's repository."""
         args = [
             settings.git_binary_path,
             'rev-parse',

@@ -3,16 +3,15 @@ import sublime_plugin
 
 try:
     if int(sublime.version()) < 3080:
-        raise Exception("No popup available.")
+        raise ImportError("No popup available.")
 
     import difflib
     import html
-    from functools import partial
+    import jinja2
+    import mdpopups
 
     _MDPOPUPS_INSTALLED = True
-    import mdpopups
-    import jinja2
-except:
+except ImportError:
     _MDPOPUPS_INSTALLED = False
 
 if _MDPOPUPS_INSTALLED:

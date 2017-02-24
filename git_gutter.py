@@ -1,4 +1,4 @@
-from sublime_plugin import TextCommand
+import sublime_plugin
 
 try:
     from .git_gutter_settings import settings
@@ -10,7 +10,7 @@ try:
     from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
-except (ImportError, ValueError):
+except ValueError:
     from git_gutter_settings import settings
     from git_gutter_handler import GitGutterHandler
     from git_gutter_compare import (
@@ -22,9 +22,10 @@ except (ImportError, ValueError):
     from git_gutter_show_diff import GitGutterShowDiff
 
 
-class GitGutterCommand(TextCommand):
+class GitGutterCommand(sublime_plugin.TextCommand):
     def __init__(self, *args, **kwargs):
-        TextCommand.__init__(self, *args, **kwargs)
+        """Initialize GitGutterCommand object."""
+        sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.git_handler = GitGutterHandler(self.view)
         self.show_diff_handler = GitGutterShowDiff(self.git_handler)
         # Last enabled state for change detection
@@ -51,12 +52,12 @@ class GitGutterCommand(TextCommand):
         elif view.settings().get("repl"):
             valid = False
         # Don't handle binary files
-        elif view.encoding() in ('Hexadecimal'):
+        elif view.encoding() == 'Hexadecimal':
             valid = False
         else:
             # Validate work tree on certain events only
             validate = any(event in ('load', 'activated', 'post-save')
-                for event in kwargs.get('event_type', []))
+                           for event in kwargs.get('event_type', []))
             # Don't handle files outside a repository
             if not self.git_handler.work_tree(validate):
                 valid = False
@@ -119,7 +120,7 @@ class GitGutterCommand(TextCommand):
             assert False, 'Unhandled sub command "%s"' % action
 
 
-class GitGutterBaseCommand(TextCommand):
+class GitGutterBaseCommand(sublime_plugin.TextCommand):
     def is_enabled(self, **kwargs):
         return self.view.settings().get('git_gutter_enabled', False)
 

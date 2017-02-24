@@ -1,10 +1,11 @@
-from functools import partial
-from threading import Lock
+import functools
+import threading
 
 
 class Promise(object):
-    """
-    A simple implementation of the Promise spec (https://promisesaplus.com/).
+    """A simple implementation of the Promise specification.
+
+    See: https://promisesaplus.com
 
     Promise is in essence a syntactic sugar for callbacks. Simplifies passing
     values from functions that might do work in asynchronous manner.
@@ -47,8 +48,7 @@ class Promise(object):
     """
 
     def __init__(self, executor):
-        """
-        Creates an instance of Promise.
+        """Creates an instance of Promise.
 
         Arguments:
             executor: A function that is executed immediately by this Promise.
@@ -57,13 +57,14 @@ class Promise(object):
         """
         self.value = None
         self.resolved = False
-        self.mutex = Lock()
+        self.mutex = threading.Lock()
         self.callbacks = []
         self._invoke_executor(executor)
 
     @staticmethod
     def resolve(resolve_value=None):
-        """
+        """Immediatelly resolve a Promise.
+
         Convenience function for creating a Promise that gets immediately
         resolved with the specified value.
 
@@ -76,8 +77,7 @@ class Promise(object):
         return Promise(executor)
 
     def then(self, callback):
-        """
-        Creates a new promise and chains it with this promise.
+        """Creates a new promise and chains it with this promise.
 
         When this promise gets resolved, the callback will be called with the
         value that this promise resolved with.
@@ -88,8 +88,7 @@ class Promise(object):
             callback: The callback to call when this promise gets resolved.
         """
         def callback_wrapper(resolve_fn, resolve_value):
-            """
-            A wrapper called when this promise resolves.
+            """A wrapper called when this promise resolves.
 
             Arguments:
                 resolve_fn: A resolve function of newly created promise.
@@ -104,18 +103,20 @@ class Promise(object):
                 resolve_fn(result)
 
         def sync_executor(resolve_fn):
-            """
+            """Call resolve_fn immediately with the resolved value.
+
             An executor that will immediately resolve resolve_fn with the
             resolved value of this promise.
             """
             callback_wrapper(resolve_fn, self._get_value())
 
         def async_executor(resolve_fn):
-            """
+            """Queue resolve_fn to be called after this promise resolves later.
+
             An executor that will resolve received resolve_fn when this promise
             resolves later.
             """
-            self._add_callback(partial(callback_wrapper, resolve_fn))
+            self._add_callback(functools.partial(callback_wrapper, resolve_fn))
 
         if self._is_resolved():
             return Promise(sync_executor)
@@ -134,8 +135,8 @@ class Promise(object):
                 "cannot set the value of an already resolved promise")
         with self.mutex:
             self.value = new_value
-            for cb in self.callbacks:
-                cb(new_value)
+            for callback in self.callbacks:
+                callback(new_value)
             self.resolved = True
 
     def _add_callback(self, callback):

@@ -1,20 +1,18 @@
-import os
-import sublime
-
 try:
     # avoid exceptions if dependency is not yet satisfied
     import jinja2.environment
     _HAVE_JINJA2 = True
-except (ImportError, ValueError):
+except ImportError:
     _HAVE_JINJA2 = False
+
+import sublime
 
 try:
     from .git_gutter_settings import settings
-except (ImportError, ValueError):
+except ValueError:
     from git_gutter_settings import settings
 
-ST3 = int(sublime.version()) >= 3000
-_ICON_EXT = '.png' if ST3 else ''
+_ICON_EXT = '.png' if int(sublime.version()) >= 3000 else ''
 
 
 class GitGutterShowDiff(object):
@@ -168,15 +166,15 @@ class GitGutterShowDiff(object):
         return (
             # deleted regions
             self._deleted_lines_to_regions(
-                first_line, del_lines, lines_regions, protected)
+                first_line, del_lines, lines_regions, protected) +
             # inserted regions
-            + [self._lines_to_regions(
-                first_line, ins_lines, lines_regions, protected)]
+            [self._lines_to_regions(
+                first_line, ins_lines, lines_regions, protected)] +
             # modified regions
-            + [self._lines_to_regions(
-                first_line, mod_lines, lines_regions, protected)]
+            [self._lines_to_regions(
+                first_line, mod_lines, lines_regions, protected)] +
             # untracked / ignored regions
-            + [] + [])
+            [] + [])
 
     def _get_modified_region(self, first_line, last_line):
         """Create a list of all line start points in the modified Region.

@@ -1,5 +1,4 @@
-from functools import partial
-
+import functools
 import sublime
 
 
@@ -26,7 +25,7 @@ class GitGutterCompareCommit(object):
     def _show_quick_panel(self, results):
         if results:
             self.git_handler.view.window().show_quick_panel(
-                results, partial(self._on_select, results))
+                results, functools.partial(self._on_select, results))
 
     def _on_select(self, results, selected):
         if 0 > selected < len(results):

@@ -1,6 +1,6 @@
 try:
     from .git_gutter_settings import settings
-except (ImportError, ValueError):
+except ValueError:
     from git_gutter_settings import settings
 
 
