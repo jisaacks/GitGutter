@@ -292,6 +292,22 @@ It is valid to use environment variables in the setting value, and they will be 
 In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
 
+#### Ignore Whitespace
+
+`"ignore_whitespace": "none"`
+
+GitGutter includes all whitespace when evaluating modifications by default. Set `ignore_whitespace` to one of the following values to change this behavior.
+
+value   | description
+--------|-----------------------------------------------
+"none"  | don't ignore any whitespace changes
+"eol"   | ignore whitespace changes at the end of line
+"space" | ignore changed amount of whitespace
+"all"   | ignore all whitespace
+
+👉 The value determines which command line argument to pass to `git diff`.
+
+
 #### Protected Regions
 
 ```
