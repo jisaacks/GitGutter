@@ -135,7 +135,7 @@ class GitGutterShowDiff(object):
                     parts.append('%d-' % count)
                 count = len(modified)
                 if count:
-                    parts.append('%d*' % count)
+                    parts.append(u'%d\u2260' % count)
                 text = ', '.join(parts)
             # add text and try to be the left most one
             self.git_handler.view.set_status('00_git_gutter', text)
