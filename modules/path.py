@@ -7,9 +7,12 @@ try:
         """Resolve symlinks and return real path to file.
 
         Note:
-            This is a fix for the issue of os.path.realpath() not to resolve
-            symlinks on Windows as it is an alias to abspath() only.
+            This is a fix for the issue of `os.path.realpath()` not to resolve
+            symlinks on Windows as it is an alias to `os.path.abspath()` only.
             see: http://bugs.python.org/issue9949
+
+            This fix applies to local paths only as symlinks are not resolved
+            by _getfinalpathname on network drives anyway.
 
         Arguments:
             path (string): The path to resolve.
@@ -19,10 +22,15 @@ try:
                 otherwise.
         """
         try:
-            return _getfinalpathname(
-                path).replace('\\\\?\\', '') if path else None
+            if path:
+                real_path = _getfinalpathname(path)
+                if real_path[5] == ':':
+                    # Remove \\?\ from beginning of resolved path
+                    return real_path[4:]
+                return os.path.abspath(path)
         except FileNotFoundError:
-            return path
+            pass
+        return path
 
 except (AttributeError, ImportError):
     def realpath(path):
@@ -58,7 +66,7 @@ def split_work_tree(file_path):
     the working tree part and relative path part.
 
     Note:
-        This is a local alternitive to calling the git command:
+        This is a local alternative to calling the git command:
 
             git rev-parse --show-toplevel
 
