@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import codecs
+import functools
 import os.path
 import re
 import subprocess
@@ -235,61 +236,16 @@ class GitGutterHandler(object):
         self._git_branch = None
 
     def update_git_file(self):
-        """Update file from git index and store in temp folder.
+        """Update file from git index and write it to a temporary file.
+
+        Query the compare target's object id from git, if the compare target
+        is not a specific hash already. Then read the file from git index only,
+        if the commit has changed since last call. If the commit is still the
+        same the file did not change, too and reading it would waste resources.
 
         Returns:
             Promise resolved with True if the temporary file was updated.
         """
-        def check_commit(commit):
-            """Check if compare target changed and update git file then.
-
-            If the commit has didn't change since the last run, the temporary
-            file is still up to date and git 'show' can be skipped and the
-            promise is resolved with False.
-
-            This method uses `git archive` to read the file content from git
-            repository to enable support of smudge filters (fixes Issue #74).
-            Git applies those smudge filters to some commands like `archive`,
-            `diff` and `checkout` only, but not to commands like `show`.
-
-            Arguments:
-                commit (string): full hash of the commit the view is currently
-                                 compared against.
-            Returns:
-                bool: True if temporary file was updated, False otherwise.
-            """
-            def write_file(contents):
-                """Extract output and write it to a temporary file.
-
-                The function resolves the promise with True to indicate the
-                updated git file.
-                """
-                try:
-                    # Mangle end of lines
-                    contents = contents.replace(b'\r\n', b'\n')
-                    contents = contents.replace(b'\r', b'\n')
-                    # Write the content to file
-                    if not self._git_temp_file:
-                        self._git_temp_file = self.tmp_file()
-                    with open(self._git_temp_file, 'wb') as file:
-                        file.write(contents)
-                    self.git_tracked = True
-                    self._git_compared_commit = commit
-                    return True
-                except AttributeError:
-                    # Git returned empty output, file is not tracked
-                    self.git_tracked = False
-                    self._git_compared_commit = commit
-                    return False
-                except OSError as error:
-                    print('GitGutter failed to create git cache: %s' % error)
-                    return False
-
-            # Read file from git incase the compare target has changed
-            if self._git_compared_commit == commit:
-                return Promise.resolve(False)
-            return self.git_read_file(commit).then(write_file)
-
         # Always resolve with False if temporary file is marked up to date.
         if self._git_temp_file_valid:
             return Promise.resolve(False)
@@ -297,9 +253,63 @@ class GitGutterHandler(object):
 
         # Read commit hash from git if compare target is a reference.
         refs = self.get_compare_against()
-        if any(ref in refs for ref in ('HEAD', '/')):
-            return self.git_compare_commit(refs).then(check_commit)
-        return check_commit(refs)
+        if 'HEAD' in refs or '/' in refs:
+            return self.git_compare_commit(refs).then(self._update_from_commit)
+        return self._update_from_commit(refs)
+
+    def _update_from_commit(self, compared_id):
+        """Update git file from commit, if the commit id changed.
+
+        The compared_id is compared to the last compare target. If it changed,
+        the temporary git file is updated from the provided commit.
+
+        Arguments:
+            compared_id (string): Full hash of the commit the view is currently
+                compared against.
+
+        Returns:
+            bool: True if temporary file was updated, False otherwise.
+        """
+        if self._git_compared_commit == compared_id:
+            return Promise.resolve(False)
+        return self.git_read_file(compared_id).then(
+            functools.partial(self._write_git_file, compared_id))
+
+    def _write_git_file(self, compared_id, contents):
+        """Extract output and write it to a temporary file.
+
+        The function resolves the promise with True to indicate the
+        updated git file.
+
+        Arguments:
+            compared_id (string): The new compare target's object id to store.
+            contents (string): The file contents read from git.
+
+        Returns:
+            bool: True if file was written to disc successfully.
+        """
+        try:
+            # Mangle end of lines
+            contents = contents.replace(b'\r\n', b'\n')
+            contents = contents.replace(b'\r', b'\n')
+            # Create temporary file
+            if not self._git_temp_file:
+                self._git_temp_file = self.tmp_file()
+            # Write content to temporary file
+            with open(self._git_temp_file, 'wb') as file:
+                file.write(contents)
+            # Indicate success.
+            self._git_compared_commit = compared_id
+            self.git_tracked = True
+            return True
+        except AttributeError:
+            # Git returned empty output, file is not tracked
+            self._git_compared_commit = compared_id
+            self.git_tracked = False
+            return False
+        except OSError as error:
+            print('GitGutter failed to create git cache: %s' % error)
+            return False
 
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
@@ -321,8 +331,9 @@ class GitGutterHandler(object):
                 the modifications of the file.
             None: Returns None if nothing has changed since last call.
         """
-        if not updated_git_file and not self.update_view_file():
-            return None
+        updated_view_file = self.update_view_file()
+        if not updated_git_file and not updated_view_file:
+            return self.process_diff(self._git_diff_cache)
 
         args = list(filter(None, (
             self.settings.git_binary,
