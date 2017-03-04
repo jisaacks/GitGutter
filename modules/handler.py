@@ -301,14 +301,64 @@ class GitGutterHandler(object):
             return self.git_compare_commit(refs).then(check_commit)
         return check_commit(refs)
 
+    def diff(self):
+        """Run git diff to check for inserted, modified and deleted lines.
+
+        Returns:
+            Promise: The Promise object containing the processed git diff.
+        """
+        return self.update_git_file().then(self._run_diff)
+
+    def _run_diff(self, updated_git_file):
+        """Call git diff and return the decoded unified diff string.
+
+        Arguments:
+            updated_git_file (bool): Is True if the file was updated
+                from git database since last call.
+        Returns:
+            tuple: (first_line, last_line, [inserted], [modified], [deleted])
+                The processed result of git diff with the information about
+                the modifications of the file.
+            None: Returns None if nothing has changed since last call.
+        """
+        if not updated_git_file and not self.update_view_file():
+            return None
+
+        args = list(filter(None, (
+            self.settings.git_binary,
+            'diff', '-U0', '--no-color', '--no-index', '--indent-heuristic',
+            self.settings.ignore_whitespace,
+            self.settings.patience_switch,
+            self._git_temp_file,
+            self._view_temp_file,
+        )))
+        return self.run_command(
+            args=args, decode=False).then(self._decode_diff)
+
+    def _decode_diff(self, results):
+        encoding = self._get_view_encoding()
+        try:
+            decoded_results = results.decode(encoding)
+        except AttributeError:
+            # git returned None on stdout
+            decoded_results = ''
+        except UnicodeError:
+            try:
+                decoded_results = results.decode('utf-8')
+            except UnicodeDecodeError:
+                decoded_results = ''
+        except LookupError:
+            try:
+                decoded_results = codecs.decode(results)
+            except UnicodeDecodeError:
+                decoded_results = ''
+        # cache the diff result for reuse with diff_popup.
+        self._git_diff_cache = decoded_results
+        return self.process_diff(decoded_results)
+
     @staticmethod
     def process_diff(diff_str):
         r"""Parse unified diff with 0 lines of context.
-
-        Returns:
-            - `None` to indicate nothing to update
-            - A tuble with information about the diff result of the form
-              (first, last, [inserted], [modified], [deleted])
 
         Hunk range info format:
           @@ -3,2 +4,0 @@
@@ -316,15 +366,20 @@ class GitGutterHandler(object):
             starts at line 4, and occupies 0 lines, i.e. it was deleted.
           @@ -9 +10,2 @@
             Hunk size can be omitted, and defaults to one line.
+
         Dealing with ambiguous hunks:
           "A\nB\n" -> "C\n"
           Was 'A' modified, and 'B' deleted? Or 'B' modified, 'A' deleted?
           Or both deleted? To minimize confusion, let's simply mark the
           hunk as modified.
+
+        Arguments:
+            diff_str (string): The unified diff string to parse.
+
+        Returns:
+            tuple: (first, last, [inserted], [modified], [deleted])
+                A tuple with meta information of the diff result.
         """
-        # go on with None if diff_str is empty
-        if diff_str is None:
-            return None
         # first and last changed line in the view
         first, last = 0, 0
         # lists with inserted, modified and deleted lines
@@ -347,56 +402,6 @@ class GitGutterHandler(object):
                 last = start + new_size
                 modified += range(start, last)
         return (first, last, inserted, modified, deleted)
-
-    def diff_str(self):
-        """Run git diff against view and decode the result then."""
-        def decode_diff(results):
-            encoding = self._get_view_encoding()
-            try:
-                decoded_results = results.decode(encoding)
-            except AttributeError:
-                # git returned None on stdout
-                decoded_results = None
-            except UnicodeError:
-                try:
-                    decoded_results = results.decode("utf-8")
-                except UnicodeDecodeError:
-                    decoded_results = None
-            except LookupError:
-                try:
-                    decoded_results = codecs.decode(results)
-                except UnicodeDecodeError:
-                    decoded_results = None
-            # cache the diff result for reuse with diff_popup.
-            self._git_diff_cache = decoded_results
-            return decoded_results
-
-        def run_diff(updated_git_file):
-            # if both temp files were not updated, diff is not necessary.
-            # Resolve with None to indicate this special situation.
-            updated_view_file = self.update_view_file()
-            if not updated_view_file and not updated_git_file:
-                return Promise.resolve(None)
-
-            args = [
-                self.settings.git_binary,
-                'diff', '-U0', '--no-color', '--no-index',
-                self.settings.ignore_whitespace,
-                self.settings.patience_switch,
-                self._git_temp_file,
-                self._view_temp_file,
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            return self.run_command(args=args, decode=False).then(decode_diff)
-        return self.update_git_file().then(run_diff)
-
-    def diff(self):
-        """Run git diff to check for inserted, modified and deleted lines.
-
-        Returns:
-            Promise: The Promise object containing the processed git diff.
-        """
-        return self.diff_str().then(self.process_diff)
 
     def diff_changed_blocks(self):
         """Create a list of all changed code blocks from cached diff result.
