@@ -58,6 +58,8 @@ class GitGutterHandler(object):
         self._git_tree = None
         # relative file path in work tree
         self._git_path = None
+        # cached branch name
+        self._git_branch = None
         # file is part of the git repository
         self.git_tracked = False
         # compare target commit hash
@@ -218,8 +220,8 @@ class GitGutterHandler(object):
             if self.view.encoding() == "UTF-8 with BOM":
                 file.write(codecs.BOM_UTF8)
             file.write(encoded)
-        # Update internal change counter after job is done
-        self._view_change_count = change_count
+            # Update internal change counter after job is done
+            self._view_change_count = change_count
         return True
 
     def is_git_file_valid(self):
@@ -229,6 +231,8 @@ class GitGutterHandler(object):
     def invalidate_git_file(self):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
+        # cached branch name
+        self._git_branch = None
 
     def update_git_file(self):
         """Update file from git index and store in temp folder.
@@ -272,13 +276,15 @@ class GitGutterHandler(object):
                     self._git_temp_file = self.tmp_file()
                 with open(self._git_temp_file, 'wb') as file:
                     file.write(contents)
-                # finally update git hash if file was updated
-                self._git_compared_commit = commit
+                    # finally update git hash if file was updated
+                    self._git_compared_commit = commit
+                    self._git_temp_file_valid = True
                 self.git_tracked = bool(contents)
                 return True
 
             # Read file from git incase the compare target has changed
             if self._git_compared_commit == commit:
+                self._git_temp_file_valid = True
                 return Promise.resolve(False)
             return self.git_read_file(commit).then(write_file)
 
@@ -566,13 +572,20 @@ class GitGutterHandler(object):
 
     def git_current_branch(self):
         """Query the current branch of the file's repository."""
+        if self._git_branch:
+            return Promise.resolve(self._git_branch)
+
+        def cache_result(branch):
+            self._git_branch = branch
+            return branch
+
         args = [
             settings.git_binary_path,
             'rev-parse',
             '--abbrev-ref',
             'HEAD'
         ]
-        return self.run_command(args)
+        return self.run_command(args).then(cache_result)
 
     def git_compare_commit(self, compare_against):
         """Query the commit hash of the compare target.
