@@ -6,5 +6,6 @@
   "1.2.3": "release_messages/dest/1.2.3.txt",
   "1.2.4": "release_messages/dest/1.2.4.txt",
   "1.3.0": "release_messages/dest/1.3.0.txt",
-  "1.4.0": "release_messages/dest/1.4.0.txt"
+  "1.4.0": "release_messages/dest/1.4.0.txt",
+  "1.5.0": "release_messages/dest/1.5.0.txt"
 }
