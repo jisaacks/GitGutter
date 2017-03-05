@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     # avoid exceptions if dependency is not yet satisfied
     import jinja2.environment
@@ -135,7 +136,7 @@ class GitGutterShowDiff(object):
                     parts.append('%d-' % count)
                 count = len(modified)
                 if count:
-                    parts.append(u'%d\u2260' % count)
+                    parts.append(u'%d≠' % count)
                 text = ', '.join(parts)
             # add text and try to be the left most one
             self.git_handler.view.set_status('00_git_gutter', text)
@@ -145,14 +146,14 @@ class GitGutterShowDiff(object):
     def _contents_to_regions(self, contents):
         """Convert the diff contents to gutter regions.
 
-        The returned tuble has the same format as `region_names`.
+        The returned tuple has the same format as `region_names`.
 
         As a line can hold only on gutter icon the 'deleted' lines are split
         into three different regions depending on the surrounding line states,
         first. All other lines are mapped normally.
 
         Arguments:
-            contents (tuble): The result of git_handler.diff(), with the
+            contents (tuple): The result of git_handler.diff(), with the
                 information about the modifications of the file.
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """

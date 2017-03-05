@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import codecs
 import os.path
 import re
@@ -124,19 +125,19 @@ class GitGutterHandler(object):
         If one of the settings 'focus_change_mode' or 'live_mode' is true,
         the view, is automatically compared by 'on_activate' event when
         returning from a quick panel and therefore the command 'git_gutter'
-        can be ommited. This assumption can be overriden by 'refresh' for
+        can be omitted. This assumption can be overridden by 'refresh' for
         commands that do not show a quick panel.
 
         Arguments:
             compare_against (string): The branch, commit or tag as returned
                 from 'git show-ref' to compare the view against
-            refresh (bool): True to force git diff and update gui
+            refresh (bool): True to force git diff and update GUI
         """
         settings.set_compare_against(self._git_tree, compare_against)
         self.invalidate_git_file()
         if refresh or not any(settings.get(key, True) for key in (
                 'focus_change_mode', 'live_mode')):
-            self.view.run_command('git_gutter')  # refresh ui
+            self.view.run_command('git_gutter')  # refresh UI
 
     def format_compare_against(self):
         """Format the compare against setting to use for display."""

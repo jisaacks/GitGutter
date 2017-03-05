@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     from .git_gutter_settings import settings
 except ValueError:
