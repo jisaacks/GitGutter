@@ -1,4 +1,21 @@
-Changes since 1.4.0:
+1.5.0
+-----
+
+  ------------------------------------------------------------------------
+              !!!   WHAT HAPPEND TO GITGUTTER-EDGE   !!!
+
+  We decided to replace GitGutter-Edge by pre-releases ...
+
+   1. to avoid issues with functions which depend on the package name.
+   2. because branch based packages are deprecated by Package Control.
+   3. to have more control about when to publish new features for testing.
+
+  For more details and information how to get access to pre-releases,
+  please have a look into the README on
+
+         https://packagecontrol.io/packages/GitGutter
+
+  ------------------------------------------------------------------------
 
   Enhancement:
    - Avoid creation of temporary files, if view does not show a file from a valid git repository.
