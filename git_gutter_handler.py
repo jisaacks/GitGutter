@@ -271,6 +271,9 @@ class GitGutterHandler(object):
                     # by exactly one file whose content we are interested in.
                     archive = zipfile.ZipFile(BytesIO(output))
                     contents = archive.read(archive.filelist[-1])
+                # Mangle end of lines
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
                 # Write the content to file
                 if not self._git_temp_file:
                     self._git_temp_file = self.tmp_file()
