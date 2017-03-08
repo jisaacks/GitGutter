@@ -82,7 +82,7 @@
   //   {{modified}} -- number of modified lines
   "status_bar_text": [
     "In {{repo}} on {{branch}}",
-    "{% if compare != 'HEAD' %}, Comparing against {{compare}}{% endif %}",
+    "{% if compare not in ('HEAD', branch) %}, Comparing against {{compare}}{% endif %}",
     ", File is {{state}}",
     "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
     "{% if inserted != 0 %}, {{inserted}}+{% endif %}",

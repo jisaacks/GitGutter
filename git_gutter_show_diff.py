@@ -126,7 +126,7 @@ class GitGutterShowDiff(object):
                 parts = []
                 parts.append('On %s' % branch_name)
                 compare = self.git_handler.format_compare_against()
-                if compare != 'HEAD':
+                if compare not in ('HEAD', branch_name):
                     parts.append('Comparing against %s' % compare)
                 count = len(inserted)
                 if count:
