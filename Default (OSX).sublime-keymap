@@ -4,6 +4,7 @@
     { "keys": ["super+shift+option+z"], "command": "git_gutter_revert_change" },
     { "keys": ["super+shift+option+c", "super+d"], "command": "git_gutter_diff_popup" },
     { "keys": ["super+shift+option+c", "v"], "command": "git_gutter_show_compare" },
+    { "keys": ["super+shift+option+c", "s"], "command": "git_gutter_compare_index" },
     { "keys": ["super+shift+option+c", "h"], "command": "git_gutter_compare_head" },
     { "keys": ["super+shift+option+c", "o"], "command": "git_gutter_compare_origin" },
     { "keys": ["super+shift+option+c", "c"], "command": "git_gutter_compare_commit" },

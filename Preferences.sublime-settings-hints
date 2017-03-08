@@ -35,10 +35,11 @@
   // This setting changes the initial compare target and can
   // be temporarily overwritten by 'Compare against ...' commands
   // Valid constants are:
+  // "INDEX":  Compare against staging area or most recent commit
   // "HEAD":   Compare against most recent commit
   // "master": Compare against master branch
   // "master@{upstream}": Compare against remote master branch
-  "git_gutter_compare_against": "HEAD",
+  "git_gutter_compare_against": "INDEX",
 
   // Live mode evaluates changes every time file is modified,
   // Set false to disable evaluation after each input
@@ -101,7 +102,7 @@
   //   {{modified}} -- number of modified lines
   "git_gutter_status_bar_text": [
     "In {{repo}} on {{branch}}",
-    "{% if compare not in ('CACHED', 'HEAD', branch) %}, Comparing against {{compare}}{% endif %}",
+    "{% if compare not in ('INDEX', 'HEAD', branch) %}, Comparing against {{compare}}{% endif %}",
     ", File is {{state}}",
     "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
     "{% if inserted != 0 %}, {{inserted}}+{% endif %}",

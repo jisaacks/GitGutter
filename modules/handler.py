@@ -63,10 +63,8 @@ class GitGutterHandler(object):
         self._git_path = None
         # cached git status result
         self._git_status = git.GitStatus()
-        # cached branch name
-        self._git_branch = None
-        # compare target commit hash
-        self._git_compared_commit = None
+        # compare target's object id
+        self._git_compared_id = None
         # cached git diff result for diff popup
         self._git_diff_cache = ''
         # PEP-440 conform git version (major, minor, patch)
@@ -164,14 +162,14 @@ class GitGutterHandler(object):
         fall back to HEAD if everything goes wrong to avoid exceptions.
 
         Returns:
-            string: HEAD/branch/tag/remote/commit
+            string: INDEX/HEAD/branch/tag/remote/commit
                 The reference to compare the view against.
         """
         # Interactively specified compare target overrides settings.
         if self._git_tree in self._compare_against_mapping:
             return self._compare_against_mapping[self._git_tree]
         # Project settings and Preferences override plugin settings if set.
-        return self.settings.get('compare_against', 'HEAD')
+        return self.settings.get('compare_against', 'INDEX')
 
     def set_compare_against(self, compare_against, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
@@ -189,7 +187,7 @@ class GitGutterHandler(object):
         """
         # Reset compare target to HEAD, if current branch is selected
         if not compare_against or compare_against == self.branch_name:
-            compare_against = 'HEAD'
+            compare_against = 'INDEX'
         self._compare_against_mapping[self._git_tree] = compare_against
         # force refresh if live_mode and focus_change_mode are disabled
         refresh |= (not self.settings.get('live_mode') and
@@ -320,8 +318,11 @@ class GitGutterHandler(object):
         self._git_temp_file_valid = True
 
         refs = self.get_compare_against()
+        # Use git status index object id to track staged changes
+        if refs == 'INDEX' and self._git_status.is_staged():
+            return self._update_from_stage(self._git_status.index_oid)
         # Use git status result to track changes on current branch.
-        if refs in ('HEAD'):
+        if refs in ('INDEX', 'HEAD'):
             return self._update_from_commit(self._git_status.head)
         # The compare target is a valid commit or object id
         if '/' not in refs:
@@ -342,16 +343,38 @@ class GitGutterHandler(object):
         Returns:
             bool: True if temporary file was updated, False otherwise.
         """
-        if self._git_compared_commit == compared_id:
+        if self._git_compared_id == compared_id:
             return Promise.resolve(False)
+        # Read and unzip the file from index and then write to disk.
         return self.git_read_file(compared_id).then(
             functools.partial(self._write_git_file, compared_id))
 
-    def _write_git_file(self, compared_id, contents):
-        """Extract output and write it to a temporary file.
+    def _update_from_stage(self, compared_id):
+        """Update git file from staging area, if the object id changed.
 
-        The function resolves the promise with True to indicate the
-        updated git file.
+        The compared_id is compared to the last compare target. If it changed,
+        the temporary git file is updated from staging area.
+
+        Note:
+            This method uses `git show` to get the file content and thus might
+            not work with smudge filters. `git archive` does unfortunately not
+            support reading cached files.
+
+        Arguments:
+            compared_id (string): The object id of the file in the staging area
+                as reported by `git status`
+
+        Returns:
+            bool: True if temporary file was updated, False otherwise.
+        """
+        if self._git_compared_id == compared_id:
+            return False
+        # Read the file from staging area and then write to disk.
+        return self.git_read_file('').then(
+            functools.partial(self._write_git_file, compared_id))
+
+    def _write_git_file(self, compared_id, contents):
+        """Write the file content from git's output to a temporary file.
 
         Arguments:
             compared_id (string): The new compare target's object id to store.
@@ -373,7 +396,7 @@ class GitGutterHandler(object):
                 with open(self._git_temp_file, 'wb') as file:
                     file.write(contents)
             # Indicate success.
-            self._git_compared_commit = compared_id
+            self._git_compared_id = compared_id
             return is_tracked
         except OSError as error:
             print('GitGutter failed to create git cache: %s' % error)
@@ -412,9 +435,6 @@ class GitGutterHandler(object):
         """
         def built_result(contents):
             """Merge status and diff result."""
-            # mark modified if diff returned changes
-            if contents and contents[0]:
-                status.set_modified()
             return (status, contents)
 
         # Return status only for untracked/ignored files
@@ -424,8 +444,10 @@ class GitGutterHandler(object):
         # Don't need to create temporary files
         elif status.is_committed() and not self.view.is_dirty():
             refs = self.get_compare_against()
-            if refs in ('HEAD'):
+            if refs in ('CACHED', 'HEAD'):
                 return Promise.resolve(built_result((0, 0, [], [], [])))
+        # Always mark modified if diff is run.
+        status.set_modified()
         # Update temporary files and then run diff
         return self.update_git_file().then(self._run_diff).then(built_result)
 

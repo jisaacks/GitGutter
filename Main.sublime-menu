@@ -37,6 +37,10 @@
                     },
                     { "caption": "-" },
                     {
+                        "caption": "Compare Against HEAD or Staging Area",
+                        "command": "git_gutter_compare_index"
+                    },
+                    {
                         "caption": "Compare Against HEAD",
                         "command": "git_gutter_compare_head"
                     },

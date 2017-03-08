@@ -153,6 +153,19 @@ def set_against_tag(git_gutter, **kwargs):
     git_gutter.git_handler.git_tags().then(show_quick_panel)
 
 
+def set_against_index(git_gutter, **kwargs):
+    """Set staging area as compare target.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
+    """
+    git_gutter.git_handler.set_compare_against('INDEX', True)
+
+
 def set_against_head(git_gutter, **kwargs):
     """Set HEAD as compare target.
 
