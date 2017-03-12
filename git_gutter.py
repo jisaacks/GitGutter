@@ -7,10 +7,10 @@ try:
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
         GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
         GitGutterCompareFileCommit)
-    from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
     from .modules import events
+    from .modules import goto
     from .modules import settings
 except ValueError:
     from git_gutter_handler import GitGutterHandler
@@ -18,10 +18,10 @@ except ValueError:
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
         GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
         GitGutterCompareFileCommit)
-    from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from git_gutter_popup import show_diff_popup
     from git_gutter_show_diff import GitGutterShowDiff
     from modules import events
+    from modules import goto
     from modules import settings
 
 
@@ -97,9 +97,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
     def _handle_subcommand(self, **kwargs):
         action = kwargs['action']
         if action == 'jump_to_next_change':
-            GitGutterJumpToChanges(self.git_handler).jump_to_next_change()
+            goto.next_change(self)
         elif action == 'jump_to_prev_change':
-            GitGutterJumpToChanges(self.git_handler).jump_to_prev_change()
+            goto.prev_change(self)
         elif action == 'compare_against_commit':
             GitGutterCompareCommit(self.git_handler).run()
         elif action == 'compare_against_file_commit':
