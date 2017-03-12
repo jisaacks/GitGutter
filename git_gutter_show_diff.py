@@ -23,6 +23,13 @@ class GitGutterShowDiff(object):
         # True if diff is running
         self._busy = False
 
+    def __del__(self):
+        """Delete GitGutterShowDiff object.
+
+        Clear all output to prevent zombies if the plugin is disabled.
+        """
+        self.clear()
+
     def clear(self):
         """Remove all gutter icons and status messages."""
         self.git_handler.view.erase_status('00_git_gutter')

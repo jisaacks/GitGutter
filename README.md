@@ -180,6 +180,13 @@ Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kb
 Default settings should not be modified, as they are overwritten when GitGutter updates. Copy the relevant settings into GitGutter's user settings file instead.
 
 
+#### Enable/Disable Evaluation
+
+`"enable": true`
+
+GitGutter evaluates changes every time the file is loaded, saved, activated or modified by default. Set `false` to disable evaluation and hide all gutter icons, status message and minimap markers.
+
+
 #### Debounce Delay
 
 `"debounce_delay": 1000`

@@ -40,8 +40,11 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         view = self.view
         valid = True
 
+        # Keep idle, if disabled by user setting
+        if not self.settings.get('enable'):
+            valid = False
         # Don't handle unattached views
-        if not view.window():
+        elif not view.window():
             valid = False
         # Don't handle scratch or readonly views
         elif view.is_scratch() or view.is_read_only():
@@ -68,8 +71,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             # File moved out of work-tree or repository gone
             if not valid:
                 self.show_diff_handler.clear()
+                self.git_handler.invalidate_view_file()
             # Save state for use in other modules
-            view.settings().set('git_gutter_enabled', valid)
+            view.settings().set('git_gutter_is_enabled', valid)
             # Save state for internal use
             self._enabled = valid
         return valid
@@ -118,7 +122,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
 class GitGutterBaseCommand(sublime_plugin.TextCommand):
     def is_enabled(self, **kwargs):
-        return self.view.settings().get('git_gutter_enabled', False)
+        return self.view.settings().get('git_gutter_is_enabled', False)
 
 
 class GitGutterShowCompareCommand(GitGutterBaseCommand):

@@ -320,7 +320,7 @@ class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
     def is_enabled(self):
         return (
             _MDPOPUPS_INSTALLED and
-            self.view.settings().get('git_gutter_enabled', False))
+            self.view.settings().get('git_gutter_is_enabled', False))
 
     def run(self, edit, point=None, highlight_diff=None, flags=0):
         if point is None:
