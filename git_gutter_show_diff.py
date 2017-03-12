@@ -8,11 +8,6 @@ except ImportError:
 
 import sublime
 
-try:
-    from .git_gutter_settings import settings
-except ValueError:
-    from git_gutter_settings import settings
-
 _ICON_EXT = '.png' if int(sublime.version()) >= 3000 else ''
 
 
@@ -21,7 +16,7 @@ class GitGutterShowDiff(object):
                     'inserted', 'changed', 'untracked', 'ignored')
 
     def __init__(self, git_handler):
-        """Initialize an object instance."""
+        """Initialize GitGutterShowDiff object."""
         self.git_handler = git_handler
         self._line_height = 0
         self._minimap_size = 1
@@ -53,7 +48,7 @@ class GitGutterShowDiff(object):
             return
 
         if not self.git_handler.in_repo():
-            show_untracked = settings.get(
+            show_untracked = self.git_handler.settings.get(
                 'show_markers_on_untracked_file', False)
 
             def bind_ignored_or_untracked(is_ignored):
@@ -85,7 +80,7 @@ class GitGutterShowDiff(object):
             'modified' if contents[0] else 'commited', contents)
         view = self.git_handler.view
         self._line_height = view.line_height()
-        self._minimap_size = settings.get_show_in_minimap(view)
+        self._minimap_size = self.git_handler.settings.show_in_minimap
         regions = self._contents_to_regions(contents)
         for name, region in zip(self.region_names, regions):
             self._bind_regions(name, region)
@@ -104,14 +99,14 @@ class GitGutterShowDiff(object):
                 information about the modifications of the file.
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """
-        if not settings.get('show_status_bar_text', False):
+        if not self.git_handler.settings.get('show_status_bar_text', False):
             self.git_handler.view.erase_status('00_git_gutter')
             return
 
         def set_status(branch_name):
             _, _, inserted, modified, deleted = contents
             template = (
-                settings.get('status_bar_text')
+                self.git_handler.settings.get('status_bar_text')
                 if _HAVE_JINJA2 else None
             )
             if template:
@@ -218,7 +213,7 @@ class GitGutterShowDiff(object):
             frozenset: A list of protected lines' start points.
         """
         view = self.git_handler.view
-        keys = settings.get('protected_regions', [])
+        keys = self.git_handler.settings.get('protected_regions', [])
         return frozenset(
             view.line(reg).a for key in keys for reg in view.get_regions(key))
 
@@ -295,7 +290,7 @@ class GitGutterShowDiff(object):
                 regions.append(region)
                 start = end + 1
         self._line_height = view.line_height()
-        self._minimap_size = settings.get_show_in_minimap(view)
+        self._minimap_size = self.git_handler.settings.show_in_minimap
         self._bind_regions(event, regions)
         self._clear_regions(event)
         self._busy = False
@@ -343,4 +338,6 @@ class GitGutterShowDiff(object):
             arrow = '_arrow'
         else:
             arrow = ''
-        return ''.join((settings.theme_path, '/', event, arrow, _ICON_EXT))
+        return ''.join((
+            self.git_handler.settings.theme_path, '/',
+            event, arrow, _ICON_EXT))

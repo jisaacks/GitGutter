@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-try:
-    from .git_gutter_settings import settings
-except ValueError:
-    from git_gutter_settings import settings
-
 
 class GitGutterJumpToChanges(object):
     def __init__(self, git_handler):
@@ -24,7 +19,7 @@ class GitGutterJumpToChanges(object):
         self.goto_line(self.prev_jump, self.git_handler.diff_changed_blocks())
 
     def next_jump(self, all_changes, current_row):
-        if settings.get('next_prev_change_wrap', True):
+        if self.git_handler.settings.get('next_prev_change_wrap', True):
             default = all_changes[0]
         else:
             default = all_changes[-1]
@@ -33,7 +28,7 @@ class GitGutterJumpToChanges(object):
                     if change > current_row), default)
 
     def prev_jump(self, all_changes, current_row):
-        if settings.get('next_prev_change_wrap', True):
+        if self.git_handler.settings.get('next_prev_change_wrap', True):
             default = all_changes[-1]
         else:
             default = all_changes[0]

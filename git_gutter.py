@@ -2,7 +2,6 @@
 import sublime_plugin
 
 try:
-    from .git_gutter_settings import settings
     from .git_gutter_handler import GitGutterHandler
     from .git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
@@ -12,8 +11,8 @@ try:
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
     from .modules import events
+    from .modules import settings
 except ValueError:
-    from git_gutter_settings import settings
     from git_gutter_handler import GitGutterHandler
     from git_gutter_compare import (
         GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
@@ -23,13 +22,15 @@ except ValueError:
     from git_gutter_popup import show_diff_popup
     from git_gutter_show_diff import GitGutterShowDiff
     from modules import events
+    from modules import settings
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
     def __init__(self, *args, **kwargs):
         """Initialize GitGutterCommand object."""
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
-        self.git_handler = GitGutterHandler(self.view)
+        self.settings = settings.ViewSettings(self.view)
+        self.git_handler = GitGutterHandler(self.view, self.settings)
         self.show_diff_handler = GitGutterShowDiff(self.git_handler)
         # Last enabled state for change detection
         self._enabled = False
@@ -39,11 +40,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         view = self.view
         valid = True
 
-        # Keep idle, if git binary is not set
-        if not settings.git_binary_path:
-            valid = False
         # Don't handle unattached views
-        elif not view.window():
+        if not view.window():
             valid = False
         # Don't handle scratch or readonly views
         elif view.is_scratch() or view.is_read_only():
@@ -113,12 +111,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         elif action == 'show_compare':
             GitGutterShowCompare(self.git_handler).run()
         elif action == 'show_diff_popup':
-            point = kwargs['point']
-            highlight_diff = kwargs['highlight_diff']
-            flags = kwargs['flags']
-            show_diff_popup(
-                point, self.git_handler,
-                highlight_diff=highlight_diff, flags=flags)
+            show_diff_popup(self, **kwargs)
         else:
             assert False, 'Unhandled sub command "%s"' % action
 

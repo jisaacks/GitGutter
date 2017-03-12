@@ -5,3 +5,5 @@ Define all API classes here, which need to be exported to Sublime Text.
 """
 
 from .events import EventListener
+from .settings import (
+    GitGutterEditSettingsCommand, GitGutterOpenFileCommand)

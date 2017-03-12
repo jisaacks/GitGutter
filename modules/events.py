@@ -4,10 +4,7 @@ import time
 import sublime
 import sublime_plugin
 
-try:
-    from ..git_gutter_settings import settings
-except ValueError:
-    from git_gutter_settings import settings
+from . import settings
 
 # binary representation of all ST events
 NEW = 1
@@ -108,7 +105,7 @@ class EventListener(sublime_plugin.EventListener):
         key = view.id()
         if key not in self.view_events:
             return
-        if not settings.get('enable_hover_diff_popup'):
+        if not self.view_events[key].settings.get('enable_hover_diff_popup'):
             return
         view.run_command('git_gutter_diff_popup', {
             'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
@@ -142,6 +139,8 @@ class ViewEventListener(object):
             view (View): The view the object is created for.
         """
         self.view = view
+        # view aware git gutter settings
+        self.settings = settings.ViewSettings(view)
         # timer is running flag
         self.busy = False
         # a binary combination of above events
@@ -162,10 +161,17 @@ class ViewEventListener(object):
         Arguments:
             event_id (int): One of the event identifiers.
         """
+        if event_id & ACTIVATED:
+            if not (self.settings.get('live_mode') or
+                    self.settings.get('focus_change_mode')):
+                return
+        elif event_id & MODIFIED:
+            if not self.settings.get('live_mode'):
+                return
         self.latest_time = time.time()
         self.events |= event_id
         if not self.busy:
-            self.delay = max(200, settings.get('debounce_delay', 1000))
+            self.delay = max(200, self.settings.get('debounce_delay', 1000))
             self.start_timer(100)
 
     def start_timer(self, delay):

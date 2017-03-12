@@ -15,22 +15,36 @@ try:
 except ImportError:
     _MDPOPUPS_INSTALLED = False
 
-if _MDPOPUPS_INSTALLED:
-    from .git_gutter_settings import settings
-
 _MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
-def show_diff_popup(point, git_handler, highlight_diff=False, flags=0):
-    if _MDPOPUPS_INSTALLED and git_handler.in_repo():
-        view = git_handler.view
-        line = view.rowcol(point)[0] + 1
-        diff_info = git_handler.diff_line_change(line)
-        _show_diff_popup_impl(
-            view, point, line, highlight_diff, flags, diff_info)
+def show_diff_popup(git_gutter, **kwargs):
+    """Show the diff popup.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+        kwargs (dict): The arguments passed from GitGutterDiffPopupCommand
+            to GitGutterCommand.
+    """
+    if not _MDPOPUPS_INSTALLED or not git_gutter.git_handler.in_repo():
+        return
+    # validate highlighting argument
+    highlight_diff = kwargs['highlight_diff']
+    if highlight_diff is None:
+        mode = git_gutter.settings.get("diff_popup_default_mode", "")
+        highlight_diff = mode == "diff"
+    # get line number from text point
+    line = git_gutter.view.rowcol(kwargs['point'])[0] + 1
+
+    _show_diff_popup_impl(
+        view=git_gutter.view, settings=git_gutter.settings, line=line,
+        highlight_diff=highlight_diff, flags=kwargs['flags'],
+        diff_info=git_gutter.git_handler.diff_line_change(line))
 
 
-def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
+def _show_diff_popup_impl(
+        view, settings, line, highlight_diff, flags, diff_info):
     (deleted_lines, start, size, meta) = diff_info
     if start == -1:
         return
@@ -87,7 +101,7 @@ def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
             }.get(href)
             # show a diff popup with the same diff info
             _show_diff_popup_impl(
-                view, point, line, highlight_diff=do_diff, flags=0,
+                view, settings, line, highlight_diff=do_diff, flags=0,
                 diff_info=diff_info)
         elif href == "copy":
             sublime.set_clipboard("\n".join(deleted_lines))
@@ -202,7 +216,7 @@ def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
     # load and join popup stylesheets
     css = []
     theme_paths = (
-        "Packages/" + settings.package_name,
+        "Packages/GitGutter",
         settings.theme_path,
         "Packages/User"
     )
@@ -226,7 +240,7 @@ def _show_diff_popup_impl(view, point, line, highlight_diff, flags, diff_info):
         css = css.replace(".git-gutter", "")
 
     # create the popup
-    location = view.line(point).a
+    location = view.text_point(line - 1, 0)
     window_width = int(view.viewport_extent()[0])
     mdpopups.show_popup(
         view, content, location=location, on_navigate=navigate, md=False,
@@ -310,17 +324,10 @@ class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, point=None, highlight_diff=None, flags=0):
         if point is None:
-            if len(self.view.sel()) == 0:
+            if not self.view.sel():
                 return
-            point = self.view.sel()[0].b
+            point = self.view.sel()[0].end()
 
-        if highlight_diff is None:
-            mode = settings.get("diff_popup_default_mode", "")
-            highlight_diff = mode == "diff"
-        kwargs = {
-            'action': 'show_diff_popup',
-            'point': point,
-            'highlight_diff': highlight_diff,
-            'flags': flags
-        }
-        self.view.run_command('git_gutter', kwargs)
+        self.view.run_command('git_gutter', {
+            'action': 'show_diff_popup', 'point': point,
+            'highlight_diff': highlight_diff, 'flags': flags})

@@ -22,11 +22,9 @@ except ImportError:
 import sublime
 
 try:
-    from .git_gutter_settings import settings
     from .modules import path
     from .modules.promise import Promise
 except ValueError:
-    from git_gutter_settings import settings
     from modules import path
     from modules.promise import Promise
 
@@ -41,8 +39,9 @@ except AttributeError:
 
 class GitGutterHandler(object):
 
-    def __init__(self, view):
+    def __init__(self, view, settings):
         """Initialize GitGutterHandler object."""
+        self.settings = settings
         # attached view being tracked
         self.view = view
         # cached view file name to detect renames
@@ -117,7 +116,7 @@ class GitGutterHandler(object):
 
     def get_compare_against(self):
         """Return the branch/commit/tag string the view is compared to."""
-        return settings.get_compare_against(self._git_tree, self.view)
+        return self.settings.get_compare_against(self._git_tree)
 
     def set_compare_against(self, compare_against, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
@@ -133,10 +132,10 @@ class GitGutterHandler(object):
                 from 'git show-ref' to compare the view against
             refresh (bool): True to force git diff and update GUI
         """
-        settings.set_compare_against(self._git_tree, compare_against)
+        self.settings.set_compare_against(self._git_tree, compare_against)
         self.invalidate_git_file()
-        if refresh or not any(settings.get(key, True) for key in (
-                'focus_change_mode', 'live_mode')):
+        if refresh or (not self.settings.get('live_mode') and
+                       not self.settings.get('focus_change_mode')):
             self.view.run_command('git_gutter')  # refresh UI
 
     def format_compare_against(self):
@@ -384,10 +383,10 @@ class GitGutterHandler(object):
                 return Promise.resolve(None)
 
             args = [
-                settings.git_binary_path,
+                self.settings.git_binary,
                 'diff', '-U0', '--no-color', '--no-index',
-                settings.ignore_whitespace,
-                settings.patience_switch,
+                self.settings.ignore_whitespace,
+                self.settings.patience_switch,
                 self._git_temp_file,
                 self._view_temp_file,
             ]
@@ -425,7 +424,8 @@ class GitGutterHandler(object):
         """
         hunk_re = r'^@@ \-(\d+),?(\d*) \+(\d+),?(\d*) @@'
         hunks = re.finditer(hunk_re, self._git_diff_cache, re.MULTILINE)
-
+        # if wrap is disable avoid wrapping
+        wrap = self.settings.get('next_prev_change_wrap')
         # we also want to extract the position of the surrounding changes
         first_change = prev_change = next_change = None
 
@@ -454,8 +454,6 @@ class GitGutterHandler(object):
             except:
                 hunk_end = len(self._git_diff_cache)
 
-            # if wrap is disable avoid wrapping
-            wrap = settings.get('next_prev_change_wrap', True)
             if not wrap:
                 if prev_change is None:
                     prev_change = start
@@ -517,7 +515,7 @@ class GitGutterHandler(object):
                 return bool(results)
 
             args = [
-                settings.git_binary_path,
+                self.settings.git_binary,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
                 os.path.join(self._git_tree, self._git_path),
@@ -535,7 +533,7 @@ class GitGutterHandler(object):
             <date> (<time> ago)
         """
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'log', '--all',
             '--pretty=%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
@@ -552,7 +550,7 @@ class GitGutterHandler(object):
             <date> (<time> ago)
         """
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'log',
             '--pretty=%at\a%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000',
@@ -563,7 +561,7 @@ class GitGutterHandler(object):
     def git_branches(self):
         """Query all branches of the file's repository."""
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'for-each-ref',
             '--sort=-committerdate',
             '--format=%(subject)\a%(refname)\a%(objectname)',
@@ -574,7 +572,7 @@ class GitGutterHandler(object):
     def git_tags(self):
         """Query all tags of the file's repository."""
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'show-ref',
             '--tags',
             '--abbrev=7'
@@ -591,7 +589,7 @@ class GitGutterHandler(object):
             return branch
 
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'rev-parse',
             '--abbrev-ref',
             'HEAD'
@@ -605,7 +603,7 @@ class GitGutterHandler(object):
             compare_against  - The reference to compare against if not a hash.
         """
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'rev-parse',
             compare_against
         ]
@@ -647,7 +645,7 @@ class GitGutterHandler(object):
                 return None
 
         args = [
-            settings.git_binary_path,
+            self.settings.git_binary,
             'archive', '--format=zip',
             commit, self._git_path
         ]
@@ -687,7 +685,7 @@ class GitGutterHandler(object):
                 proc.kill()
                 stdout, stderr = proc.communicate()
             finally:
-                if not stdout and stderr and settings.get('debug'):
+                if not stdout and stderr and self.settings.get('debug'):
                     # print out git's error message
                     print('GitGutter: \'git %s\' failed with \"%s\"' % (
                         args[1], stderr.decode('utf-8').strip()))
