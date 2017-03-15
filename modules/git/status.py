@@ -48,6 +48,12 @@ class GitStatus(object):
         self.index_oid = None
         # working file object id
         self.working_oid = None
+        # number of deleted regions
+        self.lines_deleted = 0
+        # number of inserted lines
+        self.lines_inserted = 0
+        # number of modified lines
+        self.lines_modified = 0
 
     def from_bytes(self, output):
         """Parse output of git status.
@@ -113,6 +119,24 @@ class GitStatus(object):
         self.valid = True
         # allow chained commands
         return self
+
+    def clear_line_stats(self):
+        """Return status and empty diff result."""
+        self.lines_deleted = 0
+        self.lines_inserted = 0
+        self.lines_modified = 0
+        return (self, (0, 0, [], [], []))
+
+    def update_line_stats(self, processed_diff):
+        """Merge status and diff result."""
+        if processed_diff:
+            _, _, inserted, modified, deleted = processed_diff
+            self.lines_inserted = len(inserted)
+            self.lines_modified = len(modified)
+            self.lines_deleted = len(deleted)
+        if self.lines_inserted or self.lines_modified or self.lines_deleted:
+            self.set_modified()
+        return (self, processed_diff)
 
     def set_modified(self):
         """Set the working file state modified if file is tracked.

@@ -208,6 +208,11 @@ class GitGutterHandler(object):
             comparing = comparing.replace(repl, '')
         return comparing
 
+    def comparing_against_head(self):
+        """The compare target is the currently checked out branch."""
+        return self.get_compare_against() in (
+            'CACHED', 'HEAD', self._git_status.branch)
+
     def _get_view_encoding(self):
         """Read view encoding and transform it for use with python.
 
@@ -433,23 +438,19 @@ class GitGutterHandler(object):
             Promise: The Promise to built a tuple containing the git status
                 and processed git diff result.
         """
-        def built_result(contents):
-            """Merge status and diff result."""
-            return (status, contents)
-
         # Return status only for untracked/ignored files
         if status.is_ignored_or_untracked():
-            return Promise.resolve(built_result((0, 0, [], [], [])))
+            return Promise.resolve(status.clear_line_stats())
+        # A dirty view is always modified, even if not yet saved to disk
+        elif self.view.is_dirty():
+            status.set_modified()
         # Return status and empty diff for committed file
         # Don't need to create temporary files
-        elif status.is_committed() and not self.view.is_dirty():
-            refs = self.get_compare_against()
-            if refs in ('CACHED', 'HEAD'):
-                return Promise.resolve(built_result((0, 0, [], [], [])))
-        # Always mark modified if diff is run.
-        status.set_modified()
+        elif status.is_committed() and self.comparing_against_head():
+            return Promise.resolve(status.clear_line_stats())
         # Update temporary files and then run diff
-        return self.update_git_file().then(self._run_diff).then(built_result)
+        return self.update_git_file().then(self._run_diff).then(
+            status.update_line_stats)
 
     def _run_diff(self, updated_git_file):
         """Call git diff and return the decoded unified diff string.

@@ -23,10 +23,6 @@ class GitGutterShowDiff(object):
         # True if diff is running
         self._busy = False
 
-        self._num_inserted = 0
-        self._num_modified = 0
-        self._num_deleted = 0
-
     def __del__(self):
         """Delete GitGutterShowDiff object.
 
@@ -95,13 +91,7 @@ class GitGutterShowDiff(object):
         if window and window.active_view().id() != self.git_handler.view.id():
             return
 
-        status, contents = diff_results
-        if contents:
-            _, _, inserted, modified, deleted = contents
-            self._num_inserted = len(inserted)
-            self._num_modified = len(modified)
-            self._num_deleted = len(deleted)
-
+        status, _ = diff_results
         template = (
             self.git_handler.settings.get('status_bar_text')
             if _HAVE_JINJA2 else None
@@ -113,8 +103,8 @@ class GitGutterShowDiff(object):
                 compare=self.git_handler.format_compare_against(),
                 branch=status.branch, upstream=status.upstream,
                 ahead=status.ahead, behind=status.behind,
-                state=status.status_text(), deleted=self._num_deleted,
-                inserted=self._num_inserted, modified=self._num_modified)
+                state=status.status_text(), deleted=status.lines_deleted,
+                inserted=status.lines_inserted, modified=status.lines_modified)
         else:
             # Render hardcoded text if jinja is not available.
             parts = []
@@ -122,12 +112,12 @@ class GitGutterShowDiff(object):
             compare = self.git_handler.format_compare_against()
             if compare not in ('INDEX', 'HEAD'):
                 parts.append('Comparing against %s' % compare)
-            if self._num_inserted:
-                parts.append('%d+' % self._num_inserted)
-            if self._num_deleted:
-                parts.append('%d-' % self._num_deleted)
-            if self._num_modified:
-                parts.append(u'%d≠' % self._num_modified)
+            if status.lines_inserted:
+                parts.append('%d+' % status.lines_inserted)
+            if status.lines_deleted:
+                parts.append('%d-' % status.lines_deleted)
+            if status.lines_modified:
+                parts.append(u'%d≠' % status.lines_modified)
             text = ', '.join(parts)
         # add text and try to be the left most one
         self.git_handler.view.set_status('00_git_gutter', text)
