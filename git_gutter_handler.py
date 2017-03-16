@@ -355,16 +355,19 @@ class GitGutterHandler(object):
             encoding = self._get_view_encoding()
             try:
                 decoded_results = results.decode(encoding)
+            except AttributeError:
+                # git returned None on stdout
+                decoded_results = None
             except UnicodeError:
                 try:
                     decoded_results = results.decode("utf-8")
                 except UnicodeDecodeError:
-                    decoded_results = ""
+                    decoded_results = None
             except LookupError:
                 try:
                     decoded_results = codecs.decode(results)
                 except UnicodeDecodeError:
-                    decoded_results = ""
+                    decoded_results = None
             # cache the diff result for reuse with diff_popup.
             self._git_diff_cache = decoded_results
             return decoded_results
@@ -627,6 +630,8 @@ class GitGutterHandler(object):
         """
         def read_output(resolve):
             """Start git process and forward its output to the Resolver."""
+            stdout, stderr = None, None
+
             try:
                 if os.name == 'nt':
                     startupinfo = subprocess.STARTUPINFO()
@@ -642,15 +647,22 @@ class GitGutterHandler(object):
                 else:
                     stdout, stderr = proc.communicate()
             except OSError as error:
-                print('GitGutter failed to run git: %s' % error)
-                stdout = b''
+                # print out system error message
+                print('GitGutter: \'git %s\' failed with \"%s\"' % (
+                    args[1], error))
             except TimeoutExpired:
                 proc.kill()
                 stdout, stderr = proc.communicate()
             finally:
-                if decode:
+                if stderr and stderr.startswith(b'fatal:'):
+                    # print out git's error message
+                    print('GitGutter: \'git %s\' failed with \"%s\"' % (
+                        args[1], stderr.decode('utf-8').strip()))
+                if stdout and decode:
+                    # resolve with string value
                     resolve(stdout.decode('utf-8').strip())
                 else:
+                    # resolve with binary value
                     resolve(stdout)
 
         def run_async(resolve):
