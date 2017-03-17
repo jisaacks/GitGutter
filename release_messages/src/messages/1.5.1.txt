@@ -1,0 +1,13 @@
+1.5.1
+-----
+
+  Fix:
+   - Files are randomly marked as modified (Issue #381)
+   - Print error message and abort evaluation on failed git call.
+   - Improve error handling on temporary file creation (Issue #384)
+
+  Enhancement:
+   - Hide 'Compare against ... ' current branch in status message.
+
+  Docs:
+   - Add Boxy Theme to the list of supported
