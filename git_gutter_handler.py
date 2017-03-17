@@ -214,15 +214,19 @@ class GitGutterHandler(object):
         except (LookupError, UnicodeError):
             # Fallback to utf8-encoding
             encoded = contents.encode('utf-8')
-        # Write the encoded content to file
-        if not self._view_temp_file:
-            self._view_temp_file = self.tmp_file()
-        with open(self._view_temp_file, 'wb') as file:
-            if self.view.encoding() == "UTF-8 with BOM":
-                file.write(codecs.BOM_UTF8)
-            file.write(encoded)
-            # Update internal change counter after job is done
-            self._view_change_count = change_count
+        try:
+            # Write the encoded content to file
+            if not self._view_temp_file:
+                self._view_temp_file = self.tmp_file()
+            with open(self._view_temp_file, 'wb') as file:
+                if self.view.encoding() == "UTF-8 with BOM":
+                    file.write(codecs.BOM_UTF8)
+                file.write(encoded)
+        except OSError as error:
+            print('GitGutter failed to create view cache: %s' % error)
+            return False
+        # Update internal change counter after job is done
+        self._view_change_count = change_count
         return True
 
     def is_git_file_valid(self):
@@ -259,42 +263,42 @@ class GitGutterHandler(object):
             Returns:
                 bool: True if temporary file was updated, False otherwise.
             """
-            def write_file(output):
+            def write_file(contents):
                 """Extract output and write it to a temporary file.
 
                 The function resolves the promise with True to indicate the
                 updated git file.
                 """
-                contents = b''
-                if output:
-                    # Extract file contents from zipped archive.
-                    # The `filelist` contains numberous directories finalized
-                    # by exactly one file whose content we are interested in.
-                    archive = zipfile.ZipFile(BytesIO(output))
-                    contents = archive.read(archive.filelist[-1])
-                # Mangle end of lines
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-                # Write the content to file
-                if not self._git_temp_file:
-                    self._git_temp_file = self.tmp_file()
-                with open(self._git_temp_file, 'wb') as file:
-                    file.write(contents)
-                    # finally update git hash if file was updated
+                try:
+                    # Mangle end of lines
+                    contents = contents.replace(b'\r\n', b'\n')
+                    contents = contents.replace(b'\r', b'\n')
+                    # Write the content to file
+                    if not self._git_temp_file:
+                        self._git_temp_file = self.tmp_file()
+                    with open(self._git_temp_file, 'wb') as file:
+                        file.write(contents)
+                    self.git_tracked = True
                     self._git_compared_commit = commit
-                    self._git_temp_file_valid = True
-                self.git_tracked = bool(contents)
-                return True
+                    return True
+                except AttributeError:
+                    # Git returned empty output, file is not tracked
+                    self.git_tracked = False
+                    self._git_compared_commit = commit
+                    return False
+                except OSError as error:
+                    print('GitGutter failed to create git cache: %s' % error)
+                    return False
 
             # Read file from git incase the compare target has changed
             if self._git_compared_commit == commit:
-                self._git_temp_file_valid = True
                 return Promise.resolve(False)
             return self.git_read_file(commit).then(write_file)
 
         # Always resolve with False if temporary file is marked up to date.
         if self._git_temp_file_valid:
             return Promise.resolve(False)
+        self._git_temp_file_valid = True
 
         # Read commit hash from git if compare target is a reference.
         refs = self.get_compare_against()
@@ -610,15 +614,44 @@ class GitGutterHandler(object):
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
 
+        This method uses `git archive` to read the file content from git index
+        to enable support of smudge filters (fixes Issue #74). Git applies
+        smudge filters to some commands like `archive`, `diff` and `checkout`
+        only, but not to commands like `show`.
+
         Arguments:
-            commit  - hash of the commit to read file from.
+            commit (string): The identifier of the commit to read file from.
+
+        Returns:
+            Promise: A promise to read and unzip the content of a file from git
+                index which will be resolved with the inflated file content.
         """
+        def unzip(output):
+            """Unzip file binary content from git output.
+
+            Arguments:
+                output (string): Binary output returned by git containing the
+                    zipped content of the read file or None on error.
+
+            Returns:
+                string: Unzipped file content or None if git didn't return
+                    zipped file content. Error is already printed in that case.
+            """
+            try:
+                # Extract file contents from zipped archive.
+                # The `filelist` contains numerous directories finalized
+                # by exactly one file whose content we are interested in.
+                archive = zipfile.ZipFile(BytesIO(output))
+                return archive.read(archive.filelist[-1])
+            except:
+                return None
+
         args = [
             settings.git_binary_path,
             'archive', '--format=zip',
             commit, self._git_path
         ]
-        return self.run_command(args=args, decode=False)
+        return self.run_command(args=args, decode=False).then(unzip)
 
     def run_command(self, args, decode=True):
         """Run a git command asynchronously and return a Promise.
