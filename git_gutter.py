@@ -11,6 +11,7 @@ try:
     from .git_gutter_jump_to_changes import GitGutterJumpToChanges
     from .git_gutter_popup import show_diff_popup
     from .git_gutter_show_diff import GitGutterShowDiff
+    from .modules import events
 except ValueError:
     from git_gutter_settings import settings
     from git_gutter_handler import GitGutterHandler
@@ -21,6 +22,7 @@ except ValueError:
     from git_gutter_jump_to_changes import GitGutterJumpToChanges
     from git_gutter_popup import show_diff_popup
     from git_gutter_show_diff import GitGutterShowDiff
+    from modules import events
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
@@ -57,8 +59,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             valid = False
         else:
             # Validate work tree on certain events only
-            validate = any(event in ('load', 'activated', 'post-save')
-                           for event in kwargs.get('event_type', []))
+            validate = kwargs.get('events', 0) & (
+                events.LOAD | events.ACTIVATED | events.POST_SAVE)
             # Don't handle files outside a repository
             if not self.git_handler.work_tree(validate):
                 valid = False
@@ -82,8 +84,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             self._handle_event(**kwargs)
 
     def _handle_event(self, **kwargs):
-        events = kwargs.get('event_type', [])
-        if any(event not in ('load', 'modified') for event in events):
+        queued_events = kwargs.get('events', 0)
+        if not queued_events & (events.LOAD | events.MODIFIED):
             # On 'load' the git file is not yet valid anyway.
             # On 'modified' is sent when user is typing.
             # The git repository will most likely not change then.
