@@ -389,20 +389,25 @@ class GitGutterHandler(object):
             bool: True if file was written to disc successfully.
         """
         try:
-            is_tracked = bool(contents)
-            if is_tracked:
+            if contents:
                 # Mangle end of lines
                 contents = contents.replace(b'\r\n', b'\n')
                 contents = contents.replace(b'\r', b'\n')
-                # Create temporary file
-                if not self._git_temp_file:
-                    self._git_temp_file = self.tmp_file()
-                # Write content to temporary file
-                with open(self._git_temp_file, 'wb') as file:
-                    file.write(contents)
+            else:
+                # Git returned empty output, file not found in index
+                self._git_compared_id = compared_id
+                if self.comparing_against_head():
+                    return False
+                contents = b''
+            # Create temporary file
+            if not self._git_temp_file:
+                self._git_temp_file = self.tmp_file()
+            # Write content to temporary file
+            with open(self._git_temp_file, 'wb') as file:
+                file.write(contents)
             # Indicate success.
             self._git_compared_id = compared_id
-            return is_tracked
+            return True
         except OSError as error:
             print('GitGutter failed to create git cache: %s' % error)
             return False
