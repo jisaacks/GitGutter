@@ -341,8 +341,9 @@ GitGutter provides the following variables to be used in the template.
 
 GitGutter provides support for custom gutter icons and diff popup style sheets coming with theme packages. Set `theme` to a valid theme file name to activate a different icon set.
 
-GitGutter includes 2 themes:
+GitGutter includes following themes:
 
+- Bars.gitgutter-theme
 - Default.gitgutter-theme
 - Default HiDPI.gitgutter-theme
 
