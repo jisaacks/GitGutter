@@ -29,6 +29,12 @@ try:
 except AttributeError:
     set_timeout = sublime.set_timeout
 
+# file update results
+FILE_UNCHANGED = 1
+FILE_NOT_FOUND = 2
+FILE_ERR_WRITE = 3
+FILE_UPDATED = 4
+
 
 class GitGutterHandler(object):
 
@@ -260,15 +266,14 @@ class GitGutterHandler(object):
         reduce the number of required disk writes.
 
         Returns:
-            bool: True indicates updated file.
-                  False is returned if file is up to date.
+            int: One of FILE_UPDATED, FILE_UNCHANGED or FILE_ERR_WRITE.
         """
         change_count = 0
         if _HAVE_VIEW_CHANGE_COUNT:
             # write view buffer to file only, if changed
             change_count = self.view.change_count()
             if self._view_change_count == change_count:
-                return False
+                return FILE_UNCHANGED
         # Read from view buffer
         chars = self.view.size()
         region = sublime.Region(0, chars)
@@ -290,10 +295,10 @@ class GitGutterHandler(object):
                 file.write(encoded)
         except OSError as error:
             print('GitGutter failed to create view cache: %s' % error)
-            return False
+            return FILE_ERR_WRITE
         # Update internal change counter after job is done
         self._view_change_count = change_count
-        return True
+        return FILE_UPDATED
 
     def is_git_file_valid(self):
         """Return True if temporary file is marked up to date."""
@@ -319,7 +324,8 @@ class GitGutterHandler(object):
         """
         # Always resolve with False if temporary file is marked up to date.
         if self._git_temp_file_valid:
-            return Promise.resolve(False)
+            return Promise.resolve(
+                FILE_UNCHANGED if self._git_temp_file else FILE_NOT_FOUND)
         self._git_temp_file_valid = True
 
         refs = self.get_compare_against()
@@ -349,7 +355,8 @@ class GitGutterHandler(object):
             bool: True if temporary file was updated, False otherwise.
         """
         if self._git_compared_id == compared_id:
-            return Promise.resolve(False)
+            return Promise.resolve(
+                FILE_UNCHANGED if self._git_temp_file else FILE_NOT_FOUND)
         # Read and unzip the file from index and then write to disk.
         return self.git_read_file(compared_id).then(
             functools.partial(self._write_git_file, compared_id))
@@ -373,7 +380,8 @@ class GitGutterHandler(object):
             bool: True if temporary file was updated, False otherwise.
         """
         if self._git_compared_id == compared_id:
-            return False
+            return Promise.resolve(
+                FILE_UNCHANGED if self._git_temp_file else FILE_NOT_FOUND)
         # Read the file from staging area and then write to disk.
         return self.git_read_file('').then(
             functools.partial(self._write_git_file, compared_id))
@@ -386,19 +394,18 @@ class GitGutterHandler(object):
             contents (string): The file contents read from git.
 
         Returns:
-            bool: True if file was written to disc successfully.
+            int: One of FILE_UPDATED, FILE_NOT_FOUND or FILE_ERR_WRITE.
         """
         try:
-            if contents:
-                # Mangle end of lines
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-            else:
-                # Git returned empty output, file not found in index
+            if contents is None:
                 self._git_compared_id = compared_id
-                if self.comparing_against_head():
-                    return False
-                contents = b''
+                if self._git_temp_file:
+                    os.unlink(self._git_temp_file)
+                    self._git_temp_file = None
+                return FILE_NOT_FOUND
+            # Mangle end of lines
+            contents = contents.replace(b'\r\n', b'\n')
+            contents = contents.replace(b'\r', b'\n')
             # Create temporary file
             if not self._git_temp_file:
                 self._git_temp_file = self.tmp_file()
@@ -407,10 +414,10 @@ class GitGutterHandler(object):
                 file.write(contents)
             # Indicate success.
             self._git_compared_id = compared_id
-            return True
+            return FILE_UPDATED
         except OSError as error:
             print('GitGutter failed to create git cache: %s' % error)
-            return False
+            return FILE_ERR_WRITE
 
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
@@ -443,19 +450,38 @@ class GitGutterHandler(object):
             Promise: The Promise to built a tuple containing the git status
                 and processed git diff result.
         """
+        against_head = self.comparing_against_head()
         # Return status only for untracked/ignored files
         if status.is_ignored_or_untracked():
+            self._git_diff_cache = ''
             return Promise.resolve(status.clear_line_stats())
         # A dirty view is always modified, even if not yet saved to disk
         elif self.view.is_dirty():
             status.set_modified()
         # Return status and empty diff for committed file
         # Don't need to create temporary files
-        elif status.is_committed() and self.comparing_against_head():
+        elif against_head and status.is_committed():
+            self._git_diff_cache = ''
             return Promise.resolve(status.clear_line_stats())
+
+        def update_file_state(updated_git_file):
+            """Check result of git_file update and update file state.
+
+            The file state returned by git status is valid only, if comparing
+            against head. If not comparing against current branch and requested
+            file does not exist in the repository, it is marked 'inserted'.
+            """
+            if updated_git_file == FILE_NOT_FOUND:
+                if not against_head:
+                    rows, _ = self.view.rowcol(self.view.size())
+                    status.set_inserted(rows)
+                    self._git_diff_cache = ''
+                return (status, None)
+            return self._run_diff(updated_git_file).then(
+                status.update_line_stats)
+
         # Update temporary files and then run diff
-        return self.update_git_file().then(self._run_diff).then(
-            status.update_line_stats)
+        return self.update_git_file().then(update_file_state)
 
     def _run_diff(self, updated_git_file):
         """Call git diff and return the decoded unified diff string.
@@ -469,9 +495,9 @@ class GitGutterHandler(object):
                 the modifications of the file.
             None: Returns None if nothing has changed since last call.
         """
-        updated_view_file = self.update_view_file()
-        if not updated_git_file and not updated_view_file:
-            return self.process_diff(self._git_diff_cache)
+        # nothing changed since last evaluation
+        if FILE_UPDATED not in (updated_git_file, self.update_view_file()):
+            return Promise.resolve(self.process_diff(self._git_diff_cache))
 
         args = list(filter(None, (
             self.settings.git_binary,

@@ -135,13 +135,13 @@ class GitGutterShowDiff(object):
                     If `None` git diff was skipped due to unchanged input.
         """
         status, contents = diff_results
-        if status.is_ignored_or_untracked():
+        if status.is_unhandled():
             if self.git_handler.settings.get('show_markers_on_untracked_file'):
                 self._bind_files(status.status_text())
             else:
                 self._clear_regions()
 
-        elif status.is_committed():
+        elif status.is_committed() or status.is_unknown():
             self._clear_regions()
 
         elif contents:

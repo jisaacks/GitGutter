@@ -16,7 +16,10 @@ class GitStatus(object):
     MODIFIED = 8
     STAGED = 16
     STAGED_MODIFIED = STAGED | MODIFIED
-    IGNORED_UNTRACKED = IGNORED | UNTRACKED | UNKNOWN
+    INSERTED = 32
+    INSERTED_MODIFIED = INSERTED | MODIFIED
+    IGNORED_UNTRACKED = IGNORED | UNTRACKED
+    UNHANDLED = INSERTED | IGNORED_UNTRACKED
 
     # text representations for file status
     _STATUS_TEXT = {
@@ -27,6 +30,7 @@ class GitStatus(object):
         STAGED_MODIFIED: 'staged and modified',
         UNKNOWN: '(unknown)',
         UNTRACKED: 'untracked',
+        INSERTED: 'inserted',
     }
 
     def __init__(self):
@@ -138,17 +142,32 @@ class GitStatus(object):
             self.set_modified()
         return (self, processed_diff)
 
+    def set_inserted(self, inserted):
+        """Set the working file state modified if file is tracked."""
+        self.file_state = self.INSERTED
+        self.lines_deleted = 0
+        self.lines_inserted = inserted
+        self.lines_modified = 0
+
     def set_modified(self):
         """Set the working file state modified if file is tracked.
 
         Returns:
             bool: Returns True, if state was changed or false otherwise.
         """
-        if self.file_state & (self.IGNORED_UNTRACKED | self.MODIFIED):
+        if self.file_state & (self.IGNORED_UNTRACKED | self.MODIFIED | self.INSERTED):
             return False
         self.file_state &= self.STAGED
         self.file_state |= self.MODIFIED
         return True
+
+    def is_unknown(self):
+        """Return True if the file state is unknown, ignored or untracked."""
+        return self.file_state == self.UNKNOWN
+
+    def is_unhandled(self):
+        """Return True if the file state is unknown, ignored or untracked."""
+        return self.file_state & self.UNHANDLED
 
     def is_ignored_or_untracked(self):
         """Return True if the file is ignored or untracked."""
@@ -157,6 +176,10 @@ class GitStatus(object):
     def is_committed(self):
         """Return True if the file is committed."""
         return self.file_state == self.COMMITTED
+
+    def is_inserted(self):
+        """Return True if the file is modified."""
+        return self.file_state == self.INSERTED
 
     def is_modified(self):
         """Return True if the file is modified."""
