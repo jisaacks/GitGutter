@@ -32,6 +32,10 @@
         "command": "git_gutter_compare_tag"
     },
     {
+        "caption": "GitGutter: Support Info",
+        "command": "git_gutter_support_info"
+    },
+    {
         "caption": "Preferences: GitGutter Settings",
         "command": "git_gutter_edit_settings",
         "args": {

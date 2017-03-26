@@ -135,6 +135,11 @@
                                 "caption": "Popup Stylesheet - User",
                                 "command": "git_gutter_open_file",
                                 "args": {"file": "${packages}/User/gitgutter_popup.css"}
+                            },
+                            { "caption": "-" },
+                            {
+                                "caption": "Support Info",
+                                "command": "git_gutter_support_info"
                             }
                         ]
                     }

@@ -15,3 +15,4 @@ from .popup import (
     GitGutterDiffPopupCommand, GitGutterReplaceTextCommand)
 from .settings import (
     GitGutterEditSettingsCommand, GitGutterOpenFileCommand)
+from .support import GitGutterSupportInfoCommand
