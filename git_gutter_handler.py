@@ -687,7 +687,7 @@ class GitGutterHandler(object):
                 proc.kill()
                 stdout, stderr = proc.communicate()
             finally:
-                if stderr and stderr.startswith(b'fatal:'):
+                if not stdout and stderr and settings.get('debug'):
                     # print out git's error message
                     print('GitGutter: \'git %s\' failed with \"%s\"' % (
                         args[1], stderr.decode('utf-8').strip()))
