@@ -15,7 +15,7 @@ class GitGutterCompareCommit(object):
         def parse_results(results):
             """Parse git output and create the quick panel items."""
             if results:
-                return [r.split('\a') for r in results.splitlines()]
+                return [r.split('\a') for r in results.split('\n')]
             sublime.message_dialog('No commits found in repository.')
             return []
         return self.git_handler.git_commits().then(parse_results)
@@ -43,7 +43,7 @@ class GitGutterCompareFileCommit(GitGutterCompareCommit):
             """Parse git output and create the quick panel items."""
             if results:
                 # sort splitted lines by author date in reversed order
-                sorted_results = sorted(results.splitlines(), reverse=True)
+                sorted_results = sorted(results.split('\n'), reverse=True)
                 # split each line by \a and strip time stamp from beginning
                 return [r.split('\a')[1:] for r in sorted_results]
             sublime.message_dialog(
@@ -66,7 +66,7 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
         def parse_results(results):
             """Parse git output and create the quick panel items."""
             if results:
-                return [parse_result(r) for r in results.splitlines()]
+                return [parse_result(r) for r in results.split('\n')]
             sublime.message_dialog('No branches found in repository.')
             return []
         return self.git_handler.git_branches().then(parse_results)
@@ -88,7 +88,7 @@ class GitGutterCompareTag(GitGutterCompareCommit):
         def parse_results(results):
             """Parse git output and create the quick panel items."""
             if results:
-                return [parse_result(r) for r in results.splitlines()]
+                return [parse_result(r) for r in results.split('\n')]
             sublime.message_dialog('No tags found in repository.')
             return []
         return self.git_handler.git_tags().then(parse_results)
