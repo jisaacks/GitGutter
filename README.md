@@ -344,10 +344,11 @@ GitGutter provides support for custom gutter icons and diff popup style sheets c
 GitGutter includes following themes:
 
 - Bars.gitgutter-theme
+- Bars Thin.gitgutter-theme
 - Default.gitgutter-theme
 - Default HiDPI.gitgutter-theme
 
-To provide a custom theme developers need to add a folder with all required icons and an optional `gitgutter_popup.css` file to their package. An empty JSON file `<ThemName>.gitgutter-theme` must exist to mark this folder a resource for GitGutter icons.
+To provide a custom theme developers need to add a folder with all required icons and an optional `gitgutter_popup.css` file to their package. An empty JSON file `<ThemeName>.gitgutter-theme` must exist to mark this folder a resource for GitGutter icons.
 
 
 #### Per-project Settings
