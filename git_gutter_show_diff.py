@@ -7,6 +7,7 @@ except ImportError:
     _HAVE_JINJA2 = False
 
 import sublime
+import re
 
 try:
     from .git_gutter_settings import settings
@@ -110,17 +111,27 @@ class GitGutterShowDiff(object):
 
         def set_status(branch_name):
             _, _, inserted, modified, deleted = contents
-            template = (
+            templates = (
                 settings.get('status_bar_text')
                 if _HAVE_JINJA2 else None
             )
-            if template:
-                # render the template using jinja2 library
-                text = jinja2.environment.Template(''.join(template)).render(
-                    repo=self.git_handler.repository_name,
-                    compare=self.git_handler.format_compare_against(),
-                    branch=branch_name, state=file_state, deleted=len(deleted),
-                    inserted=len(inserted), modified=len(modified))
+            rendered = []
+
+            if templates:
+                # render the templates using jinja2 library
+                for template in templates:
+                    result = jinja2.environment.Template(template).render(
+                        repo=self.git_handler.repository_name,
+                        compare=self.git_handler.format_compare_against(),
+                        branch=branch_name, state=file_state, deleted=len(deleted),
+                        inserted=len(inserted), modified=len(modified))
+
+                    result = re.sub(r'^, (.*)$', r'\1', result)
+
+                    if result != '':
+                        rendered.append(result)
+
+                text = ', '.join(rendered)
             else:
                 # Render hardcoded text if jinja is not available.
                 parts = []
