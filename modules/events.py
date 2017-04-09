@@ -108,7 +108,7 @@ class EventListener(sublime_plugin.EventListener):
         key = view.id()
         if key not in self.view_events:
             return
-        if not self.view_events[key].settings.get('enable_hover_diff_popup'):
+        if not settings.get('enable_hover_diff_popup'):
             return
         view.run_command('git_gutter_diff_popup', {
             'point': point, 'flags': sublime.HIDE_ON_MOUSE_MOVE_AWAY})
