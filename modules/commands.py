@@ -1,28 +1,16 @@
 # -*- coding: utf-8 -*-
 import sublime_plugin
 
-try:
-    from .git_gutter_handler import GitGutterHandler
-    from .git_gutter_compare import (
-        GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
-        GitGutterCompareFileCommit)
-    from .git_gutter_popup import show_diff_popup
-    from .git_gutter_show_diff import GitGutterShowDiff
-    from .modules import events
-    from .modules import goto
-    from .modules import settings
-except ValueError:
-    from git_gutter_handler import GitGutterHandler
-    from git_gutter_compare import (
-        GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-        GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
-        GitGutterCompareFileCommit)
-    from git_gutter_popup import show_diff_popup
-    from git_gutter_show_diff import GitGutterShowDiff
-    from modules import events
-    from modules import goto
-    from modules import settings
+from .compare import (
+    GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
+    GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
+    GitGutterCompareFileCommit)
+from . import events
+from . import goto
+from . import handler
+from . import popup
+from . import settings
+from . import show_diff
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
@@ -30,8 +18,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         """Initialize GitGutterCommand object."""
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.settings = settings.ViewSettings(self.view)
-        self.git_handler = GitGutterHandler(self.view, self.settings)
-        self.show_diff_handler = GitGutterShowDiff(self.git_handler)
+        self.git_handler = handler.GitGutterHandler(self.view, self.settings)
+        self.show_diff_handler = show_diff.GitGutterShowDiff(self.git_handler)
         # Last enabled state for change detection
         self._enabled = False
 
@@ -115,7 +103,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         elif action == 'show_compare':
             GitGutterShowCompare(self.git_handler).run()
         elif action == 'show_diff_popup':
-            show_diff_popup(self, **kwargs)
+            popup.show_diff_popup(self, **kwargs)
         else:
             assert False, 'Unhandled sub command "%s"' % action
 

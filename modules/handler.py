@@ -21,12 +21,8 @@ except ImportError:
 
 import sublime
 
-try:
-    from .modules import path
-    from .modules.promise import Promise
-except ValueError:
-    from modules import path
-    from modules.promise import Promise
+from . import path
+from .promise import Promise
 
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
