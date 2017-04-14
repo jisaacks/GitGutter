@@ -290,12 +290,12 @@ class GitGutterShowDiff(object):
         chars = view.size()
         region = sublime.Region(start, chars)
         for line in view.substr(region).splitlines():
+            end = start + len(line)
             if start not in protected:
-                end = start + len(line)
                 region = sublime.Region(
                     start, min(end, start + self._minimap_size))
                 regions.append(region)
-                start = end + 1
+            start = end + 1
         self._line_height = view.line_height()
         self._minimap_size = self.git_handler.settings.show_in_minimap
         self._bind_regions(event, regions)
