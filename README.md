@@ -374,9 +374,13 @@ GitGutter includes following themes:
 To provide a custom theme developers need to add a folder with all required icons and an optional `gitgutter_popup.css` file to their package. An empty JSON file `<ThemeName>.gitgutter-theme` must exist to mark this folder a resource for GitGutter icons.
 
 
-#### Per-project Settings
+#### Per-project and Per-syntax Settings
 
-Sublime Text supports project-specific settings, allowing `live_mode` to be enabled or disabled for certain repositories. To make use of this feature just open <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
+All GitGutter settings can be placed in any of Sublime Text's settings files to provide syntax-, user-, project- or view-specific setups.
+
+The setting keys need to be prefixed using `git_gutter_` to do that.
+
+To modify GitGutter settings for an open Project just open <kbd>Project</kbd> > <kbd>Edit Project</kbd> menu and add the `settings` key as shown.
 
 ```JavaScript
 {
@@ -388,10 +392,19 @@ Sublime Text supports project-specific settings, allowing `live_mode` to be enab
     ],
     "settings":
     {
-        "live_mode": false
+        // git_binary is the only setting not being prefixed
+        "git_binary": "/path/to/project/specific/git"
+
+        // git_gutter settings
+        "git_gutter_live_mode": false,
+        "git_gutter_ignore_whitespace": "space"
     }
 }
 ```
+
+👉 All correctly prefixed settings can be placed into `Preferences.sublime-settings` instead of `GitGutter.sublime-settings`.
+
+👉 Settings can be modified temporarily per view by calls like `view.settings().set("git_gutter_enable", False)`
 
 
 ## 🖌 Icon Coloring
