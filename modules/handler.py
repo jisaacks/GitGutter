@@ -187,6 +187,9 @@ class GitGutterHandler(object):
                 from 'git show-ref' to compare the view against
             refresh (bool): True to force git diff and update GUI
         """
+        # Reset compare target to HEAD, if current branch is selected
+        if not compare_against or compare_against == self.branch_name:
+            compare_against = 'HEAD'
         self._compare_against_mapping[self._git_tree] = compare_against
         # force refresh if live_mode and focus_change_mode are disabled
         refresh |= (not self.settings.get('live_mode') and
@@ -318,7 +321,7 @@ class GitGutterHandler(object):
 
         refs = self.get_compare_against()
         # Use git status result to track changes on current branch.
-        if refs in ('HEAD', self._git_status.branch):
+        if refs in ('HEAD'):
             return self._update_from_commit(self._git_status.head)
         # The compare target is a valid commit or object id
         if '/' not in refs:
@@ -421,7 +424,7 @@ class GitGutterHandler(object):
         # Don't need to create temporary files
         elif status.is_committed() and not self.view.is_dirty():
             refs = self.get_compare_against()
-            if refs in ('HEAD', self._git_status.branch):
+            if refs in ('HEAD'):
                 return Promise.resolve(built_result((0, 0, [], [], [])))
         # Update temporary files and then run diff
         return self.update_git_file().then(self._run_diff).then(built_result)
