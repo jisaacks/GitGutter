@@ -49,7 +49,7 @@ class Promise(object):
     """
 
     def __init__(self, executor):
-        """Creates an instance of Promise.
+        """Initialize Promise object.
 
         Arguments:
             executor: A function that is executed immediately by this Promise.
@@ -62,8 +62,8 @@ class Promise(object):
         self.callbacks = []
         self._invoke_executor(executor)
 
-    @staticmethod
-    def resolve(resolve_value=None):
+    @classmethod
+    def resolve(cls, resolve_value=None):
         """Immediatelly resolve a Promise.
 
         Convenience function for creating a Promise that gets immediately
@@ -75,10 +75,10 @@ class Promise(object):
         def executor(resolve_fn):
             return resolve_fn(resolve_value)
 
-        return Promise(executor)
+        return cls(executor)
 
     def then(self, callback):
-        """Creates a new promise and chains it with this promise.
+        """Create a new promise and chain it with this promise.
 
         When this promise gets resolved, the callback will be called with the
         value that this promise resolved with.
