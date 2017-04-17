@@ -22,6 +22,7 @@ except ImportError:
 import sublime
 
 from . import path
+from . import utils
 from .promise import Promise
 
 # The view class has a method called 'change_count()'
@@ -34,6 +35,12 @@ except AttributeError:
 
 
 class GitGutterHandler(object):
+
+    # The list of all instances' binaries which don't work properly.
+    # For each view/project a unique "git_binary" setting can be applied.
+    # To display error messages only once per binary, none working binaries
+    # need to be tracked here.
+    _missing_binaries = set()
 
     # The working tree / compare target map as class wide attribute.
     # It is initialized once and keeps the values of all object instantces.
@@ -66,6 +73,8 @@ class GitGutterHandler(object):
         self._git_compared_commit = None
         # cached git diff result for diff popup
         self._git_diff_cache = ''
+        # PEP-440 conform git version (major, minor, patch)
+        self._git_version = None
 
     def __del__(self):
         """Delete temporary files."""
@@ -73,6 +82,42 @@ class GitGutterHandler(object):
             os.unlink(self._git_temp_file)
         if self._view_temp_file:
             os.unlink(self._view_temp_file)
+
+    def version(self, validate):
+        """Return git executable version.
+
+        The version string is used to check, whether git executable exists and
+        works properly. It may also be used to enable functions with newer git
+        versions.
+
+        As the "git_binary" setting may be view/project specific and may change
+        at each time it needs to be checked in proper situations to validate
+        whether git still works properly.
+
+        Arguments:
+            validate (bool): If True force updating version string. Use cached
+                value otherwise.
+        Returns:
+            tuple: PEP-440 conform git version (major, minor, patch)
+        """
+        if validate:
+            git_binary = self.settings.git_binary
+            # Query git version synchronously
+            git_version = self.execute([git_binary, '--version']) or ''
+            # Parse version string like (git version 2.12.2.windows.1)
+            match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
+            if match:
+                # PEP-440 conform git version (major, minor, patch)
+                self._git_version = (int(group) for group in match.groups())
+                if git_binary in self._missing_binaries:
+                    utils.log_message(git_binary + ' is back on duty!')
+                    self._missing_binaries.discard(git_binary)
+            else:
+                self._git_version = None
+                if git_binary not in self._missing_binaries:
+                    utils.log_message(git_binary + ' not found or working!')
+                    self._missing_binaries.add(git_binary)
+        return self._git_version
 
     @staticmethod
     def tmp_file():
@@ -703,15 +748,17 @@ class GitGutterHandler(object):
             else:
                 stdout, stderr = proc.communicate()
         except OSError as error:
-            # print out system error message
-            print('GitGutter: "git %s" failed with "%s"' % (args[1], error))
+            # Print out system error message in debug mode.
+            if self.settings.get('debug'):
+                utils.log_message(
+                    '"git %s" failed with "%s"' % (args[1], error))
         except TimeoutExpired:
             proc.kill()
             stdout, stderr = proc.communicate()
         # handle empty git output
         if not stdout:
             if stderr and self.settings.get('debug'):
-                print('GitGutter: "git %s" failed with "%s"' % (
+                utils.log_message('"git %s" failed with "%s"' % (
                     args[1], stderr.decode('utf-8').strip()))
             return stdout
         # return decoded ouptut using utf-8 or binary output

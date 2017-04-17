@@ -66,7 +66,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             # Don't handle files outside a repository
             if not self.git_handler.work_tree(validate):
                 valid = False
-
+            # Keep quite if git is not working properly
+            elif not self.git_handler.version(validate):
+                valid = False
         # Handle changed state
         if valid != self._enabled:
             # File moved out of work-tree or repository gone
