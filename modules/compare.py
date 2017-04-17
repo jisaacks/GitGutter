@@ -1,60 +1,87 @@
 # -*- coding: utf-8 -*-
-import functools
 import sublime
 
 
-class GitGutterCompareCommit(object):
-    def __init__(self, git_handler):
-        self.git_handler = git_handler
+def set_against_commit(git_gutter):
+    """Show a quick panel with commits to be chosen from as compare against.
 
-    def run(self):
-        self.commit_list().then(self._show_quick_panel)
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    def show_quick_panel(output):
+        """Parse git output and present the quick panel.
 
-    def commit_list(self):
-        """Built a list of quick panel items with all commits."""
-        def parse_results(results):
-            """Parse git output and create the quick panel items."""
-            if results:
-                return [r.split('\a') for r in results.split('\n')]
-            sublime.message_dialog('No commits found in repository.')
-            return []
-        return self.git_handler.git_commits().then(parse_results)
+        Arguments:
+            output (string): The output of git with the list of commits.
+        """
+        if not output:
+            return sublime.message_dialog('No commits found in repository.')
 
-    def item_to_commit(self, item):
-        return item[0].split(' ')[0]
+        # Create the list of commits to show in the quick panel
+        items = [r.split('\a') for r in output.split('\n')]
 
-    def _show_quick_panel(self, results):
-        if results:
-            self.git_handler.view.window().show_quick_panel(
-                results, functools.partial(self._on_select, results))
+        def on_done(index):
+            """Select new compare target according to user selection."""
+            if index > -1:
+                git_gutter.git_handler.set_compare_against(
+                    items[index][0].split(' ')[0])
 
-    def _on_select(self, results, selected):
-        if 0 > selected < len(results):
-            return
-        item = results[selected]
-        commit = self.item_to_commit(item)
-        self.git_handler.set_compare_against(commit)
+        git_gutter.view.window().show_quick_panel(items, on_done)
+
+    git_gutter.git_handler.git_commits().then(show_quick_panel)
 
 
-class GitGutterCompareFileCommit(GitGutterCompareCommit):
-    def commit_list(self):
-        """Built a list of quick panel items with all file commits."""
-        def parse_results(results):
-            """Parse git output and create the quick panel items."""
-            if results:
-                # sort splitted lines by author date in reversed order
-                sorted_results = sorted(results.split('\n'), reverse=True)
-                # split each line by \a and strip time stamp from beginning
-                return [r.split('\a')[1:] for r in sorted_results]
-            sublime.message_dialog(
+def set_against_file_commit(git_gutter):
+    """Show a quick panel with commits to be chosen from as compare against.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    def show_quick_panel(output):
+        """Parse git output and present the quick panel.
+
+        Arguments:
+            output (string): The output of git with the list of commits.
+        """
+        if not output:
+            return sublime.message_dialog(
                 'No commits of this file found in repository.')
-            return []
-        return self.git_handler.git_file_commits().then(parse_results)
+
+        # Sort items by author date in reversed order,
+        # split each line by \a and strip time stamp from beginning
+        items = [
+            r.split('\a')[1:] for r in sorted(output.split('\n'), reverse=True)
+        ]
+
+        def on_done(index):
+            """Select new compare target according to user selection."""
+            if index > -1:
+                git_gutter.git_handler.set_compare_against(
+                    items[index][0].split(' ')[0])
+
+        git_gutter.view.window().show_quick_panel(items, on_done)
+
+    git_gutter.git_handler.git_file_commits().then(show_quick_panel)
 
 
-class GitGutterCompareBranch(GitGutterCompareCommit):
-    def commit_list(self):
-        """Built a list of quick panel items with all local branches."""
+def set_against_branch(git_gutter):
+    """Show a quick panel with branches to be chosen from as compare against.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    def show_quick_panel(output):
+        """Parse git output and present the quick panel.
+
+        Arguments:
+            output (string): The output of git with the list of branches.
+        """
+        if not output:
+            return sublime.message_dialog('No branches found in repository.')
+
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
             pieces = result.split('\a')
@@ -63,21 +90,36 @@ class GitGutterCompareBranch(GitGutterCompareCommit):
             commit = pieces[2][0:7]   # 7-digit commit hash
             return [branch, '%s %s' % (commit, message)]
 
-        def parse_results(results):
-            """Parse git output and create the quick panel items."""
-            if results:
-                return [parse_result(r) for r in results.split('\n')]
-            sublime.message_dialog('No branches found in repository.')
-            return []
-        return self.git_handler.git_branches().then(parse_results)
+        # Create the list of branches to show in the quick panel
+        items = [parse_result(r) for r in output.split('\n')]
 
-    def item_to_commit(self, item):
-        return 'refs/heads/%s' % item[0]
+        def on_done(index):
+            """Select new compare target according to user selection."""
+            if index > -1:
+                git_gutter.git_handler.set_compare_against(
+                    'refs/heads/%s' % items[index][0])
+
+        git_gutter.view.window().show_quick_panel(items, on_done)
+
+    git_gutter.git_handler.git_branches().then(show_quick_panel)
 
 
-class GitGutterCompareTag(GitGutterCompareCommit):
-    def commit_list(self):
-        """Built a list of quick panel items with all tags."""
+def set_against_tag(git_gutter):
+    """Show a quick panel with tags to be chosen from as compare against.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    def show_quick_panel(output):
+        """Parse git output and present the quick panel.
+
+        Arguments:
+            output (string): The output of git with the list of tags.
+        """
+        if not output:
+            return sublime.message_dialog('No tags found in repository.')
+
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
             pieces = result.split(' ')
@@ -85,34 +127,52 @@ class GitGutterCompareTag(GitGutterCompareCommit):
             tag = pieces[1][10:]   # skip 'refs/tags/'
             return [tag, commit]
 
-        def parse_results(results):
-            """Parse git output and create the quick panel items."""
-            if results:
-                return [parse_result(r) for r in results.split('\n')]
-            sublime.message_dialog('No tags found in repository.')
-            return []
-        return self.git_handler.git_tags().then(parse_results)
+        # Create the list of tags to show in the quick panel
+        items = [parse_result(r) for r in output.split('\n')]
 
-    def item_to_commit(self, item):
-        return 'refs/tags/%s' % item[0]
+        def on_done(index):
+            """Select new compare target according to user selection."""
+            if index > -1:
+                git_gutter.git_handler.set_compare_against(
+                    'refs/tags/%s' % items[index][0])
 
+        git_gutter.view.window().show_quick_panel(items, on_done)
 
-class GitGutterCompareHead(GitGutterCompareCommit):
-    def run(self):
-        self.git_handler.set_compare_against('HEAD', True)
+    git_gutter.git_handler.git_tags().then(show_quick_panel)
 
 
-class GitGutterCompareOrigin(GitGutterCompareCommit):
-    def run(self):
-        def on_branch_name(branch_name):
-            if branch_name:
-                self.git_handler.set_compare_against(
-                    'origin/%s' % branch_name, True)
-        self.git_handler.git_current_branch().then(on_branch_name)
+def set_against_head(git_gutter):
+    """Set HEAD as compare target.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    git_gutter.git_handler.set_compare_against('HEAD', True)
 
 
-class GitGutterShowCompare(GitGutterCompareCommit):
-    def run(self):
-        comparing = self.git_handler.format_compare_against()
-        sublime.message_dialog(
-            'GitGutter is comparing against: %s' % comparing)
+def set_against_origin(git_gutter):
+    """Set origin as compare target.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    def on_branch_name(branch_name):
+        if branch_name:
+            git_gutter.git_handler.set_compare_against(
+                'origin/%s' % branch_name, True)
+
+    git_gutter.git_handler.git_current_branch().then(on_branch_name)
+
+
+def show_compare(git_gutter):
+    """Show a dialog to display current compare target.
+
+    Arguments:
+        git_gutter (GitGutterCommand): The main command object, which
+            represents GitGutter.
+    """
+    comparing = git_gutter.git_handler.format_compare_against()
+    sublime.message_dialog(
+        'GitGutter is comparing against: %s' % comparing)

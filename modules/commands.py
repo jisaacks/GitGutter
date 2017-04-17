@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import sublime_plugin
 
-from .compare import (
-    GitGutterCompareCommit, GitGutterCompareBranch, GitGutterCompareTag,
-    GitGutterCompareHead, GitGutterCompareOrigin, GitGutterShowCompare,
-    GitGutterCompareFileCommit)
+from . import compare
 from . import events
 from . import goto
 from . import handler
@@ -89,19 +86,19 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         elif action == 'jump_to_prev_change':
             goto.prev_change(self)
         elif action == 'compare_against_commit':
-            GitGutterCompareCommit(self.git_handler).run()
+            compare.set_against_commit(self)
         elif action == 'compare_against_file_commit':
-            GitGutterCompareFileCommit(self.git_handler).run()
+            compare.set_against_file_commit(self)
         elif action == 'compare_against_branch':
-            GitGutterCompareBranch(self.git_handler).run()
+            compare.set_against_branch(self)
         elif action == 'compare_against_tag':
-            GitGutterCompareTag(self.git_handler).run()
+            compare.set_against_tag(self)
         elif action == 'compare_against_head':
-            GitGutterCompareHead(self.git_handler).run()
+            compare.set_against_head(self)
         elif action == 'compare_against_origin':
-            GitGutterCompareOrigin(self.git_handler).run()
+            compare.set_against_origin(self)
         elif action == 'show_compare':
-            GitGutterShowCompare(self.git_handler).run()
+            compare.show_compare(self)
         elif action == 'show_diff_popup':
             popup.show_diff_popup(self, **kwargs)
         else:
