@@ -2,12 +2,15 @@
 import sublime
 
 
-def set_against_commit(git_gutter):
+def set_against_commit(git_gutter, **kwargs):
     """Show a quick panel with commits to be chosen from as compare against.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     def show_quick_panel(output):
         """Parse git output and present the quick panel.
@@ -32,12 +35,15 @@ def set_against_commit(git_gutter):
     git_gutter.git_handler.git_commits().then(show_quick_panel)
 
 
-def set_against_file_commit(git_gutter):
+def set_against_file_commit(git_gutter, **kwargs):
     """Show a quick panel with commits to be chosen from as compare against.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     def show_quick_panel(output):
         """Parse git output and present the quick panel.
@@ -66,12 +72,15 @@ def set_against_file_commit(git_gutter):
     git_gutter.git_handler.git_file_commits().then(show_quick_panel)
 
 
-def set_against_branch(git_gutter):
+def set_against_branch(git_gutter, **kwargs):
     """Show a quick panel with branches to be chosen from as compare against.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     def show_quick_panel(output):
         """Parse git output and present the quick panel.
@@ -104,12 +113,15 @@ def set_against_branch(git_gutter):
     git_gutter.git_handler.git_branches().then(show_quick_panel)
 
 
-def set_against_tag(git_gutter):
+def set_against_tag(git_gutter, **kwargs):
     """Show a quick panel with tags to be chosen from as compare against.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     def show_quick_panel(output):
         """Parse git output and present the quick panel.
@@ -141,22 +153,28 @@ def set_against_tag(git_gutter):
     git_gutter.git_handler.git_tags().then(show_quick_panel)
 
 
-def set_against_head(git_gutter):
+def set_against_head(git_gutter, **kwargs):
     """Set HEAD as compare target.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     git_gutter.git_handler.set_compare_against('HEAD', True)
 
 
-def set_against_origin(git_gutter):
+def set_against_origin(git_gutter, **kwargs):
     """Set origin as compare target.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     def on_branch_name(branch_name):
         if branch_name:
@@ -166,12 +184,15 @@ def set_against_origin(git_gutter):
     git_gutter.git_handler.git_current_branch().then(on_branch_name)
 
 
-def show_compare(git_gutter):
+def show_compare(git_gutter, **kwargs):
     """Show a dialog to display current compare target.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     comparing = git_gutter.git_handler.format_compare_against()
     sublime.message_dialog(

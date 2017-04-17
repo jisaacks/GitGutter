@@ -11,6 +11,21 @@ from . import show_diff
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
+
+    # The map of sub commands and their implementation
+    commands = {
+        'jump_to_next_change': goto.next_change,
+        'jump_to_prev_change': goto.prev_change,
+        'compare_against_commit': compare.set_against_commit,
+        'compare_against_file_commit': compare.set_against_file_commit,
+        'compare_against_branch': compare.set_against_branch,
+        'compare_against_tag': compare.set_against_tag,
+        'compare_against_head': compare.set_against_head,
+        'compare_against_origin': compare.set_against_origin,
+        'show_compare': compare.show_compare,
+        'show_diff_popup': popup.show_diff_popup
+    }
+
     def __init__(self, *args, **kwargs):
         """Initialize GitGutterCommand object."""
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
@@ -65,12 +80,12 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
     def run(self, edit, **kwargs):
         """API entry point to run the `git_gutter` command."""
-        if 'action' in kwargs:
-            self._handle_subcommand(**kwargs)
-        else:
-            self._handle_event(**kwargs)
+        action = kwargs.get('action')
+        if action:
+            command_func = self.commands.get(action)
+            assert command_func, 'Unhandled sub command "%s"' % action
+            return command_func(self, **kwargs)
 
-    def _handle_event(self, **kwargs):
         queued_events = kwargs.get('events', 0)
         if not queued_events & (events.LOAD | events.MODIFIED):
             # On 'load' the git file is not yet valid anyway.
@@ -78,31 +93,6 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             # The git repository will most likely not change then.
             self.git_handler.invalidate_git_file()
         self.show_diff_handler.run()
-
-    def _handle_subcommand(self, **kwargs):
-        action = kwargs['action']
-        if action == 'jump_to_next_change':
-            goto.next_change(self)
-        elif action == 'jump_to_prev_change':
-            goto.prev_change(self)
-        elif action == 'compare_against_commit':
-            compare.set_against_commit(self)
-        elif action == 'compare_against_file_commit':
-            compare.set_against_file_commit(self)
-        elif action == 'compare_against_branch':
-            compare.set_against_branch(self)
-        elif action == 'compare_against_tag':
-            compare.set_against_tag(self)
-        elif action == 'compare_against_head':
-            compare.set_against_head(self)
-        elif action == 'compare_against_origin':
-            compare.set_against_origin(self)
-        elif action == 'show_compare':
-            compare.show_compare(self)
-        elif action == 'show_diff_popup':
-            popup.show_diff_popup(self, **kwargs)
-        else:
-            assert False, 'Unhandled sub command "%s"' % action
 
 
 class GitGutterBaseCommand(sublime_plugin.TextCommand):

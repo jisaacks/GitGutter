@@ -1,22 +1,28 @@
 # -*- coding: utf-8 -*-
 
 
-def next_change(git_gutter):
+def next_change(git_gutter, **kwargs):
     """Move cursor to the beginning of the next changed hunk.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     _goto_change(git_gutter, _find_next_change)
 
 
-def prev_change(git_gutter):
+def prev_change(git_gutter, **kwargs):
     """Move cursor to the beginning of the previous changed hunk.
 
     Arguments:
         git_gutter (GitGutterCommand): The main command object, which
             represents GitGutter.
+        kwargs (dict): The arguments received from the `run_command`.
+            This argument is declared to create a common interface being used
+            by the GitGutterCommand object.
     """
     _goto_change(git_gutter, _find_prev_change)
 
