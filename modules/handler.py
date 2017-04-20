@@ -368,7 +368,7 @@ class GitGutterHandler(object):
             self._git_temp_file,
             self._view_temp_file,
         )))
-        return self.run_command(
+        return self.execute_async(
             args=args, decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
@@ -558,7 +558,7 @@ class GitGutterHandler(object):
                 os.path.join(self._git_tree, self._git_path),
             ]
             args = list(filter(None, args))  # Remove empty args
-            return self.run_command(args).then(is_nonempty)
+            return self.execute_async(args).then(is_nonempty)
         return Promise.resolve(False)
 
     def git_commits(self):
@@ -575,7 +575,7 @@ class GitGutterHandler(object):
             '--pretty=%h %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
         ]
-        return self.run_command(args)
+        return self.execute_async(args)
 
     def git_file_commits(self):
         r"""Query all commits with changes to the attached file.
@@ -593,7 +593,7 @@ class GitGutterHandler(object):
             '--date=local', '--max-count=9000',
             '--', self._git_path
         ]
-        return self.run_command(args)
+        return self.execute_async(args)
 
     def git_branches(self):
         """Query all branches of the file's repository."""
@@ -604,7 +604,7 @@ class GitGutterHandler(object):
             '--format=%(subject)\a%(refname)\a%(objectname)',
             'refs/heads/'
         ]
-        return self.run_command(args)
+        return self.execute_async(args)
 
     def git_tags(self):
         """Query all tags of the file's repository."""
@@ -614,7 +614,7 @@ class GitGutterHandler(object):
             '--tags',
             '--abbrev=7'
         ]
-        return self.run_command(args)
+        return self.execute_async(args)
 
     def git_current_branch(self):
         """Query the current branch of the file's repository."""
@@ -631,7 +631,7 @@ class GitGutterHandler(object):
             '--abbrev-ref',
             'HEAD'
         ]
-        return self.run_command(args).then(cache_result)
+        return self.execute_async(args).then(cache_result)
 
     def git_compare_commit(self, compare_against):
         """Query the commit hash of the compare target.
@@ -644,7 +644,7 @@ class GitGutterHandler(object):
             'rev-parse',
             compare_against
         ]
-        return self.run_command(args)
+        return self.execute_async(args)
 
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
@@ -686,54 +686,60 @@ class GitGutterHandler(object):
             'archive', '--format=zip',
             commit, self._git_path
         ]
-        return self.run_command(args=args, decode=False).then(unzip)
+        return self.execute_async(args=args, decode=False).then(unzip)
 
-    def run_command(self, args, decode=True):
-        """Run a git command asynchronously and return a Promise.
+    def execute_async(self, args, decode=True):
+        """Execute a git command asynchronously and return a Promise.
 
         Arguments:
-            args    - a list of arguments used to create the git subprocess.
-            decode  - if True the git's output is decoded assuming utf-8
+            args (list): The command line arguments used to run git.
+            decode (bool): If True the git's output is decoded assuming utf-8
                       which is the default output encoding of git.
+
+        Returns:
+            Promise: A promise to return the git output in the future.
         """
-        def read_output(resolve):
-            """Start git process and forward its output to the Resolver."""
-            stdout, stderr = None, None
+        def executor(resolve):
+            set_timeout(lambda: resolve(self.execute(args, decode)), 10)
+        return Promise(executor)
 
-            try:
-                if os.name == 'nt':
-                    startupinfo = subprocess.STARTUPINFO()
-                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                else:
-                    startupinfo = None
-                proc = subprocess.Popen(
-                    args=args, cwd=self._git_tree, startupinfo=startupinfo,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                    stdin=subprocess.PIPE)
-                if _HAVE_TIMEOUT:
-                    stdout, stderr = proc.communicate(timeout=30)
-                else:
-                    stdout, stderr = proc.communicate()
-            except OSError as error:
-                # print out system error message
-                print('GitGutter: \'git %s\' failed with \"%s\"' % (
-                    args[1], error))
-            except TimeoutExpired:
-                proc.kill()
+    def execute(self, args, decode=True):
+        """Execute a git command synchronously and return its output.
+
+        Arguments:
+            args (list): The command line arguments used to run git.
+            decode (bool): If True the git's output is decoded assuming utf-8
+                      which is the default output encoding of git.
+
+        Returns:
+            string: The decoded or undecoded output read from stdout.
+        """
+        stdout, stderr = None, None
+
+        try:
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            proc = subprocess.Popen(
+                args=args, cwd=self._git_tree, startupinfo=startupinfo,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE)
+            if _HAVE_TIMEOUT:
+                stdout, stderr = proc.communicate(timeout=30)
+            else:
                 stdout, stderr = proc.communicate()
-            finally:
-                if not stdout and stderr and self.settings.get('debug'):
-                    # print out git's error message
-                    print('GitGutter: \'git %s\' failed with \"%s\"' % (
-                        args[1], stderr.decode('utf-8').strip()))
-                if stdout and decode:
-                    # resolve with string value
-                    resolve(stdout.decode('utf-8').strip())
-                else:
-                    # resolve with binary value
-                    resolve(stdout)
-
-        def run_async(resolve):
-            set_timeout(lambda: read_output(resolve), 10)
-
-        return Promise(run_async)
+        except OSError as error:
+            # print out system error message
+            print('GitGutter: "git %s" failed with "%s"' % (args[1], error))
+        except TimeoutExpired:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+        # handle empty git output
+        if not stdout:
+            if stderr and self.settings.get('debug'):
+                print('GitGutter: "git %s" failed with "%s"' % (
+                    args[1], stderr.decode('utf-8').strip()))
+            return stdout
+        # return decoded ouptut using utf-8 or binary output
+        return stdout.decode('utf-8').strip() if decode else stdout
