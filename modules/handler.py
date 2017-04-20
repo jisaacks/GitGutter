@@ -148,10 +148,17 @@ class GitGutterHandler(object):
             refresh (bool): True to force git diff and update GUI
         """
         self._compare_against_mapping[self._git_tree] = compare_against
-        self.invalidate_git_file()
-        if refresh or (not self.settings.get('live_mode') and
-                       not self.settings.get('focus_change_mode')):
-            self.view.run_command('git_gutter')  # refresh UI
+        # force refresh if live_mode and focus_change_mode are disabled
+        refresh |= (not self.settings.get('live_mode') and
+                    not self.settings.get('focus_change_mode'))
+        # set view id to ommit from evaluation
+        active_view_id = 0 if refresh else self.view.id()
+        # refresh all visible views
+        for window in sublime.windows():
+            for group in range(window.num_groups()):
+                view = window.active_view_in_group(group)
+                if view and view.id() != active_view_id:
+                    view.run_command('git_gutter')
 
     def format_compare_against(self):
         """Format the compare against setting to use for display."""

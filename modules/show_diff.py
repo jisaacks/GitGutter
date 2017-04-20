@@ -110,6 +110,11 @@ class GitGutterShowDiff(object):
             self.git_handler.view.erase_status('00_git_gutter')
             return
 
+        # Update status bar only for active view
+        window = self.git_handler.view.window()
+        if window and window.active_view().id() != self.git_handler.view.id():
+            return
+
         def set_status(branch_name):
             _, _, inserted, modified, deleted = contents
             template = (

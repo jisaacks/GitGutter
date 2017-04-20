@@ -59,8 +59,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         elif view.encoding() == 'Hexadecimal':
             valid = False
         else:
+            queued_events = kwargs.get('events')
             # Validate work tree on certain events only
-            validate = kwargs.get('events', 0) & (
+            validate = queued_events is None or queued_events & (
                 events.LOAD | events.ACTIVATED | events.POST_SAVE)
             # Don't handle files outside a repository
             if not self.git_handler.work_tree(validate):
