@@ -36,6 +36,10 @@ except AttributeError:
 
 class GitGutterHandler(object):
 
+    # The working tree / compare target map as class wide attribute.
+    # It is initialized once and keeps the values of all object instantces.
+    _compare_against_mapping = {}
+
     def __init__(self, view, settings):
         """Initialize GitGutterHandler object."""
         self.settings = settings
@@ -112,8 +116,22 @@ class GitGutterHandler(object):
         return self._git_tree
 
     def get_compare_against(self):
-        """Return the branch/commit/tag string the view is compared to."""
-        return self.settings.get_compare_against(self._git_tree)
+        """Return the compare target for a view.
+
+        If interactivly specified a compare target for the view's repository,
+        use it first, then try view's settings, which includes project
+        settings and preferences. Finally try GitGutter.sublime-settings or
+        fall back to HEAD if everything goes wrong to avoid exceptions.
+
+        Returns:
+            string: HEAD/branch/tag/remote/commit
+                The reference to compare the view against.
+        """
+        # Interactively specified compare target overrides settings.
+        if self._git_tree in self._compare_against_mapping:
+            return self._compare_against_mapping[self._git_tree]
+        # Project settings and Preferences override plugin settings if set.
+        return self.settings.get('compare_against', 'HEAD')
 
     def set_compare_against(self, compare_against, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
@@ -129,7 +147,7 @@ class GitGutterHandler(object):
                 from 'git show-ref' to compare the view against
             refresh (bool): True to force git diff and update GUI
         """
-        self.settings.set_compare_against(self._git_tree, compare_against)
+        self._compare_against_mapping[self._git_tree] = compare_against
         self.invalidate_git_file()
         if refresh or (not self.settings.get('live_mode') and
                        not self.settings.get('focus_change_mode')):

@@ -79,9 +79,6 @@ class ViewSettings(object):
     }
     # A map to translate between settings and git arguments
     _PATIENCE_SWITCH = (None, '--patience')
-    # The working tree / compare target map as class wide attribute.
-    # It is initialized once and keeps the values of all object instantces.
-    _compare_against_mapping = {}
 
     def __init__(self, view):
         """Initialize a ViewSettings object.
@@ -171,36 +168,6 @@ class ViewSettings(object):
     def patience_switch(self):
         """The git patience command line argument from settings."""
         return self._PATIENCE_SWITCH[bool(self.get('patience'))]
-
-    def get_compare_against(self, work_tree):
-        """Return the compare target for a view.
-
-        If interactivly specified a compare target for the view's repository,
-        use it first, then try view's settings, which includes project
-        settings and preferences. Finally try GitGutter.sublime-settings or
-        fall back to HEAD if everything goes wrong to avoid exceptions.
-
-        Arguments:
-            work_tree (string): The real root path of the current working tree
-
-        Returns:
-            string: HEAD/branch/tag/remote/commit
-                The reference to compare the view against.
-        """
-        # Interactively specified compare target overrides settings.
-        if work_tree in self._compare_against_mapping:
-            return self._compare_against_mapping[work_tree]
-        # Project settings and Preferences override plugin settings if set.
-        return self.get('compare_against', 'HEAD')
-
-    def set_compare_against(self, work_tree, compare_against):
-        """Assign a new compare target for current repository.
-
-        Arguments:
-            work_tree (string): The real root path of the current working tree
-            compare_against (string): The new branch/tag/commit
-        """
-        self._compare_against_mapping[work_tree] = compare_against
 
 
 class GitGutterOpenFileCommand(sublime_plugin.ApplicationCommand):
