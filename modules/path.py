@@ -3,6 +3,8 @@ import os.path
 
 try:
     from nt import _getfinalpathname
+    from sys import getwindowsversion
+    assert getwindowsversion().major >= 6
 
     def realpath(path):
         """Resolve symlinks and return real path to file.
@@ -14,6 +16,10 @@ try:
 
             This fix applies to local paths only as symlinks are not resolved
             by _getfinalpathname on network drives anyway.
+
+            Also note that _getfinalpathname in Python 3.3 throws
+            `NotImplementedError` on Windows versions prior to Windows Vista,
+            hence we fallback to `os.path.abspath()` on these platforms.
 
         Arguments:
             path (string): The path to resolve.
@@ -33,7 +39,7 @@ try:
             pass
         return path
 
-except (AttributeError, ImportError):
+except (AttributeError, ImportError, AssertionError):
     def realpath(path):
         """Resolve symlinks and return real path to file.
 
