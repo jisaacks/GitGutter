@@ -1,0 +1,22 @@
+1.6.0-rc.1
+----------
+
+  Feature:
+   - Add option to enable/disable GitGutter (Issue #161)
+   - Add gutter icon themes 'Bars' and 'Bars Thin' (Issue #392)
+   - Add ignore_whitespace: "space" option.
+
+  Fix:
+   - Per-Project settings don't work at all
+   - Avoid double loading of python modules. (Issue #396)
+   - Settings won't apply without restart of ST (Issue #184)
+   - Compare Against quick panels are broken by multiline commit messages
+   - Bug in protected region handling for ignored/untracked files
+   - Compatibility issue with ST3 on Windows XP due to symlinks (PR #374)
+
+  Enhancement:
+   - Reduce package loading time by 50%
+   - Update gutter icons of all visible views after selecting new compare target
+
+  README:
+   - Update Per-Project paragraph to reflect latest changes

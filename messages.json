@@ -8,5 +8,6 @@
   "1.3.0": "release_messages/dest/1.3.0.txt",
   "1.4.0": "release_messages/dest/1.4.0.txt",
   "1.5.0": "release_messages/dest/1.5.0.txt",
-  "1.5.1": "release_messages/dest/1.5.1.txt"
+  "1.5.1": "release_messages/dest/1.5.1.txt",
+  "1.6.0-rc.1": "release_messages/dest/1.6.0-rc.1.txt"
 }
