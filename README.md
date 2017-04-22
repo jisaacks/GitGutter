@@ -123,7 +123,7 @@ The most common reason for the icons to not show up is likely a problem with Git
 
 The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from command palette by `GitGutter: Show Diff Popup` or via a key binding.
 
-ⓘ _popups require Sublime Text 3 Build 3070+_
+ⓘ _popups require Sublime Text 3 Build 3080+_
 
 ⓘ _mouse hover feature requires Sublime Text 3 Build 3116+_
 
@@ -227,14 +227,14 @@ GitGutter shows a diff popup, when hovering over changes in the gutter. Set `fal
 
 `"diff_popup_default_mode": "default"`
 
-ⓘ _requires Sublime Text 3 Build 3070+_
+ⓘ _requires Sublime Text 3 Build 3080+_
 
 The popup displays the previous state of the content under the cursor by `"default"` but can be set to `"diff"` to highlight the differences between the git state and the editor state.
 
 
 #### Diff Popup Appearance
 
-ⓘ _requires Sublime Text 3 Build 3070+_
+ⓘ _requires Sublime Text 3 Build 3080+_
 
 The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-popups) library and the corresponding settings are global and not only for GitGutter. Syntax highlighting can be set to match the active color scheme by adding `"mdpopups.use_sublime_highlighter": true` to the User settings.
 
