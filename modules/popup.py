@@ -157,12 +157,12 @@ def _show_diff_popup_impl(
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
-        min_indent = _get_min_indent(deleted_lines + meta["added_lines"])
-
-        old_content = "\n".join(l[min_indent:] for l in deleted_lines)
-        new_content = "\n".join(l[min_indent:] for l in meta["added_lines"])
+        new_lines = meta["added_lines"]
+        tab_width = view.settings().get('tab_width', 4)
+        min_indent = _get_min_indent(deleted_lines + new_lines, tab_width)
+        old_content = '\n'.join(line[min_indent:] for line in deleted_lines)
+        new_content = '\n'.join(line[min_indent:] for line in new_lines)
         source_html = _highlight_diff(old_content, new_content)
-
         button_line = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
@@ -174,19 +174,17 @@ def _show_diff_popup_impl(
             '{source_html}'
             .format(**locals())
         )
+
     elif not is_added:
-        # (modified/removed) show the button line above the content,
-        # which in git
-        lang = mdpopups.get_language_from_view(view) or ""
-        # strip the indent to the minimal indentation
-        is_tab_indent = any(l.startswith("\t") for l in deleted_lines)
-        indent_char = "\t" if is_tab_indent else " "
-        min_indent = _get_min_indent(deleted_lines)
-        source_content = "\n".join(l[min_indent:] for l in deleted_lines)
+        # (modified/removed) show content from git database
+        lang = mdpopups.get_language_from_view(view) or ''
+        tab_width = view.settings().get('tab_width', 4)
+        min_indent = _get_min_indent(deleted_lines, tab_width)
+        source_content = '\n'.join(line[min_indent:] for line in deleted_lines)
         # replace spaces by non-breakable ones to avoid line wrapping
         # (this has been added to mdpopups in version 1.11.0)
         if mdpopups.version() < (1, 11, 0):
-            source_content = source_content.replace(" ", "\u00A0")
+            source_content = source_content.replace(' ', '\u00A0')
         source_html = mdpopups.syntax_highlight(
             view, source_content, language=lang)
         button_line = (
@@ -200,6 +198,7 @@ def _show_diff_popup_impl(
             '{source_html}'
             .format(**locals())
         )
+
     else:
         # (added) only show the button line without the copy button
         # (there is nothing to show or copy)
@@ -248,14 +247,27 @@ def _show_diff_popup_impl(
         flags=flags, max_width=window_width)
 
 
-def _get_min_indent(lines):
-    is_tab_indent = any(l.startswith("\t") for l in lines)
-    indent_char = "\t" if is_tab_indent else " "
-    try:
-        min_indent = min(len(l) - len(l.lstrip(indent_char))
-                         for l in lines if l)
-    except ValueError:
-        min_indent = 0
+def _get_min_indent(lines, tab_width=4):
+    """Find the minimum count of indenting whitespaces in lines.
+
+    Arguments:
+        lines (tuple):
+            The content to search the minimum indention for.
+        tab_width (int):
+            The number of spaces expand tabs before searching for indention by.
+    """
+    min_indent = 2**32
+    for line in lines:
+        if not line:
+            continue
+        line = line.expandtabs(tab_width)
+        i, n = 0, len(line)
+        while i < n and line[i] == ' ':
+            i += 1
+        if min_indent > i:
+            min_indent = i
+        if not min_indent:
+            break
     return min_indent
 
 
