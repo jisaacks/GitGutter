@@ -40,7 +40,7 @@
 
   // (ST3 only) The default mode to open the diff popup. This will be
   // used for the hover popup, the command palette entry,
-  // and the default keybinding.
+  // and the default key binding.
   // Possible modes are:
   // "default": Show the previous git state in the popup
   // "diff": Compare the git state to the working state and highlight
@@ -58,7 +58,7 @@
   // Determines whether GitGutter ignores whitespace in modified files.
   // Set "none" to ensure whitespace is considered in the diff
   // Set "eol" to only ignore whitespace at the end of lines
-  // Set "space" to ignore changes in ammount of white space
+  // Set "space" to ignore changes in amount of white space
   // Set "all" to ignore all white space
   "ignore_whitespace": "none",
 
