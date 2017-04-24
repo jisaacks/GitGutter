@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import codecs
 import functools
-import os.path
+import os
 import re
 import subprocess
 import tempfile
