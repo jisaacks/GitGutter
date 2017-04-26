@@ -362,7 +362,7 @@ class GitGutterHandler(object):
 
         args = list(filter(None, (
             self.settings.git_binary,
-            'diff', '-U0', '--no-color', '--no-index', '--indent-heuristic',
+            'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.patience_switch,
             self._git_temp_file,
