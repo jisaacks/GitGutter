@@ -1,0 +1,10 @@
+1.6.0:
+------
+
+  Fix:
+   - Possible import issue.
+   - Remove git diff command line argument '--indent-heuristic'. (Issue #403)
+   - Typo in GitGutter.sublime-settings
+
+  README:
+   - Fix minimum requirements for diff popup to ST 3080+
