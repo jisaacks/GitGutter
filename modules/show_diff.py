@@ -346,7 +346,7 @@ class GitGutterShowDiff(object):
         Arguments:
             event (string): The element of self.region_names to bind
         """
-        if self._line_height > 15 and event.startswith('del'):
+        if self._line_height > 16 and event.startswith('del'):
             arrow = '_arrow'
         else:
             arrow = ''
