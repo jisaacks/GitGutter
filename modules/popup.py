@@ -4,7 +4,7 @@ import sublime_plugin
 
 try:
     if int(sublime.version()) < 3080:
-        raise ImportError("No popup available.")
+        raise ImportError('No popup available.')
 
     import difflib
     import html
@@ -32,8 +32,8 @@ def show_diff_popup(git_gutter, **kwargs):
     # validate highlighting argument
     highlight_diff = kwargs['highlight_diff']
     if highlight_diff is None:
-        mode = git_gutter.settings.get("diff_popup_default_mode", "")
-        highlight_diff = mode == "diff"
+        mode = git_gutter.settings.get('diff_popup_default_mode', '')
+        highlight_diff = mode == 'diff'
     # get line number from text point
     line = git_gutter.view.rowcol(kwargs['point'])[0] + 1
 
@@ -55,10 +55,10 @@ def _show_diff_popup_impl(
     is_added = not is_removed and not is_modified
 
     def navigate(href):
-        if href == "hide":
+        if href == 'hide':
             view.hide_popup()
-        elif href == "revert":
-            new_text = "\n".join(deleted_lines)
+        elif href == 'revert':
+            new_text = '\n'.join(deleted_lines)
             # (removed) if there is no text to remove, set the
             # region to the end of the line, where the hunk starts
             # and add a new line to the start of the text
@@ -67,13 +67,13 @@ def _show_diff_popup_impl(
                     # set the start and the end to the end of the start line
                     start_point = end_point = view.text_point(start, 0) - 1
                     # add a leading newline before inserting the text
-                    new_text = "\n" + new_text
+                    new_text = '\n' + new_text
                 else:
                     # (special handling for deleted at the start of the file)
                     # if we are before the start we need to set the start
                     # to 0 and add the newline behind the text
                     start_point = end_point = 0
-                    new_text = new_text + "\n"
+                    new_text = new_text + '\n'
             # (modified/added)
             # set the start point to the start of the hunk
             # and the end point to the end of the hunk
@@ -86,28 +86,28 @@ def _show_diff_popup_impl(
                 if is_modified and end_point != view.size():
                     end_point -= 1
             replace_param = {
-                "a": start_point,
-                "b": end_point,
-                "text": new_text
+                'a': start_point,
+                'b': end_point,
+                'text': new_text
             }
-            view.run_command("git_gutter_replace_text", replace_param)
+            view.run_command('git_gutter_replace_text', replace_param)
             # hide the popup and update the gutter
             view.hide_popup()
-            view.run_command("git_gutter")
-        elif href in ("disable_hl_diff", "enable_hl_diff"):
+            view.run_command('git_gutter')
+        elif href in ('disable_hl_diff', 'enable_hl_diff'):
             do_diff = {
-                "disable_hl_diff": False,
-                "enable_hl_diff": True
+                'disable_hl_diff': False,
+                'enable_hl_diff': True
             }.get(href)
             # show a diff popup with the same diff info
             _show_diff_popup_impl(
                 view, settings, line, highlight_diff=do_diff, flags=0,
                 diff_info=diff_info)
-        elif href == "copy":
-            sublime.set_clipboard("\n".join(deleted_lines))
+        elif href == 'copy':
+            sublime.set_clipboard('\n'.join(deleted_lines))
             copy_message = "  ".join(l.strip() for l in deleted_lines)
-            sublime.status_message("Copied: " + copy_message)
-        elif href in ("first_change", "next_change", "prev_change"):
+            sublime.status_message('Copied: ' + copy_message)
+        elif href in ('first_change', 'next_change', 'prev_change'):
             next_line = meta.get(href, line)
             pt = view.text_point(next_line - 1, 0)
 
@@ -149,7 +149,7 @@ def _show_diff_popup_impl(
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
-        new_lines = meta["added_lines"]
+        new_lines = meta['added_lines']
         tab_width = view.settings().get('tab_width', 4)
         min_indent = _get_min_indent(deleted_lines + new_lines, tab_width)
         content = (
@@ -189,33 +189,33 @@ def _show_diff_popup_impl(
             .format(**buttons)
         )
 
-    wrapper_class = ".git-gutter" if _MD_POPUPS_USE_WRAPPER_CLASS else ""
+    wrapper_class = '.git-gutter' if _MD_POPUPS_USE_WRAPPER_CLASS else ''
 
     # load and join popup stylesheets
     css = []
     theme_paths = (
-        "Packages/GitGutter",
+        'Packages/GitGutter',
         settings.theme_path,
-        "Packages/User"
+        'Packages/User'
     )
     for path in theme_paths:
         try:
-            resource_name = path + "/gitgutter_popup.css"
+            resource_name = path + '/gitgutter_popup.css'
             css.append(sublime.load_resource(resource_name))
         except IOError:
             pass
 
     # apply the jinja template
     jinja_kwargs = {
-        "st_version": sublime.version(),
-        "wrapper_class": wrapper_class,
-        "use_icons": use_icons
+        'st_version': sublime.version(),
+        'wrapper_class': wrapper_class,
+        'use_icons': use_icons
     }
-    tmpl = jinja2.environment.Template("\n".join(css))
+    tmpl = jinja2.environment.Template('\n'.join(css))
     css = tmpl.render(**jinja_kwargs)
     # if the ST version does not support the wrapper class, remove it
     if not _MD_POPUPS_USE_WRAPPER_CLASS:
-        css = css.replace(".git-gutter", "")
+        css = css.replace('.git-gutter', '')
 
     # create the popup
     location = view.text_point(line - 1, 0)
@@ -269,19 +269,19 @@ def _highlight_diff(old_content, new_content):
     sb = ['<div class="highlight">', '<pre>']
     for op in seq_matcher.get_opcodes():
         op_type, git_start, git_end, edit_start, edit_end = op
-        if op_type == "equal":
+        if op_type == 'equal':
             sb.append(tag_eq)
             sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
-        elif op_type == "delete":
+        elif op_type == 'delete':
             sb.append(tag_del)
             sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
-        elif op_type == "insert":
+        elif op_type == 'insert':
             sb.append(tag_ins)
             sb.append(_to_html(new_content[edit_start:edit_end]))
             sb.append(tag_close)
-        elif op_type == "replace":
+        elif op_type == 'replace':
             sb.append(tag_modified_ins)
             sb.append(_to_html(new_content[edit_start:edit_end]))
             sb.append(tag_close)
@@ -289,15 +289,15 @@ def _highlight_diff(old_content, new_content):
             sb.append(_to_html(old_content[git_start:git_end]))
             sb.append(tag_close)
     sb.extend(['</pre>', '</div>'])
-    return "".join(sb)
+    return ''.join(sb)
 
 
 def _to_html(s):
     return (
         html.escape(s, quote=False)
-        .replace("\n", "<br>")
-        .replace(" ", "&nbsp;")
-        .replace("\u00A0", "&nbsp;")
+        .replace('\n', '<br>')
+        .replace(' ', '&nbsp;')
+        .replace('\u00A0', '&nbsp;')
     )
 
 
