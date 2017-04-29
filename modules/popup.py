@@ -94,7 +94,7 @@ def _show_diff_popup_impl(
             # hide the popup and update the gutter
             view.hide_popup()
             view.run_command("git_gutter")
-        elif href in ["disable_hl_diff", "enable_hl_diff"]:
+        elif href in ("disable_hl_diff", "enable_hl_diff"):
             do_diff = {
                 "disable_hl_diff": False,
                 "enable_hl_diff": True
@@ -107,7 +107,7 @@ def _show_diff_popup_impl(
             sublime.set_clipboard("\n".join(deleted_lines))
             copy_message = "  ".join(l.strip() for l in deleted_lines)
             sublime.status_message("Copied: " + copy_message)
-        elif href in ["next_change", "prev_change", "first_change"]:
+        elif href in ("first_change", "next_change", "prev_change"):
             next_line = meta.get(href, line)
             pt = view.text_point(next_line - 1, 0)
 
@@ -127,7 +127,6 @@ def _show_diff_popup_impl(
 
     # write the symbols/text for each button
     use_icons = settings.get("diff_popup_use_icon_buttons")
-
     # the buttons as a map from the href to the caption/icon
     button_descriptions = {
         "hide": chr(0x00D7) if use_icons else "(close)",
@@ -160,20 +159,14 @@ def _show_diff_popup_impl(
         new_lines = meta["added_lines"]
         tab_width = view.settings().get('tab_width', 4)
         min_indent = _get_min_indent(deleted_lines + new_lines, tab_width)
-        old_content = '\n'.join(line[min_indent:] for line in deleted_lines)
-        new_content = '\n'.join(line[min_indent:] for line in new_lines)
-        source_html = _highlight_diff(old_content, new_content)
-        button_line = (
+        content = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{disable_hl_diff} {revert}'
             .format(**buttons)
-        )
-        content = (
-            '{button_line}'
-            '{source_html}'
-            .format(**locals())
-        )
+        ) + _highlight_diff(
+            '\n'.join(line[min_indent:] for line in deleted_lines),
+            '\n'.join(line[min_indent:] for line in new_lines))
 
     elif not is_added:
         # (modified/removed) show content from git database
@@ -185,30 +178,23 @@ def _show_diff_popup_impl(
         # (this has been added to mdpopups in version 1.11.0)
         if mdpopups.version() < (1, 11, 0):
             source_content = source_content.replace(' ', '\u00A0')
-        source_html = mdpopups.syntax_highlight(
-            view, source_content, language=lang)
-        button_line = (
+        content = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{enable_hl_diff} {copy} {revert}'
             .format(**buttons)
-        )
-        content = (
-            '{button_line}'
-            '{source_html}'
-            .format(**locals())
-        )
+        ) + mdpopups.syntax_highlight(
+            view, source_content, language=lang)
 
     else:
         # (added) only show the button line without the copy button
         # (there is nothing to show or copy)
-        button_line = (
+        content = (
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{enable_hl_diff} {revert}'
             .format(**buttons)
         )
-        content = button_line
 
     wrapper_class = ".git-gutter" if _MD_POPUPS_USE_WRAPPER_CLASS else ""
 
