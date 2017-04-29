@@ -22,32 +22,55 @@ def show_diff_popup(git_gutter, **kwargs):
     """Show the diff popup.
 
     Arguments:
-        git_gutter (GitGutterCommand): The main command object, which
-            represents GitGutter.
-        kwargs (dict): The arguments passed from GitGutterDiffPopupCommand
+        git_gutter (GitGutterCommand):
+            The main command object, which represents GitGutter.
+        kwargs (dict):
+            The arguments passed from GitGutterDiffPopupCommand
             to GitGutterCommand.
     """
     if not _MDPOPUPS_INSTALLED or not git_gutter.git_handler.in_repo():
         return
     # validate highlighting argument
-    highlight_diff = kwargs['highlight_diff']
+    highlight_diff = kwargs.get('highlight_diff')
     if highlight_diff is None:
         mode = git_gutter.settings.get('diff_popup_default_mode', '')
         highlight_diff = mode == 'diff'
+    # validate point argument
+    point = kwargs.get('point')
+    if point is None:
+        selection = git_gutter.view.sel()
+        if not selection:
+            return
+        point = selection[0].end()
     # get line number from text point
-    line = git_gutter.view.rowcol(kwargs['point'])[0] + 1
+    line = git_gutter.view.rowcol(point)[0] + 1
+    # create popup asynchronously in case it takes several 100ms
+    sublime.set_timeout_async(
+        lambda: _show_diff_popup_impl(
+            git_gutter, line, highlight_diff, kwargs.get('flags', 0),
+            git_gutter.git_handler.diff_line_change(line)))
 
-    _show_diff_popup_impl(
-        view=git_gutter.view, settings=git_gutter.settings, line=line,
-        highlight_diff=highlight_diff, flags=kwargs['flags'],
-        diff_info=git_gutter.git_handler.diff_line_change(line))
 
+def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
+    """Show and update the diff popup.
 
-def _show_diff_popup_impl(
-        view, settings, line, highlight_diff, flags, diff_info):
-    (deleted_lines, start, size, meta) = diff_info
+    Arguments:
+        git_gutter (GitGutterCommand):
+            The main command object, which represents GitGutter.
+        line (int):
+            The line number the diff popup is requested for
+        highlight_diff (bool):
+            If True to the diff is displayed instead of the old revision.
+        flags (int):
+            Sublime Text popup flags.
+        diff_info (tuple):
+            All the information required to display the diff popup.
+    """
+    deleted_lines, start, size, meta = diff_info
     if start == -1:
         return
+
+    view = git_gutter.view
 
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
@@ -57,6 +80,10 @@ def _show_diff_popup_impl(
     def navigate(href):
         if href == 'hide':
             view.hide_popup()
+        elif href == 'copy':
+            sublime.set_clipboard(deleted_lines)
+            sublime.status_message(
+                'Copied: {0} characters'.format(len(deleted_lines)))
         elif href == 'revert':
             new_text = '\n'.join(deleted_lines)
             # (removed) if there is no text to remove, set the
@@ -85,48 +112,33 @@ def _show_diff_popup_impl(
                 # because we insert lines without a trailing newline
                 if is_modified and end_point != view.size():
                     end_point -= 1
-            replace_param = {
-                'a': start_point,
-                'b': end_point,
-                'text': new_text
-            }
-            view.run_command('git_gutter_replace_text', replace_param)
-            # hide the popup and update the gutter
+            # hide the popup and update the view
             view.hide_popup()
-            view.run_command('git_gutter')
-        elif href in ('disable_hl_diff', 'enable_hl_diff'):
-            do_diff = {
-                'disable_hl_diff': False,
-                'enable_hl_diff': True
-            }.get(href)
-            # show a diff popup with the same diff info
-            _show_diff_popup_impl(
-                view, settings, line, highlight_diff=do_diff, flags=0,
-                diff_info=diff_info)
-        elif href == 'copy':
-            sublime.set_clipboard('\n'.join(deleted_lines))
-            copy_message = "  ".join(l.strip() for l in deleted_lines)
-            sublime.status_message('Copied: ' + copy_message)
+            view.run_command('git_gutter_replace_text', {
+                'start': start_point, 'end': end_point, 'text': new_text})
+        elif href == 'disable_hl_diff':
+            # show a diff popup with the same diff info (previous revision)
+            _show_diff_popup_impl(git_gutter, line, False, flags, diff_info)
+        elif href == 'enable_hl_diff':
+            # show a diff popup with the same diff info (highlight diff)
+            _show_diff_popup_impl(git_gutter, line, True, flags, diff_info)
         elif href in ('first_change', 'next_change', 'prev_change'):
             next_line = meta.get(href, line)
-            pt = view.text_point(next_line - 1, 0)
+            point = view.text_point(next_line - 1, 0)
 
             def show_new_popup():
-                if view.visible_region().contains(pt):
-                    popup_kwargs = {
-                        'action': 'show_diff_popup',
-                        'highlight_diff': highlight_diff,
-                        'point': pt,
-                        'flags': 0
-                    }
-                    view.run_command('git_gutter', popup_kwargs)
-                else:
-                    sublime.set_timeout(show_new_popup, 10)
-            view.show_at_center(pt)
+                # wait until scrolling has completed
+                if not view.visible_region().contains(point):
+                    return sublime.set_timeout_async(show_new_popup, 20)
+                # show a diff popup with new diff info
+                _show_diff_popup_impl(
+                    git_gutter, next_line, highlight_diff, 0,
+                    git_gutter.git_handler.diff_line_change(next_line))
+            view.show_at_center(point)
             show_new_popup()
 
     # write the symbols/text for each button
-    use_icons = settings.get('diff_popup_use_icon_buttons')
+    use_icons = git_gutter.settings.get('diff_popup_use_icon_buttons')
     # the buttons as a map from the href to the caption/icon
     button_descriptions = {
         'hide': '×' if use_icons else '(close)',
@@ -192,16 +204,16 @@ def _show_diff_popup_impl(
     wrapper_class = '.git-gutter' if _MD_POPUPS_USE_WRAPPER_CLASS else ''
 
     # load and join popup stylesheets
-    css = []
+    css_lines = []
     theme_paths = (
         'Packages/GitGutter',
-        settings.theme_path,
+        git_gutter.settings.theme_path,
         'Packages/User'
     )
     for path in theme_paths:
         try:
             resource_name = path + '/gitgutter_popup.css'
-            css.append(sublime.load_resource(resource_name))
+            css_lines.append(sublime.load_resource(resource_name))
         except IOError:
             pass
 
@@ -211,11 +223,11 @@ def _show_diff_popup_impl(
         'wrapper_class': wrapper_class,
         'use_icons': use_icons
     }
-    tmpl = jinja2.environment.Template('\n'.join(css))
+    tmpl = jinja2.environment.Template('\n'.join(css_lines))
     css = tmpl.render(**jinja_kwargs)
     # if the ST version does not support the wrapper class, remove it
     if not _MD_POPUPS_USE_WRAPPER_CLASS:
-        css = css.replace('.git-gutter', '')
+        css = css.replace(wrapper_class, '')
 
     # create the popup
     location = view.text_point(line - 1, 0)
@@ -251,8 +263,18 @@ def _get_min_indent(lines, tab_width=4):
 
 
 def _highlight_diff(old_content, new_content):
+    """Diff two strings and convert to HTML to be displayed in the popup.
+
+    Arguments:
+        old_content (string):
+            The content from the last git `archive` call.
+        new_content (string):
+            The content from the view.
+
+    Returns:
+        string: The diff result encoded as HTML.
+    """
     seq_matcher = difflib.SequenceMatcher(None, old_content, new_content)
-    tag_close = '</span>'
 
     tag_eq = '<span class="gitgutter-hi-equal">'
     tag_ins = '<span class="gitgutter-hi-inserted">'
@@ -266,35 +288,35 @@ def _highlight_diff(old_content, new_content):
     tag_close = '</span>'
 
     # build the html string
-    sb = ['<div class="highlight">', '<pre>']
-    for op in seq_matcher.get_opcodes():
-        op_type, git_start, git_end, edit_start, edit_end = op
+    lines = ['<div class="highlight">', '<pre>']
+    for opcodes in seq_matcher.get_opcodes():
+        op_type, git_start, git_end, edit_start, edit_end = opcodes
         if op_type == 'equal':
-            sb.append(tag_eq)
-            sb.append(_to_html(old_content[git_start:git_end]))
-            sb.append(tag_close)
+            lines.append(tag_eq)
+            lines.append(_to_html(old_content[git_start:git_end]))
+            lines.append(tag_close)
         elif op_type == 'delete':
-            sb.append(tag_del)
-            sb.append(_to_html(old_content[git_start:git_end]))
-            sb.append(tag_close)
+            lines.append(tag_del)
+            lines.append(_to_html(old_content[git_start:git_end]))
+            lines.append(tag_close)
         elif op_type == 'insert':
-            sb.append(tag_ins)
-            sb.append(_to_html(new_content[edit_start:edit_end]))
-            sb.append(tag_close)
+            lines.append(tag_ins)
+            lines.append(_to_html(new_content[edit_start:edit_end]))
+            lines.append(tag_close)
         elif op_type == 'replace':
-            sb.append(tag_modified_ins)
-            sb.append(_to_html(new_content[edit_start:edit_end]))
-            sb.append(tag_close)
-            sb.append(tag_modified_del)
-            sb.append(_to_html(old_content[git_start:git_end]))
-            sb.append(tag_close)
-    sb.extend(['</pre>', '</div>'])
-    return ''.join(sb)
+            lines.append(tag_modified_ins)
+            lines.append(_to_html(new_content[edit_start:edit_end]))
+            lines.append(tag_close)
+            lines.append(tag_modified_del)
+            lines.append(_to_html(old_content[git_start:git_end]))
+            lines.append(tag_close)
+    lines.extend(['</pre>', '</div>'])
+    return ''.join(lines)
 
 
-def _to_html(s):
+def _to_html(text):
     return (
-        html.escape(s, quote=False)
+        html.escape(text, quote=False)
         .replace('\n', '<br>')
         .replace(' ', '&nbsp;')
         .replace('\u00A0', '&nbsp;')
@@ -302,23 +324,49 @@ def _to_html(s):
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
-    def run(self, edit, a, b, text):
-        region = sublime.Region(a, b)
+    """The git_gutter_replace_text command implementation."""
+
+    def run(self, edit, start, end, text):
+        """Replace the content of a region with new text.
+
+        Arguments:
+            edit (Edit):
+                The edit object to identify this operation.
+            start (int):
+                The beginning of the Region to replace.
+            end (int):
+                The end of the Region to replace.
+            text (string):
+                The new text to replace the content of the Region with.
+        """
+        region = sublime.Region(start, end)
         self.view.replace(edit, region, text)
 
 
 class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
+    """The git_gutter_diff_popup command implemention."""
+
     def is_enabled(self):
+        """Check whether diff popup is enabled for the view."""
         return (
             _MDPOPUPS_INSTALLED and
             self.view.settings().get('git_gutter_is_enabled', False))
 
     def run(self, edit, point=None, highlight_diff=None, flags=0):
-        if point is None:
-            if not self.view.sel():
-                return
-            point = self.view.sel()[0].end()
+        """Run git_gutter(show_diff_popup, ...) command.
 
+        Arguments:
+            edit (Edit):
+                The edit object to identify this operation (unused).
+            point (int):
+                The text position to show the diff popup for.
+            highlight_diff (string or bool):
+                The desired initial state of dispayed popup content.
+                "default": show old state of the selected hunk
+                "diff": show diff between current and old state
+            flags (int):
+                One of Sublime Text's popup flags.
+        """
         self.view.run_command('git_gutter', {
             'action': 'show_diff_popup', 'point': point,
             'highlight_diff': highlight_diff, 'flags': flags})
