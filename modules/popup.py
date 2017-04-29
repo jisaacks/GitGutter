@@ -78,6 +78,9 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
     is_added = not is_removed and not is_modified
 
     def navigate(href):
+        # allow navigate() to manipulate the outer variables
+        nonlocal highlight_diff
+
         if href == 'hide':
             view.hide_popup()
         elif href == 'copy':
@@ -118,10 +121,14 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
                 'start': start_point, 'end': end_point, 'text': new_text})
         elif href == 'disable_hl_diff':
             # show a diff popup with the same diff info (previous revision)
-            _show_diff_popup_impl(git_gutter, line, False, flags, diff_info)
+            highlight_diff = False
+            _show_diff_popup_impl(
+                git_gutter, line, highlight_diff, flags, diff_info)
         elif href == 'enable_hl_diff':
             # show a diff popup with the same diff info (highlight diff)
-            _show_diff_popup_impl(git_gutter, line, True, flags, diff_info)
+            highlight_diff = True
+            _show_diff_popup_impl(
+                git_gutter, line, highlight_diff, flags, diff_info)
         elif href in ('first_change', 'next_change', 'prev_change'):
             next_line = meta.get(href, line)
             point = view.text_point(next_line - 1, 0)
@@ -134,6 +141,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
                 _show_diff_popup_impl(
                     git_gutter, next_line, highlight_diff, 0,
                     git_gutter.git_handler.diff_line_change(next_line))
+            view.hide_popup()
             view.show_at_center(point)
             show_new_popup()
 
@@ -229,13 +237,23 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
     if not _MD_POPUPS_USE_WRAPPER_CLASS:
         css = css.replace(wrapper_class, '')
 
-    # create the popup
+    # common arguments used to create or update the popup
+    popup_kwargs = {
+        'view': view,
+        'content': content,
+        'md': False,
+        'css': css,
+        'wrapper_class': wrapper_class[1:],
+    }
+    # update visible popup
+    if view.is_popup_visible():
+        return mdpopups.update_popup(**popup_kwargs)
+    # create new popup
     location = view.text_point(line - 1, 0)
-    window_width = int(view.viewport_extent()[0])
-    mdpopups.show_popup(
-        view, content, location=location, on_navigate=navigate, md=False,
-        wrapper_class=wrapper_class[1:], css=css,
-        flags=flags, max_width=window_width)
+    popup_width = int(view.viewport_extent()[0])
+    return mdpopups.show_popup(
+        location=location, max_width=popup_width, flags=flags,
+        on_navigate=navigate, **popup_kwargs)
 
 
 def _get_min_indent(lines, tab_width=4):
