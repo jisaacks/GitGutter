@@ -126,33 +126,26 @@ def _show_diff_popup_impl(
             show_new_popup()
 
     # write the symbols/text for each button
-    use_icons = settings.get("diff_popup_use_icon_buttons")
+    use_icons = settings.get('diff_popup_use_icon_buttons')
     # the buttons as a map from the href to the caption/icon
     button_descriptions = {
-        "hide": chr(0x00D7) if use_icons else "(close)",
-        "copy": chr(0x2398) if use_icons else "(copy)",
-        "revert": chr(0x27F2) if use_icons else "(revert)",
-        "disable_hl_diff": chr(0x2249) if use_icons else "(diff)",
-        "enable_hl_diff": chr(0x2248) if use_icons else "(diff)",
-        "first_change": chr(0x2912) if use_icons else "(first)",
-        "prev_change": chr(0x2191) if use_icons else "(previous)",
-        "next_change": chr(0x2193) if use_icons else "(next)"
+        'hide': '×' if use_icons else '(close)',
+        'copy': '⎘' if use_icons else '(copy)',
+        'revert': '⟲' if use_icons else '(revert)',
+        'disable_hl_diff': '≉' if use_icons else '(diff)',
+        'enable_hl_diff': '≈' if use_icons else '(diff)',
+        'first_change': '⤒' if use_icons else '(first)',
+        'prev_change': '↑' if use_icons else '(previous)',
+        'next_change': '↓' if use_icons else '(next)'
     }
-
-    def is_button_enabled(k):
-        if k in ["first_change", "next_change", "prev_change"]:
-            return meta.get(k, start) != start
-        return True
+    button_fmt = '<span class="gitgutter-button"><a href="{1}">{0}</a></span>'
+    button_disabled_fmt = '<span class="gitgutter-button">{0}</span>'
     buttons = {}
-    for k, v in button_descriptions.items():
-        if is_button_enabled(k):
-            button = '<a href={1}>{0}</a>'.format(v, k)
+    for key, value in button_descriptions.items():
+        if not key.endswith('_change') or meta.get(key, start) != start:
+            buttons[key] = button_fmt.format(value, key)
         else:
-            button = v
-        buttons[k] = (
-            '<span class="gitgutter-button">{0}</span>'
-            .format(button)
-        )
+            buttons[key] = button_disabled_fmt.format(value)
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
