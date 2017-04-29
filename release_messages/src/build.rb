@@ -11,7 +11,7 @@ files = Dir.glob(File.join(%w{release_messages src messages *.txt})).sort_by do 
   if name == 'install'
     [0, 0, 0, 0]
   else
-    if name =~ /^(.*)-pre(.*)/
+    if name =~ /^(.*)-(?:pre|rc)(.*)/
       name = $1.split('.').map(&:to_i).push(0).push($2)
     else
       name.split('.').map(&:to_i).push(1)
@@ -39,7 +39,7 @@ files.each do |file|
     contents += global_message
     if file == files.last
       File.write(File.join(%w{release_messages dest VERSION}), name)
-      File.write(File.join(%w{release_messages dest PRE_RELEASE}), !!(name =~ /pre/))
+      File.write(File.join(%w{release_messages dest PRE_RELEASE}), !!(name =~ /(?:pre|rc)/))
     end
   end
   File.write(path, contents)
