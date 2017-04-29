@@ -1,49 +1,159 @@
-/*
-    Jinja2 css template. Provided values are:
-        - st_version: the version of Sublime Text;
+/**********************************************************************
+
+    This is the default stylesheet for GitGutter diff popup.
+
+    It defines additional rules to merge with mdpopups' styleshets.
+
+    NOTE: You can use all jinja2 template variables of mdpopups.
+
+        Examples:
+          var.is_dark
+          var.is_light
+          var.sublime_version       (mdpopups 2.0.0+)
+          var.mdpopups_version      (mdpopups 2.0.0+)
+
+    The popup's HTML structure:
+
+        <div class="mdpopups">
+            <div class="git-gutter">
+                <div class="toolbar">
+                    <a href="revert"><symbol>⟲</symbol></a>
+                    ...
+                    <a href="revert"><text>(revert)</text></a>
+                    ...
+                </div>
+                <div class="highlight">
+                    ... the content goes in here
+                </div>
+            </div>
+        </div>
+
     Copy the values you want to change into your user directory
     and change them there to overwrite the stylesheet.
-*/
 
-.git-gutter .gitgutter-button {
-    font-size: 1.15rem;
+ *********************************************************************/
+
+/**
+ * POPUP BACKGROUND
+ *
+ * Compatibility rules to fix default popup background color
+ * for light and dark color schemes of Sublime Text < 3132.
+ **/
+html.dark {
+    background-color: color(var(--background) blend(#fff 90%));
+}
+html.light {
+    background-color: color(var(--background) blend(#000 90%));
 }
 
-/* Don't underline button links. */
-.git-gutter .gitgutter-button a {
+/* Compatibility rules for correct popup borders with mdpopups 1.x.x */
+div.mdpopups {
+    margin: 0;
+    padding: 0;
+}
+
+/**
+ * POPUP BORDER
+ *
+ * The popup border
+ **/
+div.git-gutter {
+    margin: 0;
+    padding: 1;
+}
+
+/**
+ * TOOLBAR
+ *
+ * The navigation toolbar
+ **/
+.git-gutter div.toolbar {
+    margin: 0;
+    padding: 0.0rem 0.4rem 0.2rem 0.4em;
+}
+
+/**
+ * TEXT BUTTONS
+ *
+ * <text>(revert)</text>
+ *
+ * Text buttons look oversized with normal font size.
+ * This rule is used to fix the font-size.
+ **/
+.git-gutter div.toolbar text {
+    font-size: 0.8rem;
+    margin: 0;
+    padding: 0;
+}
+
+/**
+ * ICON BUTTONS
+ *
+ * <symbol>⟲</symbol>
+ *
+ * Unicode chars are rendered smaller than normal text and sometimes ugly
+ * depending on font-family, so force fonts known to render well.
+ * This rule is used to fix the font-family and font-size.
+ **/
+.git-gutter div.toolbar symbol {
+    font-family: "Roboto Mono", "Segoe UI", monospace;
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 0.0rem 0.1rem 0.0rem 0.1em;
+}
+
+/**
+ * LINKS
+ *
+ * Don't underline links.
+ **/
+.git-gutter a {
     text-decoration: none;
 }
 
-/* Size of button, if they are an image. */
-.git-gutter .gitgutter-button img {
-    height: 1.15rem;
-    width: 1.15rem;
+/**
+ * TEXT VIEW
+ *
+ * Shows the old content or diff.
+ **/
+.git-gutter div.highlight {
+    border-style: none;
+    border-radius: 0;
+    line-height: 1.3rem;
+    margin: 0;
+    padding: 0.7rem 0.7rem 0.6rem 0.7rem;
 }
 
-/*
-    The following entries apply to the "difference highlight"
-    mode of the popup.
-*/
+/**
+ * DIFF HIGHLIGHTING
+ *
+ * The following entries apply to the "highlight difference"
+ * mode of the popup.
+ **/
+
 /* Highlight text, that has not changed. */
-.git-gutter .gitgutter-hi-equal {
+.git-gutter .hi-equal {
+    color: var(--foreground);
 }
 
 /* Highlight text, that has been inserted. */
-.git-gutter .gitgutter-hi-inserted {
-    color: green;
+.git-gutter .hi-ins {
+    color: var(--greenish);
+    text-decoration: underline;
 }
 
 /* Highlight text, that has been deleted. */
-.git-gutter .gitgutter-hi-deleted {
-    color: red;
+.git-gutter .hi-del {
+    color: var(--redish);
     text-decoration: underline;
 }
 
 /* Highlight text, that has been inserted and substitutes other text. */
-.git-gutter .gitgutter-hi-changed .gitgutter-hi-inserted {
+.git-gutter .hi-chg-ins {
+    color: var(--yellowish);
 }
 
 /* Highlight text, that has been deleted and is substituted by other text. */
-.git-gutter .gitgutter-hi-changed .gitgutter-hi-deleted {
-    color: yellow;
+.git-gutter .hi-chg-del {
+    color: var(--orangish);
 }

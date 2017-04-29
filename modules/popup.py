@@ -3,19 +3,24 @@ import sublime
 import sublime_plugin
 
 try:
-    if int(sublime.version()) < 3080:
-        raise ImportError('No popup available.')
+    # mdpopups needs 3119+ for wrapper_class, which diff popup relies on
+    if int(sublime.version()) < 3119:
+        raise ImportError('Sublime Text 3119+ required.')
 
     import difflib
     import html
-    import jinja2
     import mdpopups
 
+    # mdpopups 1.9.0+ is required because of wrapper_class and templates
+    if mdpopups.version() < (1, 9, 0):
+        raise ImportError('mdpopups 1.9.0+ required.')
     _MDPOPUPS_INSTALLED = True
+    # mdpopups 1.11.0+ can handle none wrapping whitespace
+    _MDPOPUPS_HAVE_FIXED_SPACE = mdpopups.version() >= (1, 11, 0)
+    # mdpopups 2.0.0+ allows to switch code wrapping on or off
+    _MDPOPUPS_HAVE_CODE_WRAP = mdpopups.version() >= (2, 0, 0)
 except ImportError:
     _MDPOPUPS_INSTALLED = False
-
-_MD_POPUPS_USE_WRAPPER_CLASS = int(sublime.version()) >= 3119
 
 
 def show_diff_popup(git_gutter, **kwargs):
@@ -146,26 +151,13 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
             show_new_popup()
 
     # write the symbols/text for each button
-    use_icons = git_gutter.settings.get('diff_popup_use_icon_buttons')
-    # the buttons as a map from the href to the caption/icon
-    button_descriptions = {
-        'hide': '×' if use_icons else '(close)',
-        'copy': '⎘' if use_icons else '(copy)',
-        'revert': '⟲' if use_icons else '(revert)',
-        'disable_hl_diff': '≉' if use_icons else '(diff)',
-        'enable_hl_diff': '≈' if use_icons else '(diff)',
-        'first_change': '⤒' if use_icons else '(first)',
-        'prev_change': '↑' if use_icons else '(previous)',
-        'next_change': '↓' if use_icons else '(next)'
-    }
-    button_fmt = '<span class="gitgutter-button"><a href="{1}">{0}</a></span>'
-    button_disabled_fmt = '<span class="gitgutter-button">{0}</span>'
-    buttons = {}
-    for key, value in button_descriptions.items():
-        if not key.endswith('_change') or meta.get(key, start) != start:
-            buttons[key] = button_fmt.format(value, key)
-        else:
-            buttons[key] = button_disabled_fmt.format(value)
+    use_icons = bool(git_gutter.settings.get('diff_popup_use_icon_buttons'))
+    buttons = _built_toolbar_buttons(start, meta, use_icons)
+    location = view.text_point(line - 1, 0)
+    # code wrapping is supported by mdpopups 2.0.0 or higher
+    code_wrap = _MDPOPUPS_HAVE_CODE_WRAP and view.settings().get('word_wrap')
+    if code_wrap == 'auto':
+        code_wrap = 'source.' not in view.scope_name(location)
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
@@ -173,9 +165,11 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         tab_width = view.settings().get('tab_width', 4)
         min_indent = _get_min_indent(deleted_lines + new_lines, tab_width)
         content = (
+            '<div class="toolbar">'
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{disable_hl_diff} {revert}'
+            '</div>'
             .format(**buttons)
         ) + _highlight_diff(
             '\n'.join(line[min_indent:] for line in deleted_lines),
@@ -183,77 +177,127 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
 
     elif not is_added:
         # (modified/removed) show content from git database
-        lang = mdpopups.get_language_from_view(view) or ''
         tab_width = view.settings().get('tab_width', 4)
         min_indent = _get_min_indent(deleted_lines, tab_width)
         source_content = '\n'.join(line[min_indent:] for line in deleted_lines)
-        # replace spaces by non-breakable ones to avoid line wrapping
-        # (this has been added to mdpopups in version 1.11.0)
-        if mdpopups.version() < (1, 11, 0):
+        if not _MDPOPUPS_HAVE_FIXED_SPACE and not code_wrap:
             source_content = source_content.replace(' ', '\u00A0')
+        # common arguments used to highlight the content
+        popup_kwargs = {
+            'language': mdpopups.get_language_from_view(view) or ''
+        }
+        # code wrapping is supported by mdpopups 2.0.0 or higher
+        if _MDPOPUPS_HAVE_CODE_WRAP:
+            popup_kwargs['allow_code_wrap'] = code_wrap
         content = (
+            '<div class="toolbar">'
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{enable_hl_diff} {copy} {revert}'
+            '</div>'
             .format(**buttons)
-        ) + mdpopups.syntax_highlight(
-            view, source_content, language=lang)
+        ) + mdpopups.syntax_highlight(view, source_content, **popup_kwargs)
 
     else:
         # (added) only show the button line without the copy button
         # (there is nothing to show or copy)
         content = (
+            '<div class="toolbar">'
             '{hide} '
             '{first_change} {prev_change} {next_change} '
             '{enable_hl_diff} {revert}'
+            '</div>'
             .format(**buttons)
         )
-
-    wrapper_class = '.git-gutter' if _MD_POPUPS_USE_WRAPPER_CLASS else ''
-
-    # load and join popup stylesheets
-    css_lines = []
-    theme_paths = (
-        'Packages/GitGutter',
-        git_gutter.settings.theme_path,
-        'Packages/User'
-    )
-    for path in theme_paths:
-        try:
-            resource_name = path + '/gitgutter_popup.css'
-            css_lines.append(sublime.load_resource(resource_name))
-        except IOError:
-            pass
-
-    # apply the jinja template
-    jinja_kwargs = {
-        'st_version': sublime.version(),
-        'wrapper_class': wrapper_class,
-        'use_icons': use_icons
-    }
-    tmpl = jinja2.environment.Template('\n'.join(css_lines))
-    css = tmpl.render(**jinja_kwargs)
-    # if the ST version does not support the wrapper class, remove it
-    if not _MD_POPUPS_USE_WRAPPER_CLASS:
-        css = css.replace(wrapper_class, '')
 
     # common arguments used to create or update the popup
     popup_kwargs = {
         'view': view,
         'content': content,
         'md': False,
-        'css': css,
-        'wrapper_class': wrapper_class[1:],
+        'css': _load_popup_css(git_gutter.settings.theme_path),
+        'wrapper_class': 'git-gutter',
     }
+    # code wrapping is supported by mdpopups 2.0.0 or higher
+    if _MDPOPUPS_HAVE_CODE_WRAP:
+        popup_kwargs['allow_code_wrap'] = code_wrap
     # update visible popup
     if view.is_popup_visible():
         return mdpopups.update_popup(**popup_kwargs)
-    # create new popup
-    location = view.text_point(line - 1, 0)
+    # calculate optimal popup width to apply desired wrapping
     popup_width = int(view.viewport_extent()[0])
+    if code_wrap:
+        line_length = view.settings().get('wrap_width', 0)
+        if line_length > 0:
+            popup_width = (line_length + 5) * view.em_width()
+    # create new popup
     return mdpopups.show_popup(
         location=location, max_width=popup_width, flags=flags,
         on_navigate=navigate, **popup_kwargs)
+
+
+def _built_toolbar_buttons(start, meta, use_icons):
+    """Built the toolbar buttons with icon/text as link/label.
+
+    Each toolbar button needs to be rendered using the unicode icon character
+    or a text label for those who don't like icons. If enabled each button is
+    attached to a <a> link.
+
+    Arguments:
+        start (int):
+            First line of the current hunk.
+        meta (dict):
+            The dictionay containing additional hunk information.
+        use_icons (bool):
+            If True to use unicode buttons  or text otherwise.
+
+    Returns:
+        dict: The dictionay with all buttons where `key` is used as `href`
+            and value as link caption.
+
+            active icon button: <a href="revert"><symbol>⟲</symbol></a>
+            active text button: <a href="revert"><text>(revert)</text></a>
+            inactive icon button: <symbol>⟲</symbol>
+            inactive text button: <text>(revert)</text>
+    """
+    # The format to render disabled/enabled buttons
+    button_format = ('<{0}>{1}</{0}>', '<a href="{2}"><{0}>{1}</{0}></a>')
+    # The tag to use for each button
+    button_tag = ('text', 'symbol')
+    # The buttons as a map from the href to the caption/icon
+    button_caption = {
+        'hide': ('(close)', '×'),
+        'copy': ('(copy)', '⎘'),
+        'revert': ('(revert)', '⟲'),
+        'disable_hl_diff': ('(diff)', '≉'),
+        'enable_hl_diff': ('(diff)', '≈'),
+        'first_change': ('(first)', '⤒'),
+        'prev_change': ('(prev)', '↑'),
+        'next_change': ('(next)', '↓')
+    }
+    return {
+        key: button_format[
+            not key.endswith('_change') or meta.get(key, start) != start
+        ].format(button_tag[use_icons], value[use_icons], key)
+        for key, value in button_caption.items()
+    }
+
+
+def _load_popup_css(theme_path):
+    """Load and join popup stylesheets.
+
+    Arguments:
+        theme_path (string):
+            The path to the active gitgutter-theme file.
+    """
+    css_lines = []
+    for path in ('Packages/GitGutter', theme_path, 'Packages/User'):
+        try:
+            css_path = path + '/gitgutter_popup.css'
+            css_lines.append(sublime.load_resource(css_path))
+        except IOError:
+            pass
+    return ''.join(css_lines)
 
 
 def _get_min_indent(lines, tab_width=4):
@@ -294,15 +338,11 @@ def _highlight_diff(old_content, new_content):
     """
     seq_matcher = difflib.SequenceMatcher(None, old_content, new_content)
 
-    tag_eq = '<span class="gitgutter-hi-equal">'
-    tag_ins = '<span class="gitgutter-hi-inserted">'
-    tag_del = '<span class="gitgutter-hi-deleted">'
-    tag_modified_ins = (
-        '<span class="gitgutter-hi-changed gitgutter-hi-inserted">'
-    )
-    tag_modified_del = (
-        '<span class="gitgutter-hi-changed gitgutter-hi-deleted">'
-    )
+    tag_eq = '<span class="hi-equal">'
+    tag_ins = '<span class="hi-ins">'
+    tag_del = '<span class="hi-del">'
+    tag_modified_ins = '<span class="hi-chg-ins">'
+    tag_modified_del = '<span class="hi-chg-del">'
     tag_close = '</span>'
 
     # build the html string
@@ -335,8 +375,11 @@ def _highlight_diff(old_content, new_content):
 def _to_html(text):
     return (
         html.escape(text, quote=False)
+        # escape line feed
         .replace('\n', '<br>')
-        .replace(' ', '&nbsp;')
+        # ensure display multiple whitespace
+        .replace('  ', '&nbsp;&nbsp;')
+        # escape unbreakable whitespace
         .replace('\u00A0', '&nbsp;')
     )
 
