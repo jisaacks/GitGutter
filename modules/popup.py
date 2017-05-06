@@ -338,50 +338,56 @@ def _highlight_diff(old_content, new_content):
     """
     seq_matcher = difflib.SequenceMatcher(None, old_content, new_content)
 
-    tag_eq = '<span class="hi-equal">'
-    tag_ins = '<span class="hi-ins">'
-    tag_del = '<span class="hi-del">'
-    tag_modified_ins = '<span class="hi-chg-ins">'
-    tag_modified_del = '<span class="hi-chg-del">'
-    tag_close = '</span>'
-
     # build the html string
-    lines = ['<div class="highlight">', '<pre>']
+    lines = ['<div class="highlight"><p>']
     for opcodes in seq_matcher.get_opcodes():
         op_type, git_start, git_end, edit_start, edit_end = opcodes
         if op_type == 'equal':
-            lines.append(tag_eq)
-            lines.append(_to_html(old_content[git_start:git_end]))
-            lines.append(tag_close)
+            lines.extend(_to_html(
+                '', '', old_content[git_start:git_end]))
         elif op_type == 'delete':
-            lines.append(tag_del)
-            lines.append(_to_html(old_content[git_start:git_end]))
-            lines.append(tag_close)
+            lines.extend(_to_html(
+                '<span class="hi-del">', '</span>',
+                old_content[git_start:git_end]))
         elif op_type == 'insert':
-            lines.append(tag_ins)
-            lines.append(_to_html(new_content[edit_start:edit_end]))
-            lines.append(tag_close)
+            lines.extend(_to_html(
+                '<span class="hi-ins">', '</span>',
+                new_content[edit_start:edit_end]))
         elif op_type == 'replace':
-            lines.append(tag_modified_ins)
-            lines.append(_to_html(new_content[edit_start:edit_end]))
-            lines.append(tag_close)
-            lines.append(tag_modified_del)
-            lines.append(_to_html(old_content[git_start:git_end]))
-            lines.append(tag_close)
-    lines.extend(['</pre>', '</div>'])
+            lines.extend(_to_html(
+                '<span class="hi-chg-del">', '</span>',
+                old_content[git_start:git_end]))
+            lines.extend(_to_html(
+                '<span class="hi-chg-ins">', '</span>',
+                new_content[edit_start:edit_end]))
+
+    lines.append('</p></div>')
+    # return markup string
     return ''.join(lines)
 
 
-def _to_html(text):
-    return (
-        html.escape(text, quote=False)
-        # escape line feed
-        .replace('\n', '<br>')
-        # ensure display multiple whitespace
-        .replace('  ', '&nbsp;&nbsp;')
-        # escape unbreakable whitespace
-        .replace('\u00A0', '&nbsp;')
-    )
+def _to_html(tag_start, tag_end, text):
+    # escape basic html entities
+    markup = html.escape(text, quote=False)
+    # ensure display multiple whitespace
+    markup = markup.replace('  ', '&nbsp;&nbsp;')
+    # escape unbreakable whitespace
+    if not _MDPOPUPS_HAVE_FIXED_SPACE:
+        markup = markup.replace('\u00A0', '&nbsp;')
+    # escape line feed in changed hunks
+    if tag_start and tag_end:
+        markup = markup.replace('\n', '↵\n')
+    # Ignore the right most line feed because next replace would
+    # add an empty region to the next line otherwise.
+    if markup[-1] == '\n':
+        markup = markup[:-1]
+        tag_eol = '</p><p>'
+    else:
+        tag_eol = ''
+    # escape remaining line feed
+    markup = markup.replace('\n', ''.join((tag_end, '</p><p>', tag_start)))
+    # wrap content into tags
+    return (tag_start, markup, tag_end, tag_eol)
 
 
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):

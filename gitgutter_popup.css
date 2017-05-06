@@ -41,9 +41,26 @@
  **/
 html.dark {
     background-color: color(var(--background) blend(#fff 90%));
+    --diffpopup-ins-bg: color(green blend(black 60%));
+    --diffpopup-ins-fg: color(green blend(white 40%));
+    --diffpopup-del-bg: color(red blend(black 60%));
+    --diffpopup-del-fg: color(red blend(white 40%));
+    --diffpopup-chg-ins-bg: color(#769908 blend(black 95%));
+    --diffpopup-chg-ins-fg: color(#769908 blend(white 20%));
+    --diffpopup-chg-del-bg: color(orangered blend(black 80%));
+    --diffpopup-chg-del-fg: color(orangered blend(white 40%));
 }
+
 html.light {
     background-color: color(var(--background) blend(#000 90%));
+    --diffpopup-ins-bg: color(green blend(white 25%));
+    --diffpopup-ins-fg: color(green blend(black 80%));
+    --diffpopup-del-bg: color(red blend(white 25%));
+    --diffpopup-del-fg: color(red blend(black 80%));
+    --diffpopup-chg-ins-bg: color(#93921b blend(white 20%));
+    --diffpopup-chg-ins-fg: color(#93921b blend(black 85%)); /*#b3ca23*/
+    --diffpopup-chg-del-bg: color(orangered blend(white 20%));
+    --diffpopup-chg-del-fg: color(orangered blend(black 85%));
 }
 
 /* Compatibility rules for correct popup borders with mdpopups 1.x.x */
@@ -125,6 +142,15 @@ div.git-gutter {
 }
 
 /**
+ * TEXT LINE
+ *
+ * Each line is wrapped into <p> tag.
+ **/
+.git-gutter .highlight p {
+    margin: 0;
+}
+
+/**
  * DIFF HIGHLIGHTING
  *
  * The following entries apply to the "highlight difference"
@@ -138,22 +164,24 @@ div.git-gutter {
 
 /* Highlight text, that has been inserted. */
 .git-gutter .hi-ins {
-    color: var(--greenish);
-    text-decoration: underline;
+    color: var(--diffpopup-ins-fg);
+    background-color: var(--diffpopup-ins-bg);
 }
 
 /* Highlight text, that has been deleted. */
 .git-gutter .hi-del {
-    color: var(--redish);
-    text-decoration: underline;
+    color: var(--diffpopup-del-fg);
+    background-color: var(--diffpopup-del-bg);
 }
 
 /* Highlight text, that has been inserted and substitutes other text. */
 .git-gutter .hi-chg-ins {
-    color: var(--yellowish);
+    color: var(--diffpopup-chg-ins-fg);
+    background-color: var(--diffpopup-chg-ins-bg);
 }
 
 /* Highlight text, that has been deleted and is substituted by other text. */
 .git-gutter .hi-chg-del {
-    color: var(--orangish);
+    color: var(--diffpopup-chg-del-fg);
+    background-color: var(--diffpopup-chg-del-bg);
 }
