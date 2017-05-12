@@ -114,7 +114,39 @@ Some functions of GitGutter depend on the following external libraries to work p
 
 ## 🔫 Troubleshooting
 
-The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)). Please read the section on the [git_binary](#git-path) setting for how to fix that.
+
+#### Is git working?
+
+The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
+
+To check, whether git is found and working properly ...
+
+1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+2. Search for _GitGutter: Support Info_ and hit <kbd>Enter</kbd>.
+
+An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter. 
+
+If git is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some  more detailed information about the reason for git not to work may be found in the console window, then.
+
+
+#### Git works in shell but is not found by GitGutter!
+
+Some operating systems (especially OSX) may not run Sublime Text within the login shell. As a result Sublime Text and all its packages don't have access to some of the user's environment variables including the [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) to git.
+
+In some cases the package providing git, simply required some user confirmation due to license changes and thus simply refuses to run git.
+
+_With [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath) package Sublime Text loads the PATH environment from the login shell. If git is working there, it will be found by GitGutter, too, then._
+
+_GitGutter can work with a certain binary, too. Please read the section on the [git_binary](#git-path) setting._
+
+
+#### GitGutter no longer works after upgrade
+
+_Please check if GitGutter works after restarting Sublime Text._
+
+All modules of GitGutter were moved to `modules` sub directory to present them to Sublime Text as one package to avoid creating multiple instances of some modules and objects and reduce package loading time by about 50%.
+
+GitGutter handles Package Control's `post_upgrade` event to reload all its submodules once after upgrading. In rare cases some modules might not be recovered properly and thus require a restart of ST to make GitGutter work again.
 
 
 ## 🚀 Advanced Features
