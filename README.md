@@ -416,6 +416,8 @@ The colors come from your _color scheme_ **.tmTheme** file.
 
 If your color scheme file does not define the appropriate colors (or you want to edit them) add an entry that looks like this:
 
+NOTE: It is best to add this as the last entry in the main settings ```<array>``` to overide any other settings that might not allow the icons to appear.
+
 ```xml
 <dict>
   <key>name</key>
