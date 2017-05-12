@@ -649,44 +649,22 @@ class GitGutterHandler(object):
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
 
-        This method uses `git archive` to read the file content from git index
-        to enable support of smudge filters (fixes Issue #74). Git applies
-        smudge filters to some commands like `archive`, `diff` and `checkout`
-        only, but not to commands like `show`.
+        This method uses `git cat-files` to read the file content from git
+        index to enable support of smudge filters (fixes Issue #74). Git
+        applies smudge filters to some commands like `archive`, `diff`,
+        `checkout` and `cat-file` only, but not to commands like `show`.
 
         Arguments:
             commit (string): The identifier of the commit to read file from.
 
         Returns:
-            Promise: A promise to read and unzip the content of a file from git
-                index which will be resolved with the inflated file content.
+            Promise: A promise to read the content of a file from git index.
         """
-        def unzip(output):
-            """Unzip file binary content from git output.
-
-            Arguments:
-                output (string): Binary output returned by git containing the
-                    zipped content of the read file or None on error.
-
-            Returns:
-                string: Unzipped file content or None if git didn't return
-                    zipped file content. Error is already printed in that case.
-            """
-            try:
-                # Extract file contents from zipped archive.
-                # The `filelist` contains numerous directories finalized
-                # by exactly one file whose content we are interested in.
-                archive = zipfile.ZipFile(BytesIO(output))
-                return archive.read(archive.filelist[-1])
-            except:
-                return None
-
         args = [
             self.settings.git_binary,
-            'archive', '--format=zip',
-            commit, self._git_path
+            'cat-file', '--filters', ':'.join((commit, self._git_path))
         ]
-        return self.execute_async(args=args, decode=False).then(unzip)
+        return self.execute_async(args=args, decode=False)
 
     def execute_async(self, args, decode=True):
         """Execute a git command asynchronously and return a Promise.
