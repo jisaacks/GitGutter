@@ -1,0 +1,14 @@
+## git
+.github/ export-ignore
+gh-pages/ export-ignore
+*.git export-ignore
+*.gitignore export-ignore
+*.gitattributes export-ignore
+
+## release message sources
+release_messages/src/ export-ignore
+makefile export-ignore
+
+## unit testing
+tests/ export-ignore
+unittesting.json export-ignore
