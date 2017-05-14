@@ -5,7 +5,6 @@ import os
 import re
 import subprocess
 import tempfile
-import zipfile
 
 try:
     from io import BytesIO
@@ -314,24 +313,20 @@ class GitGutterHandler(object):
             bool: True if file was written to disc successfully.
         """
         try:
-            # Mangle end of lines
-            contents = contents.replace(b'\r\n', b'\n')
-            contents = contents.replace(b'\r', b'\n')
-            # Create temporary file
-            if not self._git_temp_file:
-                self._git_temp_file = self.tmp_file()
-            # Write content to temporary file
-            with open(self._git_temp_file, 'wb') as file:
-                file.write(contents)
+            self.git_tracked = bool(contents)
+            if self.git_tracked:
+                # Mangle end of lines
+                contents = contents.replace(b'\r\n', b'\n')
+                contents = contents.replace(b'\r', b'\n')
+                # Create temporary file
+                if not self._git_temp_file:
+                    self._git_temp_file = self.tmp_file()
+                # Write content to temporary file
+                with open(self._git_temp_file, 'wb') as file:
+                    file.write(contents)
             # Indicate success.
             self._git_compared_commit = compared_id
-            self.git_tracked = True
-            return True
-        except AttributeError:
-            # Git returned empty output, file is not tracked
-            self._git_compared_commit = compared_id
-            self.git_tracked = False
-            return False
+            return self.git_tracked
         except OSError as error:
             print('GitGutter failed to create git cache: %s' % error)
             return False
