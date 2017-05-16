@@ -43,12 +43,12 @@ def git_version():
 def gitgutter_version():
     """Read commit hash or version of GitGutter."""
     try:
-        version = git('rev-parse', 'HEAD')
-    finally:
+        return git('rev-parse', 'HEAD')[:7]
+    except:
         try:
-            return version[:7] if version else sublime.load_resource(
+            return sublime.load_resource(
                 'Packages/%s/release_messages/dest/VERSION' % PACKAGE)
-        except IOError as exception:
+        except Exception as exception:
             print('%s: %s' % (PACKAGE, exception))
             return 'GitGutter version could not be acquired!'
 
