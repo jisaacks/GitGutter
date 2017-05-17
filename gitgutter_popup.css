@@ -157,11 +157,6 @@ div.git-gutter {
  * mode of the popup.
  **/
 
-/* Highlight text, that has not changed. */
-.git-gutter .hi-equal {
-    color: var(--foreground);
-}
-
 /* Highlight text, that has been inserted. */
 .git-gutter .hi-ins {
     color: var(--diffpopup-ins-fg);
