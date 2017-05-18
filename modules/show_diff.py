@@ -84,7 +84,7 @@ class GitGutterShowDiff(object):
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """
         self._update_status(
-            'modified' if contents[0] else 'commited', contents)
+            'modified' if contents[0] else 'committed', contents)
         view = self.git_handler.view
         self._line_height = view.line_height()
         self._minimap_size = self.git_handler.settings.show_in_minimap
