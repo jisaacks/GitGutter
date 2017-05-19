@@ -90,20 +90,6 @@ div.git-gutter {
 }
 
 /**
- * TEXT BUTTONS
- *
- * <text>(revert)</text>
- *
- * Text buttons look oversized with normal font size.
- * This rule is used to fix the font-size.
- **/
-.git-gutter div.toolbar text {
-    font-size: 0.8rem;
-    margin: 0;
-    padding: 0;
-}
-
-/**
  * ICON BUTTONS
  *
  * <symbol>⟲</symbol>

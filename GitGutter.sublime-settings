@@ -47,11 +47,6 @@
   //         the differences in the popup
   "diff_popup_default_mode": "default",
 
-  // (ST3 only)
-  // Whether the the diff popup should use icons (true) or
-  // text (false) buttons
-  "diff_popup_use_icon_buttons": true,
-
   // Delay update of gutter icons by the following amount (in milliseconds).
   "debounce_delay": 1000,
 

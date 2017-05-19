@@ -141,8 +141,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
             show_new_popup()
 
     # write the symbols/text for each button
-    use_icons = bool(git_gutter.settings.get('diff_popup_use_icon_buttons'))
-    buttons = _built_toolbar_buttons(start, meta, use_icons)
+    buttons = _built_toolbar_buttons(start, meta)
     location = view.text_point(line - 1, 0)
     # code wrapping is supported by mdpopups 2.0.0 or higher
     code_wrap = _MDPOPUPS_HAVE_CODE_WRAP and view.settings().get('word_wrap')
@@ -226,7 +225,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         on_navigate=navigate, **popup_kwargs)
 
 
-def _built_toolbar_buttons(start, meta, use_icons):
+def _built_toolbar_buttons(start, meta):
     """Built the toolbar buttons with icon/text as link/label.
 
     Each toolbar button needs to be rendered using the unicode icon character
@@ -238,8 +237,6 @@ def _built_toolbar_buttons(start, meta, use_icons):
             First line of the current hunk.
         meta (dict):
             The dictionay containing additional hunk information.
-        use_icons (bool):
-            If True to use unicode buttons  or text otherwise.
 
     Returns:
         dict: The dictionay with all buttons where `key` is used as `href`
@@ -251,25 +248,25 @@ def _built_toolbar_buttons(start, meta, use_icons):
             inactive text button: <text>(revert)</text>
     """
     # The format to render disabled/enabled buttons
-    button_format = ('<{0}>{1}</{0}>', '<a href="{2}"><{0}>{1}</{0}></a>')
-    # The tag to use for each button
-    button_tag = ('text', 'symbol')
+    button_format = (
+        '<symbol>{0}</symbol>',
+        '<a href="{1}"><symbol>{0}</symbol></a>'
+    )
     # The buttons as a map from the href to the caption/icon
     button_caption = {
-        'hide': ('(close)', '×'),
-        'copy': ('(copy)', '⎘'),
-        'revert': ('(revert)', '⟲'),
-        'disable_hl_diff': ('(diff)', '≉'),
-        'enable_hl_diff': ('(diff)', '≈'),
-        'first_change': ('(first)', '⤒'),
-        'prev_change': ('(prev)', '↑'),
-        'next_change': ('(next)', '↓')
+        'hide': '×',
+        'copy': '⎘',
+        'revert': '⟲',
+        'disable_hl_diff': '≉',
+        'enable_hl_diff': '≈',
+        'first_change':  '⤒',
+        'prev_change': '↑',
+        'next_change': '↓'
     }
     return {
         key: button_format[
             not key.endswith('_change') or meta.get(key, start) != start
-        ].format(button_tag[use_icons], value[use_icons], key)
-        for key, value in button_caption.items()
+        ].format(value, key) for key, value in button_caption.items()
     }
 
 
