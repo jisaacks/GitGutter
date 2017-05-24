@@ -1,0 +1,62 @@
+1.7.0:
+------
+
+  A T T E N T I O N
+
+  Due to a change in module structure you must restart Sublime Text to make
+  sure GitGutter works properly!
+
+  This release includes a major update to Diff Popup to ...
+
+    1. ensure compatibility with upcoming mdpopups 2.0.0
+    2. improve its overall look & feel
+    3. clean up the code base a little bit
+
+  Diff Popup requires
+
+    - Sublime Text 3119 +
+    - mdpopups 1.9.0 +
+
+  Diff Popup CSS
+
+    If you are using a customized `gitgutter_popup.css` you need to update it
+    due to some required internal changes. To do so please
+
+      1. Open Command Palette
+      2. Type Preferences: GitGutter Popup Stylesheet
+
+    Some class names changed to keep as short as possible.
+
+    Jinja Templates are now handled by mdpopups. Thus some of the variables
+    defined by Diff Popup might no longer work. But you can use all template
+    variables being supported by mdpopups now.
+
+
+  C H A N G E S
+
+  Enhancement:
+   - Reduce package size (ignore unnecessary in the repository)
+   - Use git version to check if git works properly (Issue #411)
+   - Avoid diff popup flickering if diff highlighting is toggled
+   - Prepare for mdpopups 2.0.0 and add code wrapping support
+   - Diff popup adapts its colors to active color scheme
+   - Diff popup uses background colors to highlight diff
+   - Diff popup distinguishes inserted/deleted/replaced text in diff
+   - Diff popup uses python's Differ to generate human readable diff
+     with better results in most situations
+
+  Feature:
+   - Add support information module and ISSUE_TEMPLATE.
+
+  Fix:
+   - Correct resolution of gutter icon image resources
+   - Line height to switch gutter icons for deleted regions too small
+   - All export-ignored files are marked as new files (Issue #409)
+
+  Other:
+   - Remove support for text buttons from diff popup
+   - Let mdpopups handle jinja templates in gitgutter_popup.css
+
+  README:
+   - Add some information to the troubleshooting section
+   - Update requirements for diff popup
