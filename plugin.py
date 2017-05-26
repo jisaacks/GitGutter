@@ -9,6 +9,13 @@ try:
     from .modules import *
 except ValueError:
     from modules import *
+except ImportError:
+    # Failed to import at least one module. This can happen after upgrade due
+    # to internal structure changes.
+    import sublime
+    sublime.message_dialog(
+        "GitGutter failed to reload some of its modules.\n"
+        "Please restart Sublime Text!")
 
 
 def plugin_loaded():
