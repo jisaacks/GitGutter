@@ -40,7 +40,8 @@
  * for light and dark color schemes of Sublime Text < 3132.
  **/
 html.dark {
-    background-color: color(var(--background) blend(#fff 90%));
+    background-color: color(var(--background) blend(white 85%));
+    --mdpopups-hl-bg: color(var(--background) blend(white 95%));
     --diffpopup-ins-bg: color(green blend(black 60%));
     --diffpopup-ins-fg: color(green blend(white 40%));
     --diffpopup-del-bg: color(red blend(black 60%));
@@ -52,7 +53,8 @@ html.dark {
 }
 
 html.light {
-    background-color: color(var(--background) blend(#000 90%));
+    background-color: color(var(--background) blend(black 80%));
+    --mdpopups-hl-bg: color(var(--background) blend(black 93%));
     --diffpopup-ins-bg: color(green blend(white 25%));
     --diffpopup-ins-fg: color(green blend(black 80%));
     --diffpopup-del-bg: color(red blend(white 25%));
@@ -72,11 +74,11 @@ div.mdpopups {
 /**
  * POPUP BORDER
  *
- * The popup border
+ * Set padding to the desired border-width.
  **/
 div.git-gutter {
     margin: 0;
-    padding: 1;
+    padding: 0;
 }
 
 /**
