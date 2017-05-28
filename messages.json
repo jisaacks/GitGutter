@@ -10,5 +10,6 @@
   "1.5.0": "release_messages/dest/1.5.0.txt",
   "1.5.1": "release_messages/dest/1.5.1.txt",
   "1.6.0-rc.1": "release_messages/dest/1.6.0-rc.1.txt",
-  "1.6.0": "release_messages/dest/1.6.0.txt"
+  "1.6.0": "release_messages/dest/1.6.0.txt",
+  "1.7.0": "release_messages/dest/1.7.0.txt"
 }
