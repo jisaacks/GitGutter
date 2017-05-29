@@ -11,8 +11,16 @@ import textwrap
 import sublime
 import sublime_plugin
 
-PACKAGE = os.path.basename(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__))))
+# get absolute path of the package
+PACKAGE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if os.path.isfile(PACKAGE_PATH):
+    # Package is a PACKAGE.sublime-package so get its filename
+    PACKAGE, _ = os.path.splitext(os.path.basename(PACKAGE_PATH))
+elif os.path.isdir(PACKAGE_PATH):
+    # Package is a directory, so get its basename
+    PACKAGE = os.path.basename(PACKAGE_PATH)
+else:
+    raise ValueError('Package is no file and no directory!')
 
 
 def git(*args):
@@ -26,7 +34,7 @@ def git(*args):
         args=['git'] + [arg for arg in args], startupinfo=startupinfo,
         stdout=subprocess.PIPE, stdin=subprocess.PIPE,
         # run command in package directory if exists.
-        cwd='/'.join((sublime.packages_path(), PACKAGE)))
+        cwd=PACKAGE_PATH if os.path.isdir(PACKAGE_PATH) else None)
     stdout, _ = proc.communicate()
     return stdout.decode('utf-8').strip() if stdout else None
 
@@ -50,7 +58,7 @@ def gitgutter_version():
                 'Packages/%s/release_messages/dest/VERSION' % PACKAGE)
         except Exception as exception:
             print('%s: %s' % (PACKAGE, exception))
-            return 'GitGutter version could not be acquired!'
+            return 'Version could not be acquired!'
 
 
 def module_version(module, attr):
