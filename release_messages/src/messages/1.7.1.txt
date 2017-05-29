@@ -1,0 +1,8 @@
+1.7.1:
+------
+
+	Sorry for the trouble.
+
+  Fix:
+   - git cat-file --filters argument is supported on git 2.11.0+ only (Issue #416)
+   - Support Info is unable to read package version and git version
