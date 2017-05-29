@@ -108,7 +108,7 @@ class GitGutterHandler(object):
             match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
             if match:
                 # PEP-440 conform git version (major, minor, patch)
-                self._git_version = (int(group) for group in match.groups())
+                self._git_version = tuple(int(g) for g in match.groups())
                 if git_binary in self._missing_binaries:
                     utils.log_message(git_binary + ' is back on duty!')
                     self._missing_binaries.discard(git_binary)
@@ -702,7 +702,10 @@ class GitGutterHandler(object):
         """
         args = [
             self.settings.git_binary,
-            'cat-file', '--filters', ':'.join((commit, self._git_path))
+            'cat-file',
+            # smudge filters are supported with git 2.11.0+ only
+            '--filters' if self._git_version >= (2, 11, 0) else '-p',
+            ':'.join((commit, self._git_path))
         ]
         return self.execute_async(args=args, decode=False)
 
