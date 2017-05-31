@@ -40,10 +40,9 @@ def show_diff_popup(git_gutter, **kwargs):
     # get line number from text point
     line = git_gutter.view.rowcol(point)[0] + 1
     # create popup asynchronously in case it takes several 100ms
-    sublime.set_timeout_async(
-        lambda: _show_diff_popup_impl(
-            git_gutter, line, highlight_diff, kwargs.get('flags', 0),
-            git_gutter.git_handler.diff_line_change(line)))
+    _show_diff_popup_impl(
+        git_gutter, line, highlight_diff, kwargs.get('flags', 0),
+        git_gutter.git_handler.diff_line_change(line))
 
 
 def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
