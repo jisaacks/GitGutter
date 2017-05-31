@@ -23,8 +23,13 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
             text (string):
                 The new text to replace the content of the Region with.
         """
+        visible_region = self.view.visible_region()
         region = sublime.Region(start, end)
         self.view.replace(edit, region, text)
+        if start < visible_region.begin():
+            self.view.show_at_center(start)
+        self.view.sel().clear()
+        self.view.sel().add(start)
 
 
 class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):
