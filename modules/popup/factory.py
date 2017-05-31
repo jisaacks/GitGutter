@@ -61,7 +61,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         diff_info (tuple):
             All the information required to display the diff popup.
     """
-    deleted_lines, start, size, meta = diff_info
+    del_lines, start, size, meta = diff_info
     if start == -1:
         return
 
@@ -69,7 +69,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
 
     # extract the type of the hunk: removed, modified, (x)or added
     is_removed = size == 0
-    is_modified = not is_removed and bool(deleted_lines)
+    is_modified = not is_removed and bool(del_lines)
     is_added = not is_removed and not is_modified
 
     def navigate(href):
@@ -79,11 +79,11 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         if href == 'hide':
             view.hide_popup()
         elif href == 'copy':
-            sublime.set_clipboard(deleted_lines)
+            sublime.set_clipboard(del_lines)
             sublime.status_message(
-                'Copied: {0} characters'.format(len(deleted_lines)))
+                'Copied: {0} characters'.format(len(del_lines)))
         elif href == 'revert':
-            new_text = '\n'.join(deleted_lines)
+            new_text = '\n'.join(del_lines)
             # (removed) if there is no text to remove, set the
             # region to the end of the line, where the hunk starts
             # and add a new line to the start of the text
@@ -152,7 +152,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         # (*) show a highlighted diff of the merged git and editor content
         new_lines = meta['added_lines']
         tab_width = view.settings().get('tab_width', 4)
-        min_indent = _get_min_indent(deleted_lines + new_lines, tab_width)
+        min_indent = _get_min_indent(del_lines + new_lines, tab_width)
         content = (
             '<div class="toolbar">'
             '{hide} '
@@ -161,14 +161,15 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
             '</div>'
             .format(**buttons)
         ) + differ.highlight_diff(
-            [line[min_indent:] for line in deleted_lines],
-            [line[min_indent:] for line in new_lines])
+            [line.expandtabs(tab_width)[min_indent:] for line in del_lines],
+            [line.expandtabs(tab_width)[min_indent:] for line in new_lines])
 
     elif not is_added:
         # (modified/removed) show content from git database
         tab_width = view.settings().get('tab_width', 4)
-        min_indent = _get_min_indent(deleted_lines, tab_width)
-        source_content = '\n'.join(line[min_indent:] for line in deleted_lines)
+        min_indent = _get_min_indent(del_lines, tab_width)
+        source_content = '\n'.join(
+            (line.expandtabs(tab_width)[min_indent:] for line in del_lines))
         if not _MDPOPUPS_HAVE_FIXED_SPACE and not code_wrap:
             source_content = source_content.replace(' ', '\u00A0')
         # common arguments used to highlight the content
@@ -298,12 +299,15 @@ def _get_min_indent(lines, tab_width=4):
     """
     min_indent = 2**32
     for line in lines:
-        if not line:
-            continue
-        line = line.expandtabs(tab_width)
-        i, n = 0, len(line)
-        while i < n and line[i] == ' ':
-            i += 1
+        i = 0
+        for c in line:
+            if c == ' ':
+                i += 1
+            elif c == '\t':
+                i += tab_width - (i % tab_width)
+            else:
+                break
+
         if min_indent > i:
             min_indent = i
         if not min_indent:
