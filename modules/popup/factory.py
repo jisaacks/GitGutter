@@ -79,9 +79,10 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         if href == 'hide':
             view.hide_popup()
         elif href == 'copy':
-            sublime.set_clipboard(del_lines)
+            del_text = '\n'.join(del_lines)
+            sublime.set_clipboard(del_text)
             sublime.status_message(
-                'Copied: {0} characters'.format(len(del_lines)))
+                'Copied: {0} characters'.format(len(del_text)))
         elif href == 'revert':
             new_text = '\n'.join(del_lines)
             # (removed) if there is no text to remove, set the
