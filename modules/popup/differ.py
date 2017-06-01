@@ -161,5 +161,4 @@ def _dump_chunk(tag, x):
 
 
 def _to_html(text):
-    text = html.escape(text, quote=False)
-    yield text.replace('  ', '&nbsp;&nbsp;') if text else '↵'
+    yield html.escape(text, quote=False).replace('  ', '&nbsp;&nbsp;') or '↵'
