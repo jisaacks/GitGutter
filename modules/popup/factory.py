@@ -142,7 +142,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
 
     # write the symbols/text for each button
     buttons = _built_toolbar_buttons(start, meta)
-    location = view.text_point(line - 1, 0)
+    location = _visible_text_point(view, line - 1, 0)
     # code wrapping is supported by mdpopups 2.0.0 or higher
     code_wrap = _MDPOPUPS_HAVE_CODE_WRAP and view.settings().get('word_wrap')
     if code_wrap == 'auto':
@@ -313,3 +313,22 @@ def _get_min_indent(lines, tab_width=4):
         if not min_indent:
             break
     return min_indent
+
+
+def _visible_text_point(view, row, col):
+    """Return the text_point of row,col clipped to the visible viewport.
+
+    Arguments:
+        view (sublime.View):
+            the view to return the text_point for
+        row (int):
+            the row to use for text_point calculation
+        col (int):
+            the column relative to the first visible column of the viewport
+            which is defined by the horizontal scroll position.
+    Returns:
+        int: The text_point of row & col within the viewport.
+    """
+    viewport = view.visible_region()
+    _, vp_col = view.rowcol(viewport.begin())
+    return view.text_point(row, vp_col + col)
