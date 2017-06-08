@@ -15,6 +15,10 @@ try:
     if mdpopups.version() < (1, 9, 0):
         raise ImportError('mdpopups 1.9.0+ required.')
 
+    # mdpopups 2.0.0+ requires Sublime Text 3124+
+    if mdpopups.version() >= (2, 0, 0) and int(sublime.version()) < 3124:
+        raise ImportError('Sublime Text 3124+ required.')
+
     # public Sublime Text Commands
     from .commands import (
         GitGutterDiffPopupCommand, GitGutterReplaceTextCommand)

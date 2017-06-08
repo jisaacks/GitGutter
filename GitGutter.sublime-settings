@@ -33,7 +33,7 @@
   // Set false to disable evaluation when changing views
   "focus_change_mode": true,
 
-  // (ST3, Build 3116+ only)
+  // (ST3, Build 3119+ only)
   // Enable an hover popup, which shows an diff of the
   // changed lines.
   "enable_hover_diff_popup": true,
