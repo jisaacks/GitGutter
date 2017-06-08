@@ -78,7 +78,11 @@ class ViewSettings(object):
         'all': '-w'
     }
     # A map to translate between settings and git arguments
-    _PATIENCE_SWITCH = (None, '--patience')
+    _DIFF_ALGORITHM = {
+        'minimal': '--minimal',
+        'patience': '--patience',
+        'histogram': '--histogram'
+    }
 
     def __init__(self, view):
         """Initialize a ViewSettings object.
@@ -165,9 +169,15 @@ class ViewSettings(object):
             return None
 
     @property
-    def patience_switch(self):
-        """The git patience command line argument from settings."""
-        return self._PATIENCE_SWITCH[bool(self.get('patience'))]
+    def diff_algorithm(self):
+        """The git diff algorithm command line argument from settings.
+
+        Returns:
+            string:
+                One of (--minimal, --patience, --histogram)
+                or None if setting is invalid.
+        """
+        return self._DIFF_ALGORITHM.get(self.get('algorithm'))
 
 
 class GitGutterOpenFileCommand(sublime_plugin.ApplicationCommand):

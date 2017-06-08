@@ -50,6 +50,14 @@
   // Delay update of gutter icons by the following amount (in milliseconds).
   "debounce_delay": 1000,
 
+  // The algorithm used by git diff to determine the differences.
+  // "default": let git decide (don't pass an algorithm)
+  // "minimal": use minimal diff algorithm
+  // "patience": use patience diff algorithm
+  //             see: http://bramcohen.livejournal.com/73318.html
+  // "histogram": use histogram diff algorithm
+  "diff_algorithm": "patience",
+
   // Determines whether GitGutter ignores whitespace in modified files.
   // Set "none" to ensure whitespace is considered in the diff
   // Set "eol" to only ignore whitespace at the end of lines
@@ -59,11 +67,6 @@
 
   // Add a special marker on untracked files
   "show_markers_on_untracked_file": true,
-
-  // Add --patience switch to git diff command. See
-  // http://bramcohen.livejournal.com/73318.html for
-  // an example of why you might need this.
-  "patience": true,
 
   // Determines whether GitGutter shows status information in the status bar.
   // Set false to disable status information.

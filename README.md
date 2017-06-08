@@ -322,6 +322,22 @@ It is valid to use environment variables in the setting value, and they will be 
 In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
 
+#### Diff Algorithm
+
+`"diff_algorithm": "patience"`
+
+GitGutter uses the "patience" diff algorithm by default. Set`diff_algorithm` to one of the follwoing values to change this behavior.
+
+value       | description
+------------|-----------------------------------------------
+"default"   | The basic greedy diff algorithm. Currently, this is the default.
+"minimal"   | Spend extra time to make sure the smallest possible diff is produced.
+"patience"  | Use "patience diff" algorithm when generating patches.
+"histogram" | This algorithm extends the patience algorithm to "support low-occurrence common elements".
+
+👉 The value determines which command line argument to pass to `git diff`.
+
+
 #### Ignore Whitespace
 
 `"ignore_whitespace": "none"`

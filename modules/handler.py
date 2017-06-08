@@ -404,7 +404,7 @@ class GitGutterHandler(object):
             self.settings.git_binary,
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
-            self.settings.patience_switch,
+            self.settings.diff_algorithm,
             self._git_temp_file,
             self._view_temp_file,
         )))
