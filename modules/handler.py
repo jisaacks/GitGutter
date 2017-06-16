@@ -221,19 +221,23 @@ class GitGutterHandler(object):
         Returns:
             string: python compatible view encoding
         """
-        encoding = self.view.settings().get('origin_encoding')
-        if not encoding:
-            encoding = self.view.encoding()
-            if encoding == "Undefined":
-                encoding = self.view.settings().get('default_encoding')
-            begin = encoding.find('(')
-            if begin > -1:
-                encoding = encoding[begin + 1:-1]
-            encoding = encoding.replace('with BOM', '')
-            encoding = encoding.replace('Windows', 'cp')
-            encoding = encoding.replace('-', '_')
+        # get encoding and clean it for python ex: "Western (ISO 8859-1)"
+        # NOTE(maelnor): are we need regex here?
+        pattern = re.compile(r'.+\((.*)\)')
+        encoding = self.view.encoding()
+        if encoding == "Undefined":
+            encoding = self.view.settings().get('default_encoding')
+        if pattern.match(encoding):
+            encoding = pattern.sub(r'\1', encoding)
+
+        encoding = encoding.replace('with BOM', '')
+        encoding = encoding.replace('Windows', 'cp')
+        encoding = encoding.replace('-', '_')
         encoding = encoding.replace(' ', '')
-        return encoding
+
+        # work around with ConvertToUTF8 plugin
+        origin_encoding = self.view.settings().get('origin_encoding')
+        return origin_encoding or encoding
 
     def in_repo(self):
         """Return true, if the most recent `git show` returned any content.
