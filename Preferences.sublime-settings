@@ -1,0 +1,117 @@
+{
+  // Enable/Disable GitGutter
+  // Set false to disable evaluation of changes and hide all gutter icons,
+  // status message and minimap marker.
+  "git_gutter_enable": true,
+
+  // Custom path to git binary when not in PATH.  An empty string will search
+  // PATH for "git".  The setting may be a direct string to a git binary, e.g.:
+  //
+  //   "git_binary": "/usr/bin/git",
+  //
+  // Or it may be a dictionary keyed off what sublime.platform() returns,
+  // so it may be customized on a per-platform basis.  e.g.:
+  //
+  //   "git_binary": {
+  //       "default": "",
+  //       "windows": "C:/Program Files/Git/cmd/git.exe"
+  //   },
+  "git_binary": "",
+
+  // The commit, branch, tag, or remote to compare against
+  // Can be set on a per-project basis by adding a project
+  // setting of "git_gutter_compare_against".
+  // This setting only changes the default (HEAD), but can
+  // still be overwritten temporarily using one of the commands
+  "git_gutter_compare_against": "CACHED",
+
+  // Live mode evaluates changes every time file is modified,
+  // Set false to disable evaluation after each input
+  "git_gutter_live_mode": true,
+
+  // Focus Change mode evaluates changes every time a view gets the focus
+  // Set false to disable evaluation when changing views
+  "git_gutter_focus_change_mode": true,
+
+  // (ST3, Build 3119+ only)
+  // Enable an hover popup, which shows an diff of the
+  // changed lines.
+  "git_gutter_enable_hover_diff_popup": true,
+
+  // (ST3 only) The default mode to open the diff popup. This will be
+  // used for the hover popup, the command palette entry,
+  // and the default key binding.
+  // Possible modes are:
+  // "git_gutter_default": Show the previous git state in the popup
+  // "git_gutter_diff": Compare the git state to the working state and highlight
+  //         the differences in the popup
+  "git_gutter_diff_popup_default_mode": "default",
+
+  // Delay update of gutter icons by the following amount (in milliseconds).
+  "git_gutter_debounce_delay": 1000,
+
+  // The algorithm used by git diff to determine the differences.
+  // "git_gutter_default": let git decide (don't pass an algorithm)
+  // "git_gutter_minimal": use minimal diff algorithm
+  // "git_gutter_patience": use patience diff algorithm
+  //             see: http://bramcohen.livejournal.com/73318.html
+  // "git_gutter_histogram": use histogram diff algorithm
+  "git_gutter_diff_algorithm": "patience",
+
+  // Determines whether GitGutter ignores whitespace in modified files.
+  // Set "none" to ensure whitespace is considered in the diff
+  // Set "eol" to only ignore whitespace at the end of lines
+  // Set "space" to ignore changes in amount of white space
+  // Set "all" to ignore all white space
+  "git_gutter_ignore_whitespace": "none",
+
+  // Add a special marker on untracked files
+  "git_gutter_show_markers_on_untracked_file": true,
+
+  // Determines whether GitGutter shows status information in the status bar.
+  // Set false to disable status information.
+  // Set true to show information using the "status_bar_text" template.
+  "git_gutter_show_status_bar_text": true,
+
+  // STATUS BAR TEXT TEMPLATE
+  // The array is joined to a single string and passed to jinja2 template
+  // engine to render the status message text. The template can be modified using
+  // jinja2 supported syntax. GitGutter provides the following variables:
+  //   {{repo}}     -- repository name / folder name containing the .git directory
+  //   {{branch}}   -- checked out branch you are working on
+  //   {{compare}}  -- commit/branch/HEAD the file is compared to
+  //   {{state}}    -- One of committed/modified/ignored/untracked
+  //   {{deleted}}  -- number of deleted regions
+  //   {{inserted}} -- number of inserted lines
+  //   {{modified}} -- number of modified lines
+  "git_gutter_status_bar_text": [
+    "In {{repo}} on {{branch}}",
+    "{% if compare not in ('CACHED', 'HEAD', branch) %}, Comparing against {{compare}}{% endif %}",
+    ", File is {{state}}",
+    "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
+    "{% if inserted != 0 %}, {{inserted}}+{% endif %}",
+    "{% if modified != 0 %}, {{modified}}≠{% endif %}"
+  ],
+
+  // Show GitGutter information in the minimap
+  // =0: hide markers
+  // >0: width of markers
+  // -1: highlight full line
+  "git_gutter_show_in_minimap": 1,
+
+  // Determines whether the git_gutter_next_change and git_gutter_prev_change
+  // commands wrap around on reaching the beginning/ending of the file.
+  "git_gutter_next_prev_change_wrap": true,
+
+  // Do not set GitGutter icons in these regions
+  // Useful for making sure GitGutter does not override other
+  // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
+  "git_gutter_protected_regions": [
+    "sublimelinter-warning-gutter-marks",
+    "sublimelinter-error-gutter-marks",
+    "bookmarks"
+  ],
+
+  // The gutter theme defines the icons to show for the different events.
+  "git_gutter_theme": "Default.gitgutter-theme"
+}
