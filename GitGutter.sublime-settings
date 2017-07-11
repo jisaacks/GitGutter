@@ -18,12 +18,14 @@
   //   },
   "git_binary": "",
 
-  // The commit, branch, tag, or remote to compare against
-  // Can be set on a per-project basis by adding a project
-  // setting of "git_gutter_compare_against".
-  // This setting only changes the default (HEAD), but can
-  // still be overwritten temporarily using one of the commands
-  "compare_against": "HEAD",
+  // The commit, branch, tag, or remote to compare against.
+  // This setting changes the initial compare target and can
+  // be temporarily overwritten by 'Compare against ...' commands
+  // Valid constants are:
+  // "CACHED": Compare against staging area (if available)
+  // "HEAD":   Compare against most recent commit
+  // "master": Compare against master branch
+  "compare_against": "CACHED",
 
   // Live mode evaluates changes every time file is modified,
   // Set false to disable evaluation after each input
