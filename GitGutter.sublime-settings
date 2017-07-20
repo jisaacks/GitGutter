@@ -14,7 +14,9 @@
   //
   //   "git_binary": {
   //       "default": "",
-  //       "windows": "C:/Program Files/Git/cmd/git.exe"
+  //       "windows": "C:/Program Files/Git/cmd/git.exe",
+  //       "linux": "/usr/bin/git",
+  //       "osx": "/usr/bin/git"
   //   },
   "git_binary": "",
 
@@ -22,10 +24,9 @@
   // This setting changes the initial compare target and can
   // be temporarily overwritten by 'Compare against ...' commands
   // Valid constants are:
-  // "CACHED": Compare against staging area (if available)
   // "HEAD":   Compare against most recent commit
   // "master": Compare against master branch
-  "compare_against": "CACHED",
+  "compare_against": "HEAD",
 
   // Live mode evaluates changes every time file is modified,
   // Set false to disable evaluation after each input
