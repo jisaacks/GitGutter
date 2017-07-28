@@ -1,3 +1,14 @@
+//
+// Default values for Preferences.sublime-settings
+// 
+// This file exists to support PackageDev settings completions/linting/tooltips.
+// It MUST be an exact copy of GitGutter.sublime-settings with `git_gutter_` being
+// prefixed to all settings keys except "git_binary". It contains all the settings
+// which can be placed into Preferences or view/project settings.
+// 
+// It MUST NOT be caulled Preferences.sublime-settings as long as 
+// GitGutter.sublime-settings is used to store package settings as well.
+//
 {
   // Enable/Disable GitGutter
   // Set false to disable evaluation of changes and hide all gutter icons,
