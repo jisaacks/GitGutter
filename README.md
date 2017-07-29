@@ -149,6 +149,38 @@ All modules of GitGutter were moved to `modules` sub directory to present them t
 GitGutter handles Package Control's `post_upgrade` event to reload all its submodules once after upgrading. In rare cases some modules might not be recovered properly and thus require a restart of ST to make GitGutter work again.
 
 
+#### GitGutter doesen't recognize working tree
+
+git 2.5+ allows configurations with .git directory not being located in the working tree root. You may also checkout multiple working trees from one repository. No matter which configuration is used, GitGutter expects a `.git` directory or a `.git` file in the root of a working tree to recognize it as such.
+
+If the `.git` directory is not located in the working tree root the following steps are required.
+
+1. Configure the repository to point to the custom working tree by calling
+   
+   `git config --add core.worktree <path_to_worktree>`
+
+   This step is required to let git use the custom working tree.
+
+2. Create a `.git` file in the root of the working tree which points to the repository's database.
+   
+   ⓘ _The `.git` file must contain the line `gitdir: <path_to_git_dir>`._
+
+   The file can be created using the following shell commands.
+
+   **Linux / OSX**
+
+   ```shell
+   echo "gitdir: $(git rev-parse --git-dir)" > .git
+   ```
+
+   **Windows**
+
+   ```shell
+   for /f %i in ('git rev-parse --git-dir') do set gitdir=%i
+   echo gitdir: %gitdir% > .git
+   ```
+
+
 ## 🚀 Advanced Features
 
 ### Diff Popup
