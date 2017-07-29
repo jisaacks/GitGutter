@@ -759,10 +759,10 @@ class GitGutterHandler(object):
             proc.kill()
             stdout, stderr = proc.communicate()
         # handle empty git output
-        if not stdout:
-            if stderr and self.settings.get('debug'):
-                utils.log_message('"git %s" failed with "%s"' % (
-                    args[1], stderr.decode('utf-8').strip()))
-            return stdout
+        if stderr and not stdout and self.settings.get('debug'):
+            utils.log_message('"git %s" failed with "%s"' % (
+                args[1], stderr.decode('utf-8').strip()))
         # return decoded ouptut using utf-8 or binary output
-        return stdout.decode('utf-8').strip() if decode else stdout
+        if decode and stdout is not None:
+            stdout = stdout.decode('utf-8').strip()
+        return stdout
