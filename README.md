@@ -155,12 +155,12 @@ GitGutter handles Package Control's `post_upgrade` event to reload all its submo
 
 The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from command palette by `GitGutter: Show Diff Popup` or via a key binding.
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+_
+ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
 
 ![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
 
  symbol | meaning of the symbol
- -------| ---------------------------------------
+ :-----:| ---------------------------------------
  ×      | close the popup
  ⤒      | jump to first change
  ↑      | jump to previous change
@@ -248,7 +248,7 @@ GitGutter evaluates changes every time the file is modified by default. Set `fal
 
 `"enable_hover_diff_popup": true`
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+_
+ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
 
 GitGutter shows a diff popup, when hovering over changes in the gutter. Set `false` to disable this popup. You can still open it with a key binding and from the command palette.
 
@@ -257,14 +257,14 @@ GitGutter shows a diff popup, when hovering over changes in the gutter. Set `fal
 
 `"diff_popup_default_mode": "default"`
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+_
+ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
 
 The popup displays the previous state of the content under the cursor by `"default"` but can be set to `"diff"` to highlight the differences between the git state and the editor state.
 
 
 #### Diff Popup Appearance
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+_
+ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
 
 The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-popups) library and the corresponding settings are global and not only for GitGutter. Syntax highlighting can be set to match the active color scheme by adding `"mdpopups.use_sublime_highlighter": true` to the User settings.
 
@@ -291,7 +291,7 @@ You may need to add scopes (`markup.ignored.git_gutter` and `markup.untracked.gi
 GitGutter shows diffs in the minimap on Sublime Text 3 by default. Change `show_in_minimap` to one of the following values to disable this feature or change the width of the markers.
 
  value  | description
---------|-----------------
+:------:|-----------------
  =0     | hide markers
  &gt;1  | width of markers
  -1     | highlight full line
@@ -329,7 +329,7 @@ In a POSIX environment you can run `which git` to find the path to git if it is 
 GitGutter uses the "patience" diff algorithm by default. Set`diff_algorithm` to one of the follwoing values to change this behavior.
 
 value       | description
-------------|-----------------------------------------------
+:----------:|-----------------------------------------------
 "default"   | The basic greedy diff algorithm. Currently, this is the default.
 "minimal"   | Spend extra time to make sure the smallest possible diff is produced.
 "patience"  | Use "patience diff" algorithm when generating patches.
@@ -345,7 +345,7 @@ value       | description
 GitGutter includes all whitespace when evaluating modifications by default. Set `ignore_whitespace` to one of the following values to change this behavior.
 
 value   | description
---------|-----------------------------------------------
+:------:|-----------------------------------------------
 "none"  | don't ignore any whitespace changes
 "eol"   | ignore whitespace changes at the end of line
 "space" | ignore changed amount of whitespace
@@ -394,7 +394,7 @@ The _Status Bar Text_ is rendered using a fully customizable template from `stat
 GitGutter provides the following variables to be used in the template.
 
  Variable     | Description
---------------|-------------------------------------------------------------
+:------------:|-------------------------------------------------------------
  {{repo}}     | repository name / folder name containing the .git directory
  {{branch}}   | checked out branch you are working on
  {{compare}}  | commit/branch/HEAD the file is compared to
