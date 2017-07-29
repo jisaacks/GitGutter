@@ -122,6 +122,7 @@ div.git-gutter {
  * Shows the old content or diff.
  **/
 .git-gutter div.highlight {
+    font-family: "sf mono", "Roboto Mono", "Liberation Mono", Menlo, Courier, monospace;
     border-style: none;
     border-radius: 0;
     line-height: 1.3rem;
