@@ -10,7 +10,7 @@ A [Sublime Text 2/3](http://www.sublimetext.com) plug-in to show information abo
 3. _Status Bar Text_ with information about file and repository
 4. _Jumping Between Changes_ to easily navigate between modified lines
 
-![screenshot](https://raw.github.com/jisaacks/GitGutter/master/screenshot.png)
+![screenshot](https://user-images.githubusercontent.com/16542113/28744712-f80ea13e-7466-11e7-96ac-51f453fb22b6.gif)
 
  Icon          | Description
 :-------------:|-------------------------
@@ -157,7 +157,7 @@ The diff popup appears by hovering the mouse over the gutter changes on Sublime 
 
 ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
 
-![diff_popup_screenshot](https://cloud.githubusercontent.com/assets/12573621/17908698/ccbecd24-6981-11e6-8f56-edd0faaed9ec.png)
+![diff_popup_screenshot](https://user-images.githubusercontent.com/16542113/28744598-804b73fe-7464-11e7-91c6-215a06644181.gif)
 
  symbol | meaning of the symbol
  :-----:| ---------------------------------------
