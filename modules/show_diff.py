@@ -83,15 +83,21 @@ class GitGutterShowDiff(object):
                 information about the modifications of the file.
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """
-        self._update_status(
-            'modified' if contents[0] else 'committed', contents)
-        view = self.git_handler.view
-        self._line_height = view.line_height()
-        self._minimap_size = self.git_handler.settings.show_in_minimap
-        regions = self._contents_to_regions(contents)
-        for name, region in zip(self.region_names, regions):
-            self._bind_regions(name, region)
-        self._busy = False
+        try:
+            view = self.git_handler.view
+            self._line_height = view.line_height()
+            self._minimap_size = self.git_handler.settings.show_in_minimap
+            regions = self._contents_to_regions(contents)
+            for name, region in zip(self.region_names, regions):
+                self._bind_regions(name, region)
+            self._update_status(
+                'modified' if contents[0] else 'committed', contents)
+        except IndexError:
+            # Fail silently and don't update ui if _content_to_regions raises
+            # index error as the result wouldn't be valid anyway.
+            pass
+        finally:
+            self._busy = False
 
     def _update_status(self, file_state, contents):
         """Update status message.
