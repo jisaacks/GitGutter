@@ -243,6 +243,13 @@ class GitGutterHandler(object):
         """
         return self.git_tracked
 
+    def view_file_changed(self):
+        """Check whether the content of the view changed."""
+        return (
+            not _HAVE_VIEW_CHANGE_COUNT or 
+            self._view_change_count != self.view.change_count()
+        )
+
     def invalidate_view_file(self):
         """Reset change_count and force writing the view cache file.
 

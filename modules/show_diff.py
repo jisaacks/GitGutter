@@ -88,8 +88,9 @@ class GitGutterShowDiff(object):
             self._line_height = view.line_height()
             self._minimap_size = self.git_handler.settings.show_in_minimap
             regions = self._contents_to_regions(contents)
-            for name, region in zip(self.region_names, regions):
-                self._bind_regions(name, region)
+            if not self.git_handler.view_file_changed():
+                for name, region in zip(self.region_names, regions):
+                    self._bind_regions(name, region)
             self._update_status(
                 'modified' if contents[0] else 'committed', contents)
         except IndexError:

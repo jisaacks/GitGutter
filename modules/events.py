@@ -172,7 +172,7 @@ class ViewEventListener(object):
         self.events |= event_id
         if not self.busy:
             self.delay = max(200, self.settings.get('debounce_delay', 1000))
-            self.start_timer(100)
+            self.start_timer(200)
 
     def start_timer(self, delay):
         """Run GitGutterCommand after some idle time.
