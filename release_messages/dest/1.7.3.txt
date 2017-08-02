@@ -1,0 +1,44 @@
+1.7.3:
+------
+
+  Enhancement:
+   - Add support for PackageDev settings linting & completion
+
+  Fix:
+   - Don't use Consolas font in diff popup
+   - Correctly decode empty git output
+   - IndexError exception in console (Issue #429)
+   - Reduce gutter icon jumping while editing text
+
+  README:
+   - Fix some smaller graphical glitches
+   - Use animated screenshots captured with latest Sublime Text
+   - Add trouble shooting section for working tree
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟

@@ -1,0 +1,16 @@
+1.7.3:
+------
+
+  Enhancement:
+   - Add support for PackageDev settings linting & completion
+
+  Fix:
+   - Don't use Consolas font in diff popup
+   - Correctly decode empty git output
+   - IndexError exception in console (Issue #429)
+   - Reduce gutter icon jumping while editing text
+
+  README:
+   - Fix some smaller graphical glitches
+   - Use animated screenshots captured with latest Sublime Text
+   - Add trouble shooting section for working tree
