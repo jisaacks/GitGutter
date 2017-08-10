@@ -246,7 +246,7 @@ class GitGutterHandler(object):
     def view_file_changed(self):
         """Check whether the content of the view changed."""
         return (
-            not _HAVE_VIEW_CHANGE_COUNT or 
+            _HAVE_VIEW_CHANGE_COUNT and
             self._view_change_count != self.view.change_count()
         )
 
