@@ -6,9 +6,6 @@ import sublime_plugin
 STVER = int(sublime.version())
 ST3 = STVER >= 3000
 
-# The one and only refernce to the GitGutter.sublime-settings file(s).
-_package_settings = None
-
 
 def get(key, default=None):
     """Get a value from GitGutter.sublime-settings.
@@ -24,12 +21,12 @@ def get(key, default=None):
         any: The value from settings file if loaded and key exists or the
             default value provided from the caller.
     """
-    global _package_settings
-    if not _package_settings:
-        _package_settings = sublime.load_settings('GitGutter.sublime-settings')
-        if not _package_settings:
-            return default
-    return _package_settings.get(key, default)
+    try:
+        settings = get.settings
+    except AttributeError:
+        settings = sublime.load_settings('GitGutter.sublime-settings')
+        get.settings = settings
+    return settings.get(key, default)
 
 
 class ViewSettings(object):
