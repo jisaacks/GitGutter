@@ -126,7 +126,7 @@ To check, whether git is found and working properly ...
 
 An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter. 
 
-If git is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some  more detailed information about the reason for git not to work may be found in the console window, then.
+If git was found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) and is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some  more detailed information about the reason for git not to work may be found in the console window, then.
 
 
 #### Git works in shell but is not found by GitGutter!
@@ -149,7 +149,29 @@ All modules of GitGutter were moved to `modules` sub directory to present them t
 GitGutter handles Package Control's `post_upgrade` event to reload all its submodules once after upgrading. In rare cases some modules might not be recovered properly and thus require a restart of ST to make GitGutter work again.
 
 
-#### GitGutter doesen't recognize working tree
+#### GitGutter keeps completely quite
+
+GitGutter is installed and loads properly without any error messages printed to Sublime Text's console, but keeps completely disabled in some or all repositories. Neither gutter icons nor messages are displayed in the status bar.
+
+GitGutter is designed to keep quite in the following situations when evaluation is expected useless:
+
+- disabled in _Preferences.sublime-settings_, project settings or view settings (`"git_gutter_enabled": false`)
+- disabled in _GitGutter.sublime-settings_ (`"enabled": false`)
+- the current view
+  - is not attached to a window
+  - is read only
+  - is a scratch view
+  - is a widget (`"is_widget": true`)
+  - is a REPL view (`"repl": true`)
+  - has "Hexadecimal" encoding
+
+Please check if one of those states was applied to your view by one of your packages.
+
+👉 _ConvertToUTF8_ package is known to mark views as scratch during conversion without reverting that state reliably.
+
+
+
+#### GitGutter doesn't recognize working tree
 
 git 2.5+ allows configurations with .git directory not being located in the working tree root. You may also checkout multiple working trees from one repository. No matter which configuration is used, GitGutter expects a `.git` directory or a `.git` file in the root of a working tree to recognize it as such.
 
