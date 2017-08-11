@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 import sublime_plugin
 
 from . import compare
@@ -8,6 +10,21 @@ from . import handler
 from . import popup
 from . import settings
 from . import show_diff
+from . import utils
+
+# the reason why evaluation is skipped, which is printed to console
+# if debug is set true and evaluation.
+DISABLED_REASON = {
+    1: 'disabled in settings',
+    2: 'view is transient',
+    3: 'view is scratch',
+    4: 'view is readonly',
+    5: 'view is a widget',
+    6: 'view is a REPL',
+    7: 'view encoding is Hexadecimal',
+    8: 'file not in a working tree',
+    9: 'git is not working'
+}
 
 
 class GitGutterCommand(sublime_plugin.TextCommand):
@@ -33,31 +50,34 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.git_handler = handler.GitGutterHandler(self.view, self.settings)
         self.show_diff_handler = show_diff.GitGutterShowDiff(self.git_handler)
         # Last enabled state for change detection
-        self._enabled = False
+        self._state = -1
 
     def is_enabled(self, **kwargs):
         """Determine if `git_gutter` command is _enabled to execute."""
         view = self.view
-        valid = True
+        state = 0
 
         # Keep idle, if disabled by user setting
         if not self.settings.get('enable'):
-            valid = False
+            state = 1
         # Don't handle unattached views
         elif not view.window():
-            valid = False
-        # Don't handle scratch or readonly views
-        elif view.is_scratch() or view.is_read_only():
-            valid = False
+            state = 2
+        # Don't handle scratch views
+        elif view.is_scratch():
+            state = 3
+        # Don't handle readonly views
+        elif view.is_read_only():
+            state = 4
         # Don't handle widgets
         elif view.settings().get('is_widget'):
-            valid = False
+            state = 5
         # Don't handle SublimeREPL views
         elif view.settings().get("repl"):
-            valid = False
+            state = 6
         # Don't handle binary files
         elif view.encoding() == 'Hexadecimal':
-            valid = False
+            state = 7
         else:
             queued_events = kwargs.get('events')
             # Validate work tree on certain events only
@@ -65,20 +85,26 @@ class GitGutterCommand(sublime_plugin.TextCommand):
                 events.LOAD | events.ACTIVATED | events.POST_SAVE)
             # Don't handle files outside a repository
             if not self.git_handler.work_tree(validate):
-                valid = False
+                state = 8
             # Keep quite if git is not working properly
             elif not self.git_handler.version(validate):
-                valid = False
+                state = 9
+
         # Handle changed state
-        if valid != self._enabled:
+        valid = state == 0
+        if self._state != state:
             # File moved out of work-tree or repository gone
             if not valid:
                 self.show_diff_handler.clear()
                 self.git_handler.invalidate_view_file()
+                if settings.get('debug'):
+                    utils.log_message('disabled for "%s" because %s' % (
+                        os.path.basename(self.view.file_name() or 'untitled'),
+                        DISABLED_REASON[state]))
             # Save state for use in other modules
             view.settings().set('git_gutter_is_enabled', valid)
             # Save state for internal use
-            self._enabled = valid
+            self._state = state
         return valid
 
     def run(self, edit, **kwargs):
