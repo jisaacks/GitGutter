@@ -10,7 +10,8 @@ from .commands import (
     GitGutterCompareCommitCommand, GitGutterCompareFileCommitCommand,
     GitGutterCompareHeadCommand, GitGutterCompareOriginCommand,
     GitGutterCompareTagCommand, GitGutterNextChangeCommand,
-    GitGutterPrevChangeCommand, GitGutterShowCompareCommand)
+    GitGutterPrevChangeCommand, GitGutterShowCompareCommand,
+    GitGutterRevertChangeCommand)
 from .popup import (
     GitGutterDiffPopupCommand, GitGutterReplaceTextCommand)
 from .settings import (

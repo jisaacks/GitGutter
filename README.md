@@ -257,6 +257,15 @@ There are commands to jump between modifications. The default key bindings for t
  <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Next
 
 
+### Revert Change
+
+The command reverts the text under the first cursor to the state in git. The default key binding for this command is:
+
+ OS X                          | Windows / Linux             | Description
+-------------------------------|-----------------------------|-------------
+ <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert
+
+
 ## ⚙ Settings
 
 Settings are accessed via the <kbd>Preferences</kbd> > <kbd>Package Settings</kbd> > <kbd>GitGutter</kbd> menu.

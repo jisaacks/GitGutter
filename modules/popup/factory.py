@@ -6,6 +6,7 @@ Contains all functions required to built the diff popup and its content.
 import sublime
 import mdpopups
 from . import differ
+from .. import revert
 
 # mdpopups 1.11.0+ can handle none wrapping whitespace
 _MDPOPUPS_HAVE_FIXED_SPACE = mdpopups.version() >= (1, 11, 0)
@@ -83,37 +84,9 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
             sublime.status_message(
                 'Copied: {0} characters'.format(len(del_text)))
         elif href == 'revert':
-            new_text = '\n'.join(del_lines)
-            # (removed) if there is no text to remove, set the
-            # region to the end of the line, where the hunk starts
-            # and add a new line to the start of the text
-            if is_removed:
-                if start != 0:
-                    # set the start and the end to the end of the start line
-                    start_point = end_point = view.text_point(start, 0) - 1
-                    # add a leading newline before inserting the text
-                    new_text = '\n' + new_text
-                else:
-                    # (special handling for deleted at the start of the file)
-                    # if we are before the start we need to set the start
-                    # to 0 and add the newline behind the text
-                    start_point = end_point = 0
-                    new_text = new_text + '\n'
-            # (modified/added)
-            # set the start point to the start of the hunk
-            # and the end point to the end of the hunk
-            else:
-                start_point = view.text_point(start - 1, 0)
-                end_point = view.text_point(start + size - 1, 0)
-                # (modified) if there is text to insert, we
-                # don't want to capture the trailing newline,
-                # because we insert lines without a trailing newline
-                if is_modified and end_point != view.size():
-                    end_point -= 1
             # hide the popup and update the view
             view.hide_popup()
-            view.run_command('git_gutter_replace_text', {
-                'start': start_point, 'end': end_point, 'text': new_text})
+            revert.revert_change_impl(view, diff_info)
         elif href == 'disable_hl_diff':
             # show a diff popup with the same diff info (previous revision)
             highlight_diff = False

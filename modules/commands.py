@@ -8,6 +8,7 @@ from . import events
 from . import goto
 from . import handler
 from . import popup
+from . import revert
 from . import settings
 from . import show_diff
 from . import utils
@@ -40,7 +41,8 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         'compare_against_head': compare.set_against_head,
         'compare_against_origin': compare.set_against_origin,
         'show_compare': compare.show_compare,
-        'show_diff_popup': popup.show_diff_popup
+        'show_diff_popup': popup.show_diff_popup,
+        'revert_change': revert.revert_change
     }
 
     def __init__(self, *args, **kwargs):
@@ -176,3 +178,8 @@ class GitGutterNextChangeCommand(GitGutterBaseCommand):
 class GitGutterPrevChangeCommand(GitGutterBaseCommand):
     def run(self, edit):
         self.view.run_command('git_gutter', {'action': 'jump_to_prev_change'})
+
+
+class GitGutterRevertChangeCommand(GitGutterBaseCommand):
+    def run(self, edit):
+        self.view.run_command('git_gutter', {'action': 'revert_change'})

@@ -4,6 +4,10 @@
         "command": "git_gutter_diff_popup"
     },
     {
+        "caption": "GitGutter: Revert Change",
+        "command": "git_gutter_revert_change"
+    },
+    {
         "caption": "GitGutter: Show Comparing Against",
         "command": "git_gutter_show_compare"
     },
