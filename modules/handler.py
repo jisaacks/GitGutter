@@ -7,11 +7,6 @@ import subprocess
 import tempfile
 
 try:
-    from io import BytesIO
-except ImportError:
-    from cStringIO import StringIO as BytesIO
-
-try:
     from subprocess import TimeoutExpired
     _HAVE_TIMEOUT = True
 except ImportError:
