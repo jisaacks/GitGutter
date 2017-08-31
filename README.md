@@ -235,7 +235,7 @@ The following options are available:
 - Compare against particular tag
 - Compare against specific commit
 - Compare against specific file commit (current file's history)
-- Compare against origin
+- Compare against origin (@{upstream})
 
 To change the compare option:
 

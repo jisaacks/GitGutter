@@ -179,7 +179,7 @@ def set_against_origin(git_gutter, **kwargs):
     def on_branch_name(branch_name):
         if branch_name:
             git_gutter.git_handler.set_compare_against(
-                'origin/%s' % branch_name, True)
+                '%s@{upstream}' % branch_name, True)
 
     git_gutter.git_handler.git_current_branch().then(on_branch_name)
 

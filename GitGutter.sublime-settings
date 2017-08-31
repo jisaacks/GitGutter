@@ -26,6 +26,7 @@
   // Valid constants are:
   // "HEAD":   Compare against most recent commit
   // "master": Compare against master branch
+  // "master@{upstream}": Compare against remote master branch
   "compare_against": "HEAD",
 
   // Live mode evaluates changes every time file is modified,
