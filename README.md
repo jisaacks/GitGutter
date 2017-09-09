@@ -8,7 +8,7 @@ A [Sublime Text 2/3](http://www.sublimetext.com) plug-in to show information abo
 1. _Gutter Icons_ indicating inserted, modified or deleted lines
 2. _Diff Popup_ with details about modified lines
 3. _Status Bar Text_ with information about file and repository
-4. _Jumping Between Changes_ to easily navigate between modified lines
+4. _Goto Change_ to easily navigate between modified lines
 
 ![screenshot](https://user-images.githubusercontent.com/16542113/28744712-f80ea13e-7466-11e7-96ac-51f453fb22b6.gif)
 
@@ -216,12 +216,31 @@ The diff popup appears by hovering the mouse over the gutter changes on Sublime 
  symbol | meaning of the symbol
  :-----:| ---------------------------------------
  ×      | close the popup
- ⤒      | jump to first change
- ↑      | jump to previous change
- ↓      | jump to next change
+ ⤒      | goto to first change
+ ↑      | goto to previous change
+ ↓      | goto to next change
  ≈, ≉   | enable/disable difference highlighting
  ⎘      | copy the content of the git state
  ⟲      | revert changes to the state in git
+
+
+### Goto Change
+
+The commands are used to quickly navigate between modifications. The default key bindings for these commands are:
+
+ OS X                          | Windows / Linux             | Description
+-------------------------------|-----------------------------|-------------
+ <kbd>Cmd+Shift+Option+k</kbd> | <kbd>Ctrl+Shift+Alt+k</kbd> | Goto Previous Change
+ <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Goto Next Change
+
+
+### Revert Change
+
+The command reverts the text under the first cursor to the state in git. The default key binding for this command is:
+
+ OS X                          | Windows / Linux             | Description
+-------------------------------|-----------------------------|-------------
+ <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert Change
 
 
 ### Comparing against different commits/branches/tags
@@ -247,25 +266,6 @@ or just use one of the following key bindings:
  <kbd>Cmd+Shift+Option+c, o</kbd> | <kbd>Ctrl+Shift+Alt+c, o</kbd> | Compare against particular origin _(@{upstream})_
 
 👉 The changes apply temporarily to the whole repository.
-
-
-### Jumping Between Changes
-
-There are commands to jump between modifications. The default key bindings for these commands are:
-
- OS X                          | Windows / Linux             | Description
--------------------------------|-----------------------------|-------------
- <kbd>Cmd+Shift+Option+k</kbd> | <kbd>Ctrl+Shift+Alt+k</kbd> | Previous
- <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Next
-
-
-### Revert Change
-
-The command reverts the text under the first cursor to the state in git. The default key binding for this command is:
-
- OS X                          | Windows / Linux             | Description
--------------------------------|-----------------------------|-------------
- <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert
 
 
 ## ⚙ Settings

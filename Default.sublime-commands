@@ -4,6 +4,14 @@
         "command": "git_gutter_diff_popup"
     },
     {
+        "caption": "GitGutter: Goto Previous Change",
+        "command": "git_gutter_prev_change"
+    },
+    {
+        "caption": "GitGutter: Goto Next Change",
+        "command": "git_gutter_next_change"
+    },
+    {
         "caption": "GitGutter: Revert Change",
         "command": "git_gutter_revert_change"
     },
