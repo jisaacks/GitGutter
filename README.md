@@ -234,13 +234,13 @@ The commands are used to quickly navigate between modifications. The default key
  <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Goto Next Change
 
 
-### Revert Change
+### Revert Change to Commit
 
 The command reverts the text under the first cursor to the state in git. The default key binding for this command is:
 
  OS X                          | Windows / Linux             | Description
 -------------------------------|-----------------------------|-------------
- <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert Change
+ <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert Change to Commit
 
 
 ### Comparing against different commits/branches/tags

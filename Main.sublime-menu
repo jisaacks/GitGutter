@@ -1,5 +1,17 @@
 [
     {
+        "caption": "Edit",
+        "mnemonic": "E",
+        "id": "edit",
+        "children":
+        [
+            {
+                "caption": "Revert Change to Commit",
+                "command": "git_gutter_revert_change"
+            },
+        ]
+    },
+    {
         "caption": "View",
         "mnemonic": "V",
         "id": "view",
