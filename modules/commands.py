@@ -127,59 +127,53 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
 
 class GitGutterBaseCommand(sublime_plugin.TextCommand):
+    """The base command proxies all commands to the git_gutter command."""
+
+    # The action to proxy to git_gutter command.
+    ACTION = ''
+
     def is_enabled(self, **kwargs):
         return self.view.settings().get('git_gutter_is_enabled', False)
 
+    def run(self, edit):
+        self.view.run_command('git_gutter', {'action': self.ACTION})
+
 
 class GitGutterShowCompareCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'show_compare'})
+    ACTION = 'show_compare'
 
 
 class GitGutterCompareHeadCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'compare_against_head'})
+    ACTION = 'compare_against_head'
 
 
 class GitGutterCompareOriginCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_origin'})
+    ACTION = 'compare_against_origin'
 
 
 class GitGutterCompareCommitCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_commit'})
+    ACTION = 'compare_against_commit'
 
 
 class GitGutterCompareFileCommitCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_file_commit'})
+    ACTION = 'compare_against_file_commit'
 
 
 class GitGutterCompareBranchCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command(
-            'git_gutter', {'action': 'compare_against_branch'})
+    ACTION = 'compare_against_branch'
 
 
 class GitGutterCompareTagCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'compare_against_tag'})
+    ACTION = 'compare_against_tag'
 
 
 class GitGutterNextChangeCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'jump_to_next_change'})
+    ACTION = 'jump_to_next_change'
 
 
 class GitGutterPrevChangeCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'jump_to_prev_change'})
+    ACTION = 'jump_to_prev_change'
 
 
 class GitGutterRevertChangeCommand(GitGutterBaseCommand):
-    def run(self, edit):
-        self.view.run_command('git_gutter', {'action': 'revert_change'})
+    ACTION = 'revert_change'
