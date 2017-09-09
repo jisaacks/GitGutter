@@ -1,5 +1,10 @@
 [
     {
+        "caption": "GitGutter: Enable/Disable",
+        "command": "toggle_setting",
+        "args": {"setting": "git_gutter_enable"}
+    },
+    {
         "caption": "GitGutter: Show Diff Popup",
         "command": "git_gutter_diff_popup"
     },

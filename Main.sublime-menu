@@ -10,6 +10,12 @@
                 "children":
                 [
                     {
+                        "caption": "Enabled",
+                        "command": "toggle_setting",
+                        "args": {"setting": "git_gutter_enable"}
+                    },
+                    { "caption": "-" },
+                    {
                         "caption": "Compare Against",
                         "children":
                         [
