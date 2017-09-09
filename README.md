@@ -226,23 +226,25 @@ The diff popup appears by hovering the mouse over the gutter changes on Sublime 
 
 ### Comparing against different commits/branches/tags
 
-GitGutter compares the working copy against the HEAD by default. This behavior can be changed through the command palette.
-
-The following options are available:
-
-- Compare against HEAD
-- Compare against particular branch
-- Compare against particular tag
-- Compare against specific commit
-- Compare against specific file commit (current file's history)
-- Compare against origin (@{upstream})
+GitGutter compares the working copy against the HEAD by default.
 
 To change the compare option:
 
 1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
 2. Start typing `GitGutter: Compare against`
-3. You'll see the 5 options listed above, select one with the keyboard and press <kbd>Enter</kbd>.
+3. Select one of the 6 options with the keyboard and press <kbd>Enter</kbd>.
 4. Choose the branch/tag/commit to compare against.
+
+or just use one of the following key bindings:
+
+ OS X                             | Windows / Linux                | Description
+----------------------------------|--------------------------------|-------------
+ <kbd>Cmd+Shift+Option+c, h</kbd> | <kbd>Ctrl+Shift+Alt+c, h</kbd> | Compare against HEAD
+ <kbd>Cmd+Shift+Option+c, b</kbd> | <kbd>Ctrl+Shift+Alt+c, b</kbd> | Compare against particular branch
+ <kbd>Cmd+Shift+Option+c, t</kbd> | <kbd>Ctrl+Shift+Alt+c, t</kbd> | Compare against particular tag
+ <kbd>Cmd+Shift+Option+c, c</kbd> | <kbd>Ctrl+Shift+Alt+c, c</kbd> | Compare against particular commit
+ <kbd>Cmd+Shift+Option+c, f</kbd> | <kbd>Ctrl+Shift+Alt+c, f</kbd> | Compare against particular file commit _(current file's history)_
+ <kbd>Cmd+Shift+Option+c, o</kbd> | <kbd>Ctrl+Shift+Alt+c, o</kbd> | Compare against particular origin _(@{upstream})_
 
 👉 The changes apply temporarily to the whole repository.
 
