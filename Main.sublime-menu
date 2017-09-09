@@ -28,38 +28,37 @@
                     },
                     { "caption": "-" },
                     {
-                        "caption": "Compare Against",
-                        "children":
-                        [
-                            {
-                                "caption": "View Current",
-                                "command": "git_gutter_show_compare"
-                            },
-                            {
-                                "caption": "HEAD",
-                                "command": "git_gutter_compare_head"
-                            },
-                            {
-                                "caption": "Origin",
-                                "command": "git_gutter_compare_origin"
-                            },
-                            {
-                                "caption": "Commit",
-                                "command": "git_gutter_compare_commit"
-                            },
-                            {
-                                "caption": "File Commit",
-                                "command": "git_gutter_compare_file_commit"
-                            },
-                            {
-                                "caption": "Branch",
-                                "command": "git_gutter_compare_branch"
-                            },
-                            {
-                                "caption": "Tag",
-                                "command": "git_gutter_compare_tag"
-                            }
-                        ]
+                        "caption": "Show Diff Popup",
+                        "command": "git_gutter_diff_popup"
+                    },
+                    {
+                        "caption": "Show Comparing Against",
+                        "command": "git_gutter_show_compare"
+                    },
+                    { "caption": "-" },
+                    {
+                        "caption": "Compare Against HEAD",
+                        "command": "git_gutter_compare_head"
+                    },
+                    {
+                        "caption": "Compare Against Origin",
+                        "command": "git_gutter_compare_origin"
+                    },
+                    {
+                        "caption": "Compare Against Commit",
+                        "command": "git_gutter_compare_commit"
+                    },
+                    {
+                        "caption": "Compare Against File Commit",
+                        "command": "git_gutter_compare_file_commit"
+                    },
+                    {
+                        "caption": "Compare Against Branch",
+                        "command": "git_gutter_compare_branch"
+                    },
+                    {
+                        "caption": "Compare Against Tag",
+                        "command": "git_gutter_compare_tag"
                     }
                 ]
             }
