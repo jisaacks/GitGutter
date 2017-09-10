@@ -20,8 +20,8 @@ try:
         raise ImportError('Sublime Text 3124+ required.')
 
     # public Sublime Text Commands
-    from .commands import (
-        GitGutterDiffPopupCommand, GitGutterReplaceTextCommand)
+    from .commands import GitGutterDiffPopupCommand
+    from .commands import GitGutterReplaceTextCommand
     # public function
     from .factory import show_diff_popup
 except ImportError:
