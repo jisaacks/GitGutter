@@ -12,6 +12,7 @@ from .commands import GitGutterCompareFileCommitCommand
 from .commands import GitGutterCompareHeadCommand
 from .commands import GitGutterCompareOriginCommand
 from .commands import GitGutterCompareTagCommand
+from .commands import GitGutterCopyFromCommitCommand
 from .commands import GitGutterNextChangeCommand
 from .commands import GitGutterPrevChangeCommand
 from .commands import GitGutterRevertChangeCommand

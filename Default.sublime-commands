@@ -17,6 +17,10 @@
         "command": "git_gutter_next_change"
     },
     {
+        "caption": "GitGutter: Copy Content from Commit",
+        "command": "git_gutter_copy_from_commit"
+    },
+    {
         "caption": "GitGutter: Revert Change to Commit",
         "command": "git_gutter_revert_change"
     },

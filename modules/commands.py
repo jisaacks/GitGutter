@@ -4,6 +4,7 @@ import os
 import sublime_plugin
 
 from . import compare
+from . import copy
 from . import events
 from . import goto
 from . import handler
@@ -42,6 +43,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         'compare_against_origin': compare.set_against_origin,
         'show_compare': compare.show_compare,
         'show_diff_popup': popup.show_diff_popup,
+        'copy_from_commit': copy.copy_from_commit,
         'revert_change': revert.revert_change
     }
 
@@ -173,6 +175,10 @@ class GitGutterNextChangeCommand(GitGutterBaseCommand):
 
 class GitGutterPrevChangeCommand(GitGutterBaseCommand):
     ACTION = 'jump_to_prev_change'
+
+
+class GitGutterCopyFromCommitCommand(GitGutterBaseCommand):
+    ACTION = 'copy_from_commit'
 
 
 class GitGutterRevertChangeCommand(GitGutterBaseCommand):

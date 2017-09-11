@@ -1,4 +1,5 @@
 [
+    { "keys": ["ctrl+shift+c"], "command": "git_gutter_copy_from_commit" },
     { "keys": ["ctrl+shift+alt+j"], "command": "git_gutter_next_change" },
     { "keys": ["ctrl+shift+alt+k"], "command": "git_gutter_prev_change" },
     { "keys": ["ctrl+shift+alt+z"], "command": "git_gutter_revert_change" },

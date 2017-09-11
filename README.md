@@ -234,6 +234,15 @@ The commands are used to quickly navigate between modifications. The default key
  <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Goto Next Change
 
 
+### Copy Content from Commit
+
+The command copies the committed content of the changed hunk under the first cursor to the clipboard. The default key binding for this command is:
+
+ OS X                   | Windows / Linux         | Description
+------------------------|-------------------------|-------------
+ <kbd>Cmd+Shift+c</kbd> | <kbd>Ctrl+Shift+c</kbd> | Copy Content
+
+
 ### Revert Change to Commit
 
 The command reverts the text under the first cursor to the state in git. The default key binding for this command is:

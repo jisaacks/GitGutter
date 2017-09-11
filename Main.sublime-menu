@@ -5,10 +5,16 @@
         "id": "edit",
         "children":
         [
+            { "caption": "-" },
             {
                 "caption": "Revert Change to Commit",
                 "command": "git_gutter_revert_change"
             },
+            {
+                "caption": "Copy Content from Commit",
+                "command": "git_gutter_copy_from_commit"
+            },
+            { "caption": "-" },
         ]
     },
     {
