@@ -135,7 +135,7 @@ class GitGutterBaseCommand(sublime_plugin.TextCommand):
     def is_enabled(self, **kwargs):
         return self.view.settings().get('git_gutter_is_enabled', False)
 
-    def run(self, edit):
+    def run(self, edit, **kwargs):
         self.view.run_command('git_gutter', {'action': self.ACTION})
 
 
