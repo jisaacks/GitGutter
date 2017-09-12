@@ -11,15 +11,23 @@ def revert_change(git_gutter, **kwargs):
         kwargs (dict):
             The arguments passed from GitGutterRevertChangesCommand
             to GitGutterCommand.
+
+            valid kwargs are:
+                line (int): zero-based line number within the hunk to copy
+                point (int): zero based text position within the hunk to copy
     """
     view = git_gutter.view
-    selection = view.sel()
-    if not selection:
-        return
-    point = selection[0].end()
-    # get line number from text point
-    line = view.rowcol(point)[0] + 1
-    revert_change_impl(view, git_gutter.git_handler.diff_line_change(line))
+    line = kwargs.get('line')
+    if line is None:
+        point = kwargs.get('point')
+        if point is None:
+            selection = view.sel()
+            if not selection:
+                return
+            point = selection[0].end()
+        # get line number from text point
+        line = view.rowcol(point)[0]
+    revert_change_impl(view, git_gutter.git_handler.diff_line_change(line + 1))
 
 
 def revert_change_impl(view, diff_info):
