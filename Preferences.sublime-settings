@@ -1,0 +1,12 @@
+//
+// Default values for Preferences.sublime-settings
+//
+// The file contains settings, which are available in user preferences,
+// project specific settings, view setting only. All settings placed here
+// can't be disabled in the Packages/User/GitGutter.sublime-settings!
+{
+  // Enable/Disable GitGutter
+  // Set false to disable evaluation of changes and hide all gutter icons,
+  // status message and minimap marker.
+  "git_gutter_enable": true
+}

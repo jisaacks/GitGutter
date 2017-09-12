@@ -10,11 +10,6 @@
 // GitGutter.sublime-settings is used to store package settings as well.
 //
 {
-  // Enable/Disable GitGutter
-  // Set false to disable evaluation of changes and hide all gutter icons,
-  // status message and minimap marker.
-  "git_gutter_enable": true,
-
   // Custom path to git binary when not in PATH.  An empty string will search
   // PATH for "git".  The setting may be a direct string to a git binary, e.g.:
   //
