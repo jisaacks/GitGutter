@@ -14,7 +14,7 @@
                 "caption": "Copy Content from Commit",
                 "command": "git_gutter_copy_from_commit"
             },
-            { "caption": "-" },
+            { "caption": "-" }
         ]
     },
     {
