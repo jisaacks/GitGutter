@@ -111,7 +111,10 @@
   "protected_regions": [
     "sublimelinter-warning-gutter-marks",
     "sublimelinter-error-gutter-marks",
-    "bookmarks"
+    "bookmarks",
+    "lsp_error",
+    "lsp_warning",
+    "lsp_info"
   ],
 
   // The gutter theme defines the icons to show for the different events.
