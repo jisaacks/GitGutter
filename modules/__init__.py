@@ -15,10 +15,10 @@ from .commands import GitGutterCompareTagCommand
 from .commands import GitGutterCopyFromCommitCommand
 from .commands import GitGutterNextChangeCommand
 from .commands import GitGutterPrevChangeCommand
+from .commands import GitGutterReplaceTextCommand
 from .commands import GitGutterRevertChangeCommand
 from .commands import GitGutterShowCompareCommand
 from .popup import GitGutterDiffPopupCommand
-from .popup import GitGutterReplaceTextCommand
 from .settings import GitGutterEditSettingsCommand
 from .settings import GitGutterOpenFileCommand
 from .support import GitGutterSupportInfoCommand

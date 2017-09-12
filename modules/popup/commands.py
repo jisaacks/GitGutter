@@ -3,33 +3,7 @@
 
 All command objects required by diff popup are defined here.
 """
-import sublime
 import sublime_plugin
-
-
-class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
-    """The git_gutter_replace_text command implementation."""
-
-    def run(self, edit, start, end, text):
-        """Replace the content of a region with new text.
-
-        Arguments:
-            edit (Edit):
-                The edit object to identify this operation.
-            start (int):
-                The beginning of the Region to replace.
-            end (int):
-                The end of the Region to replace.
-            text (string):
-                The new text to replace the content of the Region with.
-        """
-        visible_region = self.view.visible_region()
-        region = sublime.Region(start, end)
-        self.view.replace(edit, region, text)
-        if start < visible_region.begin():
-            self.view.show_at_center(start)
-        self.view.sel().clear()
-        self.view.sel().add(start)
 
 
 class GitGutterDiffPopupCommand(sublime_plugin.TextCommand):

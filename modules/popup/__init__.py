@@ -21,11 +21,9 @@ try:
 
     # public Sublime Text Commands
     from .commands import GitGutterDiffPopupCommand
-    from .commands import GitGutterReplaceTextCommand
     # public function
     from .factory import show_diff_popup
 except ImportError:
     # Some dummy interface objects to avoid import errors
     GitGutterDiffPopupCommand = None
-    GitGutterReplaceTextCommand = None
     show_diff_popup = None
