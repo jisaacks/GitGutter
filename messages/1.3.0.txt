@@ -1,4 +1,3 @@
-
 * Diff Popup
   - You can now get a popup to see what the code was before it was changed
   - You can do so via a command pallete, keyboard shortcut, and after

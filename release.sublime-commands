@@ -1,0 +1,10 @@
+[
+    {
+        "caption": "GitGutter: Build Release",
+        "command": "git_gutter_build_release"
+    },
+    {
+        "caption": "GitGutter: Publish Release",
+        "command": "git_gutter_publish_release"
+    }
+]

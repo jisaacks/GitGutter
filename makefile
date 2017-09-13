@@ -1,5 +1,6 @@
 build_release:
-	./release_messages/src/build.rb
+	./release build
 
-release: build_release
-	./release_messages/src/release.sh
+release:
+	build_release
+	./release publish --token `cat $HOME/.github_access_token`

@@ -1,5 +1,0 @@
-* Fixes a bug dealing with UTF-8 with BOM
-
-* Fixes ST3 not working with Cygwin git
-
-* Make non_blocking mode work in ST2

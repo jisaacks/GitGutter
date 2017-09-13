@@ -1,4 +1,0 @@
-* Fix error dialog for missing git binary from reopening
-  in an endless loop. Should only show once per session now.
-
-* Fix an bug that was introduced that broke GitGutter in ST2
