@@ -6,17 +6,17 @@ To run this unit test install UnitTesting package and choose
 """
 
 import sys
-from os import path
+import os
 import time
-from unittest import TestCase
+import unittest
 
 import sublime
 
-sys.path.append(path.dirname(path.dirname(__file__)))
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from modules.promise import Promise
 
 
-class test_promise(TestCase):
+class test_promise(unittest.TestCase):
     # Tests are using private methods of Promise on purpose.
 
     def test_chain_with_resolved(self):
