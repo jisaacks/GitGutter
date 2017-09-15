@@ -2,14 +2,16 @@
     "*": {
         "*": [
             "markupsafe",
-            "python-jinja2"
+            "python-jinja2",
+            "shellenv"
         ],
         ">=3119": [
             "pygments",
             "python-markdown",
             "mdpopups",
             "python-jinja2",
-            "markupsafe"
+            "markupsafe",
+            "shellenv"
         ]
     }
 }

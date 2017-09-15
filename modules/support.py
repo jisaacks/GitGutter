@@ -11,6 +11,13 @@ import textwrap
 import sublime
 import sublime_plugin
 
+try:
+    import shellenv
+    _, SHELL_ENV = shellenv.get_env(for_subprocess=True)
+except ImportError:
+    SHELL_ENV = None
+
+
 # get absolute path of the package
 PACKAGE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if os.path.isfile(PACKAGE_PATH):
@@ -32,7 +39,7 @@ def git(*args):
         startupinfo = None
     proc = subprocess.Popen(
         args=['git'] + [arg for arg in args], startupinfo=startupinfo,
-        stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE, stdin=subprocess.PIPE, env=SHELL_ENV,
         # run command in package directory if exists.
         cwd=PACKAGE_PATH if os.path.isdir(PACKAGE_PATH) else None)
     stdout, _ = proc.communicate()

@@ -14,6 +14,12 @@ except ImportError:
         pass
     _HAVE_TIMEOUT = False
 
+try:
+    import shellenv
+    _, SHELL_ENV = shellenv.get_env(for_subprocess=True)
+except ImportError:
+    SHELL_ENV = None
+
 import sublime
 
 from . import path
@@ -747,7 +753,7 @@ class GitGutterHandler(object):
             proc = subprocess.Popen(
                 args=args, cwd=self._git_tree, startupinfo=startupinfo,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE)
+                stdin=subprocess.PIPE, env=SHELL_ENV)
             if _HAVE_TIMEOUT:
                 stdout, stderr = proc.communicate(timeout=30)
             else:
