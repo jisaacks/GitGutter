@@ -121,7 +121,7 @@ def _fancy_replace(a, alo, ahi, b, blo, bhi):
     yield '</p>'
 
     # pump out diffs from after the synch point
-    yield from _fancy_helper(a, best_i+1, ahi, b, best_j+1, bhi)
+    yield from _fancy_helper(a, best_i + 1, ahi, b, best_j + 1, bhi)
 
 
 def _fancy_helper(a, alo, ahi, b, blo, bhi):
