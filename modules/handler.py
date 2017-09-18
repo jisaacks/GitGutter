@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import tempfile
+import threading
 
 try:
     from subprocess import TimeoutExpired
@@ -20,13 +21,11 @@ from . import path
 from . import utils
 from .promise import Promise
 
+STVER = int(sublime.version())
+ST3 = STVER >= 3000
+
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
-
-try:
-    set_timeout = sublime.set_timeout_async
-except AttributeError:
-    set_timeout = sublime.set_timeout
 
 
 class GitGutterHandler(object):
@@ -723,7 +722,18 @@ class GitGutterHandler(object):
             Promise: A promise to return the git output in the future.
         """
         def executor(resolve):
-            set_timeout(lambda: resolve(self.execute(args, decode)), 10)
+
+            def do_resolve():
+                """Resolve the promise with the output of git."""
+                return resolve(self.execute(args, decode))
+
+            if ST3:
+                # use real threads to run git in the background
+                threading.Thread(target=do_resolve).start()
+            else:
+                # ST2 API does not support threads
+                sublime.set_timeout(do_resolve, 10)
+
         return Promise(executor)
 
     def execute(self, args, decode=True):
