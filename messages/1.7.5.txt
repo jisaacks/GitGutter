@@ -1,0 +1,99 @@
+1.7.5:
+------
+
+   A N N O U N C E M E N T
+
+  In manner of consistency all functions are now available via
+
+   * command pallet
+   * main menu
+   * key bindings
+
+  The command pallet is probably the best and most quickly available cheat
+  sheet for key bindings which is the reason to add all commands there.
+
+  The following main menu entries are available:
+
+     Edit
+      +- Revert Change to Commit             (ctrl+shift+alt+z)
+      +- Copy Content from Commit            (ctrl+shift+c)
+
+     View
+      +- GitGutter
+         +- Enable
+         +- Show Diff Popup                  (ctrl+shift+alt+c, ctrl+d)
+         +- ...
+
+     Goto
+      +- Goto Previous Git Difference        (ctrl+shift+alt+k)
+      +- Goto Next Git Difference            (ctrl+shift+alt+j)
+
+     Preferences
+      +- Package Settings
+         +- GitGutter
+            +- ...
+
+  ---------------------------------------------------------------------------
+
+   N O T E
+
+  The command "GitGutter: Enable/Disable" was added to provide the opportunity
+  to disable GitGutter for single views.
+
+  As this command uses ST's "toggle_setting" the setting "enable"
+  in GitGutter.sublime-settings moved to Preferences.sublime-settings.
+
+  If you need to disable GitGutter globally, you'll need to do that by adding
+
+     "git_gutter_enable": false
+
+  to the Preferences.sublime-settings. 
+
+  This setting works in Project settings as well.
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  Enhancement:
+   - Add a text command with key binding to revert changes
+   - Add a text command with key binding to copy content from commit
+   - Add main menu entry/command pallet entry/key binding for all commands
+   - Toggle GitGutter via main menu and command pallet
+   - Flatten the 'Compare against' main menu structure
+
+  Fix:
+   - Compare against Origin uses @{upstream} (Issue #371)
+   - Compare against… panels don't show immediately. (#446)
+
+  README:
+   - Update Compare against paragraph
+   - Add Goto/Copy/Revert Change
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
