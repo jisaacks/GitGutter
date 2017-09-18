@@ -19,11 +19,7 @@ try:
     if mdpopups.version() >= (2, 0, 0) and int(sublime.version()) < 3124:
         raise ImportError('Sublime Text 3124+ required.')
 
-    # public Sublime Text Commands
-    from .commands import GitGutterDiffPopupCommand
     # public function
     from .factory import show_diff_popup
 except ImportError:
-    # Some dummy interface objects to avoid import errors
-    GitGutterDiffPopupCommand = None
     show_diff_popup = None

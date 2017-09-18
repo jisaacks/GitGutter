@@ -186,6 +186,38 @@ class GitGutterRevertChangeCommand(GitGutterBaseCommand):
     ACTION = 'revert_change'
 
 
+class GitGutterDiffPopupCommand(GitGutterBaseCommand):
+    """The git_gutter_diff_popup command implemention."""
+    ACTION = 'show_diff_popup'
+
+    def is_visible(self):
+        """Show command in main menu only if mdpopups is available."""
+        return popup.show_diff_popup is not None
+
+    def run(self, edit, point=None, highlight_diff=None, flags=0):
+        """Run git_gutter(show_diff_popup, ...) command.
+
+        Note:
+            Don't use run() of the base class to explicitly pusblish
+            the command parameters.
+
+        Arguments:
+            edit (Edit):
+                The edit object to identify this operation (unused).
+            point (int):
+                The text position to show the diff popup for.
+            highlight_diff (string or bool):
+                The desired initial state of dispayed popup content.
+                "default": show old state of the selected hunk
+                "diff": show diff between current and old state
+            flags (int):
+                One of Sublime Text's popup flags.
+        """
+        self.view.run_command('git_gutter', {
+            'action': self.ACTION, 'point': point,
+            'highlight_diff': highlight_diff, 'flags': flags})
+
+
 class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
     """The git_gutter_replace_text command implementation."""
 

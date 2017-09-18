@@ -13,12 +13,12 @@ from .commands import GitGutterCompareHeadCommand
 from .commands import GitGutterCompareOriginCommand
 from .commands import GitGutterCompareTagCommand
 from .commands import GitGutterCopyFromCommitCommand
+from .commands import GitGutterDiffPopupCommand
 from .commands import GitGutterNextChangeCommand
 from .commands import GitGutterPrevChangeCommand
 from .commands import GitGutterReplaceTextCommand
 from .commands import GitGutterRevertChangeCommand
 from .commands import GitGutterShowCompareCommand
-from .popup import GitGutterDiffPopupCommand
 from .settings import GitGutterEditSettingsCommand
 from .settings import GitGutterOpenFileCommand
 from .support import GitGutterSupportInfoCommand
