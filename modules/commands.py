@@ -63,7 +63,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         state = 0
 
         # Keep idle, if disabled by user setting
-        if not self.settings.get('enable'):
+        if not self.settings.get('enable', True):
             state = 1
         # Don't handle unattached views
         elif not view.window():
