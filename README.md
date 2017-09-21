@@ -34,7 +34,7 @@ A [Sublime Text 2/3](http://www.sublimetext.com) plug-in to show information abo
 It is highly recommended to install GitGutter with [Package Control](https://packagecontrol.io) as it automatically installs required [dependencies](#dependencies) and keeps all packages up to date.
 
 1. [Install Package Control](https://packagecontrol.io/installation) if you haven't yet.
-2. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+2. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 3. Search for _Package Control: Install Package_ and hit <kbd>Enter</kbd>.
 4. Type `GitGutter` and press <kbd>Enter</kbd> to install it.
 
@@ -69,7 +69,7 @@ This change was made ...
 You can clone this repository into your _Sublime Text x/Packages_
 
 
-##### OSX
+##### Mac OS
 
 ```shell
 cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/
@@ -107,7 +107,7 @@ Some functions of GitGutter depend on the following external libraries to work p
 - [python-jinja2](https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-jinja2)
 - [python-markdown](https://github.com/facelessuser/sublime-markdown)
 
-👉 On OSX you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
+👉 On Mac OS you might need to install the package [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath).
 
 👉 To manually install pull from the linked repos into ST's Packages folder.
 
@@ -117,21 +117,24 @@ Some functions of GitGutter depend on the following external libraries to work p
 
 #### Is git working?
 
-The most common reason for the icons to not show up is likely a problem with GitGutter finding the `git` executable on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
+The most common reasons for the icons to not show up are:
+
+- GitGutter can't find the `git` executable on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
+- On Mac OS the "Xcode/iOS license" needs to be aggreed to make git work. 
 
 To check, whether git is found and working properly ...
 
-1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 2. Search for _GitGutter: Support Info_ and hit <kbd>Enter</kbd>.
 
 An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter. 
 
-If git was found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) and is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some  more detailed information about the reason for git not to work may be found in the console window, then.
+If git was found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) and is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some more detailed information about the reason for git not to work may be found in the console window, then. If not try again with `"debug": true` added to the GitGutter settings.
 
 
 #### Git works in shell but is not found by GitGutter!
 
-Some operating systems (especially OSX) may not run Sublime Text within the login shell. As a result Sublime Text and all its packages don't have access to some of the user's environment variables including the [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) to git.
+Some operating systems (especially Mac OS) may not run Sublime Text within the login shell. As a result Sublime Text and all its packages don't have access to some of the user's environment variables including the [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) to git.
 
 In some cases the package providing git, simply required some user confirmation due to license changes and thus simply refuses to run git.
 
@@ -189,7 +192,7 @@ If the `.git` directory is not located in the working tree root the following st
 
    The file can be created using the following shell commands.
 
-   **Linux / OSX**
+   **Linux / Mac OS**
 
    ```shell
    echo "gitdir: $(git rev-parse --git-dir)" > .git
@@ -247,7 +250,7 @@ The command copies the committed content of the changed hunk under the first cur
 
 The command reverts the text under the first cursor to the state in git. The default key binding for this command is:
 
- OS X                          | Windows / Linux             | Description
+ Mac OS                        | Windows / Linux             | Description
 -------------------------------|-----------------------------|-------------
  <kbd>Cmd+Shift+Option+z</kbd> | <kbd>Ctrl+Shift+Alt+z</kbd> | Revert Change to Commit
 
@@ -258,14 +261,14 @@ GitGutter compares the working copy against the HEAD by default.
 
 To change the compare option:
 
-1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac)
+1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 2. Start typing `GitGutter: Compare against`
 3. Select one of the 6 options with the keyboard and press <kbd>Enter</kbd>.
 4. Choose the branch/tag/commit to compare against.
 
 or just use one of the following key bindings:
 
- OS X                             | Windows / Linux                | Description
+ Mac OS                           | Windows / Linux                | Description
 ----------------------------------|--------------------------------|-------------
  <kbd>Cmd+Shift+Option+c, h</kbd> | <kbd>Ctrl+Shift+Alt+c, h</kbd> | Compare against HEAD
  <kbd>Cmd+Shift+Option+c, b</kbd> | <kbd>Ctrl+Shift+Alt+c, b</kbd> | Compare against particular branch
