@@ -55,7 +55,7 @@ def gitgutter_version():
     except:
         try:
             return sublime.load_resource(
-                'Packages/%s/release_messages/dest/VERSION' % PACKAGE)
+                'Packages/%s/VERSION' % PACKAGE).strip()
         except Exception as exception:
             print('%s: %s' % (PACKAGE, exception))
             return 'Version could not be acquired!'

@@ -121,6 +121,7 @@ def build_release():
     """Built the new release locally."""
     history = version_history()
     version = history[-2]
+    put_message(os.path.join(PACKAGE_PATH, 'VERSION'), version)
     update_global_message(history)
     built_messages_json(history)
     commit_release(version)
