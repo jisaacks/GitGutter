@@ -615,6 +615,7 @@ Color schemes that already have support for GitGutter include:
 - [Grandson of Obsidian](https://github.com/jfromaniello/Grandson-of-Obsidian)
 - [Hitoshi](https://github.com/runxel/hitoshi)
 - [Monokai Extended](https://github.com/jisaacks/sublime-monokai-extended)
+- [Monokai Pro](https://www.monokai.pro)
 - [Neon Color Scheme](https://github.com/MattDMo/Neon-color-scheme)
 - [Neon](https://github.com/farzher/Sublime-Text-Themes)
 - [Oblivion](https://github.com/jbrooksuk/Oblivion)
