@@ -40,8 +40,8 @@
  * for light and dark color schemes of Sublime Text < 3132.
  **/
 html.dark {
-    background-color: color(var(--background) blend(white 85%));
     --mdpopups-hl-bg: color(var(--background) blend(white 95%));
+    --diffpopup-tb-bg: color(var(--mdpopups-hl-bg) blend(white 95%));
     --diffpopup-ins-bg: color(green blend(black 60%));
     --diffpopup-ins-fg: color(green blend(white 40%));
     --diffpopup-del-bg: color(red blend(black 60%));
@@ -53,8 +53,8 @@ html.dark {
 }
 
 html.light {
-    background-color: color(var(--background) blend(black 80%));
-    --mdpopups-hl-bg: color(var(--background) blend(black 93%));
+    --mdpopups-hl-bg: color(var(--background) blend(black 95%));
+    --diffpopup-tb-bg: color(var(--mdpopups-hl-bg) blend(black 91%));
     --diffpopup-ins-bg: color(green blend(white 25%));
     --diffpopup-ins-fg: color(green blend(black 80%));
     --diffpopup-del-bg: color(red blend(white 25%));
@@ -87,6 +87,8 @@ div.git-gutter {
  * The navigation toolbar
  **/
 .git-gutter div.toolbar {
+    background-color: var(--diffpopup-tb-bg);
+    color: color(var(--foreground) blend(var(--diffpopup-tb-bg) 30%));
     margin: 0;
     padding: 0.0rem 0.4rem 0.2rem 0.4em;
 }
@@ -109,11 +111,10 @@ div.git-gutter {
 
 /**
  * LINKS
- *
- * Don't underline links.
  **/
 .git-gutter a {
-    text-decoration: none;
+    color: var(--foreground);
+    text-decoration: bold;
 }
 
 /**
