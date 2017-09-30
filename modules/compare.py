@@ -93,11 +93,10 @@ def set_against_branch(git_gutter, **kwargs):
 
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
-            pieces = result.split('\a')
-            message = pieces[0]
-            branch = pieces[1][11:]   # skip 'refs/heads/'
-            commit = pieces[2][0:7]   # 7-digit commit hash
-            return [branch, '%s %s' % (commit, message)]
+            branch, commit, subject, name, date = result.split('\a')
+            branch = branch[11:]   # skip 'refs/heads/'
+            commit = commit[0:7]   # 7-digit commit hash
+            return [branch, '%s | %s' % (commit, subject), name, date]
 
         # Create the list of branches to show in the quick panel
         items = [parse_result(r) for r in output.split('\n')]
@@ -134,10 +133,13 @@ def set_against_tag(git_gutter, **kwargs):
 
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
-            pieces = result.split(' ')
-            commit = pieces[0]     # 7-digit commit hash
-            tag = pieces[1][10:]   # skip 'refs/tags/'
-            return [tag, commit]
+            tag, commit, subject, tname, tdate, cname, cdate = result.split('\a')
+            tag = tag[10:]         # skip 'refs/heads/'
+            commit = commit[0:7]   # 7-digit commit hash
+            tname = tname.strip()
+            tdate = tdate.strip()
+            return [tag, '%s | %s' % (commit, subject),
+                    tname or cname, tdate or cdate]
 
         # Create the list of tags to show in the quick panel
         items = [parse_result(r) for r in output.split('\n')]

@@ -613,7 +613,7 @@ class GitGutterHandler(object):
         args = [
             self.settings.git_binary,
             'log', '--all',
-            '--pretty=%h %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty=%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
         ]
         return self.execute_async(args)
@@ -630,7 +630,7 @@ class GitGutterHandler(object):
         args = [
             self.settings.git_binary,
             'log',
-            '--pretty=%at\a%h %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty=%at\a%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000',
             '--', self._git_path
         ]
@@ -641,19 +641,29 @@ class GitGutterHandler(object):
         args = [
             self.settings.git_binary,
             'for-each-ref',
-            '--sort=-committerdate',
-            '--format=%(subject)\a%(refname)\a%(objectname)',
+            '--sort=-committerdate', (
+                '--format=%(refname)\a%(objectname)\a%(subject)'
+                '\a%(committername) %(committeremail)\a%(committerdate)'),
             'refs/heads/'
         ]
         return self.execute_async(args)
 
     def git_tags(self):
-        """Query all tags of the file's repository."""
+        """Query all tags of the file's repository.
+
+        Use the plumping for-each-ref to read the tag information.
+        Both tagger- and commiter- name/date are read as
+        first is valid for annoted and later is required for simple tags.
+        """
         args = [
             self.settings.git_binary,
-            'show-ref',
-            '--tags',
-            '--abbrev=7'
+            'for-each-ref',
+            '--sort=-committerdate', (
+                '--format=%(refname)\a%(objectname)\a%(subject)'
+                '\a%(taggername) %(taggeremail)\a%(taggerdate)'
+                '\a%(committername) %(committeremail)\a%(committerdate)'
+            ),
+            'refs/tags/'
         ]
         return self.execute_async(args)
 
