@@ -642,7 +642,7 @@ class GitGutterHandler(object):
             self.settings.git_binary,
             'for-each-ref',
             '--sort=-committerdate', (
-                '--format=%(refname)\a%(objectname)\a%(subject)'
+                '--format=%(refname)\a%(objectname:short) | %(subject)'
                 '\a%(committername) %(committeremail)\a%(committerdate)'),
             'refs/heads/'
         ]
@@ -652,14 +652,14 @@ class GitGutterHandler(object):
         """Query all tags of the file's repository.
 
         Use the plumping for-each-ref to read the tag information.
-        Both tagger- and commiter- name/date are read as
-        first is valid for annoted and later is required for simple tags.
+        Both tagger- and committer- name/date are read because the first one
+        is valid for annoted and later for simple tags.
         """
         args = [
             self.settings.git_binary,
             'for-each-ref',
-            '--sort=-committerdate', (
-                '--format=%(refname)\a%(objectname)\a%(subject)'
+            '--sort=-refname', (
+                '--format=%(refname)\a%(objectname:short) | %(subject)'
                 '\a%(taggername) %(taggeremail)\a%(taggerdate)'
                 '\a%(committername) %(committeremail)\a%(committerdate)'
             ),
