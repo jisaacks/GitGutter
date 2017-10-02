@@ -190,6 +190,10 @@ class GitGutterDiffPopupCommand(GitGutterBaseCommand):
     """The git_gutter_diff_popup command implemention."""
     ACTION = 'show_diff_popup'
 
+    def is_enabled(self):
+        """Enable command if mdpopups is available."""
+        return self.is_visible() and GitGutterBaseCommand.is_enabled(self)
+
     def is_visible(self):
         """Show command in main menu only if mdpopups is available."""
         return popup.show_diff_popup is not None
