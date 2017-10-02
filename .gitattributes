@@ -13,3 +13,6 @@ release.sublime-commands export-ignore
 ## unit testing
 tests/ export-ignore
 unittesting.json export-ignore
+
+## linter setup
+setup.cfg export-ignore
