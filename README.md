@@ -236,6 +236,22 @@ The commands are used to quickly navigate between modifications. The default key
  <kbd>Cmd+Shift+Option+k</kbd> | <kbd>Ctrl+Shift+Alt+k</kbd> | Goto Previous Change
  <kbd>Cmd+Shift+Option+j</kbd> | <kbd>Ctrl+Shift+Alt+j</kbd> | Goto Next Change
 
+The commands use `"next_prev_change_wrap"` setting by default to decide whether to continue at document boundaries. This behavior and the step size can be customized by command arguments with values other then `None`.
+
+#### Example
+
+```JavaScript
+{ "command": "git_gutter_prev_change", "args": {"count": 2, "wrap": False} },
+{ "command": "git_gutter_next_change", "args": {"count": 2, "wrap": False} }
+```
+
+#### Arguments
+
+arg     | valid range       | description
+:------:|:-----------------:|-----------------------------------------------
+count   | None, >=1         | number of iterations to find destination hunk
+wrap    | None, False, True | enable/disable wrapping at document boundaries
+
 
 ### Copy Content from Commit
 
