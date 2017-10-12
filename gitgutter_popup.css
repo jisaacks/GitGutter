@@ -65,12 +65,6 @@ html.light {
     --diffpopup-chg-del-fg: color(orangered blend(black 85%));
 }
 
-/* Compatibility rules for correct popup borders with mdpopups 1.x.x */
-div.mdpopups {
-    margin: 0;
-    padding: 0;
-}
-
 /**
  * POPUP BORDER
  *
@@ -125,7 +119,6 @@ div.git-gutter {
 .git-gutter div.highlight {
     font-family: "sf mono", "Roboto Mono", "Liberation Mono", Menlo, Courier, monospace;
     border-style: none;
-    border-radius: 0;
     line-height: 1.3rem;
     margin: 0;
     padding: 0.7rem 0.7rem 0.6rem 0.7rem;

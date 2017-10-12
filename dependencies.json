@@ -4,12 +4,14 @@
             "markupsafe",
             "python-jinja2"
         ],
-        ">=3119": [
-            "pygments",
-            "python-markdown",
+        ">=3124": [
+            "markupsafe",
             "mdpopups",
+            "pygments",
+            "pymdownx",
             "python-jinja2",
-            "markupsafe"
+            "python-markdown",
+            "pyyaml"
         ]
     }
 }

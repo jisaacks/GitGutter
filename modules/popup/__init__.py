@@ -5,18 +5,14 @@ Check dependencies and enable/disable diff popup.
 Declare public API functions.
 """
 try:
-    # mdpopups needs 3119+ for wrapper_class, which diff popup relies on
-    import sublime
-    if int(sublime.version()) < 3119:
-        raise ImportError('Sublime Text 3119+ required.')
-
-    # mdpopups 1.9.0+ is required because of wrapper_class and templates
+    # mdpopups 2.0.0+ is required
     import mdpopups
-    if mdpopups.version() < (1, 9, 0):
-        raise ImportError('mdpopups 1.9.0+ required.')
+    if mdpopups.version() < (2, 0, 0):
+        raise ImportError('mdpopups 2.0.0+ required.')
 
     # mdpopups 2.0.0+ requires Sublime Text 3124+
-    if mdpopups.version() >= (2, 0, 0) and int(sublime.version()) < 3124:
+    import sublime
+    if int(sublime.version()) < 3124:
         raise ImportError('Sublime Text 3124+ required.')
 
     # public function

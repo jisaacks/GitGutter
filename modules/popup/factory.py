@@ -8,11 +8,6 @@ import mdpopups
 from . import differ
 from .. import revert
 
-# mdpopups 1.11.0+ can handle none wrapping whitespace
-_MDPOPUPS_HAVE_FIXED_SPACE = mdpopups.version() >= (1, 11, 0)
-# mdpopups 2.0.0+ allows to switch code wrapping on or off
-_MDPOPUPS_HAVE_CODE_WRAP = mdpopups.version() >= (2, 0, 0)
-
 
 def show_diff_popup(git_gutter, **kwargs):
     """Show the diff popup.
@@ -116,10 +111,9 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
     # write the symbols/text for each button
     buttons = _built_toolbar_buttons(start, meta)
     location = _visible_text_point(view, line - 1, 0)
-    # code wrapping is supported by mdpopups 2.0.0 or higher
-    code_wrap = _MDPOPUPS_HAVE_CODE_WRAP and view.settings().get('word_wrap')
+    code_wrap = view.settings().get('word_wrap')
     if code_wrap == 'auto':
-        code_wrap = 'source.' not in view.scope_name(location)
+        code_wrap = view.match_selector(location, 'source')
 
     if highlight_diff:
         # (*) show a highlighted diff of the merged git and editor content
@@ -143,15 +137,11 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         min_indent = _get_min_indent(del_lines, tab_width)
         source_content = '\n'.join(
             (line.expandtabs(tab_width)[min_indent:] for line in del_lines))
-        if not _MDPOPUPS_HAVE_FIXED_SPACE and not code_wrap:
-            source_content = source_content.replace(' ', '\u00A0')
         # common arguments used to highlight the content
         popup_kwargs = {
+            'allow_code_wrap': code_wrap,
             'language': mdpopups.get_language_from_view(view) or ''
         }
-        # code wrapping is supported by mdpopups 2.0.0 or higher
-        if _MDPOPUPS_HAVE_CODE_WRAP:
-            popup_kwargs['allow_code_wrap'] = code_wrap
         content = (
             '<div class="toolbar">'
             '{hide} '
@@ -180,10 +170,8 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         'md': False,
         'css': _load_popup_css(git_gutter.settings.theme_path),
         'wrapper_class': 'git-gutter',
+        'allow_code_wrap': code_wrap
     }
-    # code wrapping is supported by mdpopups 2.0.0 or higher
-    if _MDPOPUPS_HAVE_CODE_WRAP:
-        popup_kwargs['allow_code_wrap'] = code_wrap
     # update visible popup
     if view.is_popup_visible():
         return mdpopups.update_popup(**popup_kwargs)

@@ -212,7 +212,7 @@ If the `.git` directory is not located in the working tree root the following st
 
 The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from command palette by `GitGutter: Show Diff Popup` or via a key binding.
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
+ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
 ![diff_popup_screenshot](https://user-images.githubusercontent.com/16542113/28744598-804b73fe-7464-11e7-91c6-215a06644181.gif)
 
@@ -341,7 +341,7 @@ GitGutter evaluates changes every time the file is modified by default. Set `fal
 
 `"enable_hover_diff_popup": true`
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
+ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
 GitGutter shows a diff popup, when hovering over changes in the gutter. Set `false` to disable this popup. You can still open it with a key binding and from the command palette.
 
@@ -350,14 +350,14 @@ GitGutter shows a diff popup, when hovering over changes in the gutter. Set `fal
 
 `"diff_popup_default_mode": "default"`
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
+ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
 The popup displays the previous state of the content under the cursor by `"default"` but can be set to `"diff"` to highlight the differences between the git state and the editor state.
 
 
 #### Diff Popup Appearance
 
-ⓘ requires Sublime Text 3 Build 3119+ and mdpopups 1.9.0+
+ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
 The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-popups) library and the corresponding settings are global and not only for GitGutter. Syntax highlighting can be set to match the active color scheme by adding `"mdpopups.use_sublime_highlighter": true` to the User settings.
 
