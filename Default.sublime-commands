@@ -1,8 +1,13 @@
 [
     {
-        "caption": "GitGutter: Enable/Disable",
-        "command": "toggle_setting",
-        "args": {"setting": "git_gutter_enable"}
+        "caption": "GitGutter: Enable for View",
+        "command": "git_gutter_enable_view",
+        "args": { "enabled": true },
+    },
+    {
+        "caption": "GitGutter: Disable for View",
+        "command": "git_gutter_enable_view",
+        "args": { "enabled": false },
     },
     {
         "caption": "GitGutter: Show Diff Popup",

@@ -28,9 +28,8 @@
                 "children":
                 [
                     {
-                        "caption": "Enabled",
-                        "command": "toggle_setting",
-                        "args": {"setting": "git_gutter_enable"}
+                        "caption": "Enabled for View",
+                        "command": "git_gutter_enable_view"
                     },
                     { "caption": "-" },
                     {

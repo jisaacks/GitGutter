@@ -14,6 +14,7 @@ from .commands import GitGutterCompareOriginCommand
 from .commands import GitGutterCompareTagCommand
 from .commands import GitGutterCopyFromCommitCommand
 from .commands import GitGutterDiffPopupCommand
+from .commands import GitGutterEnableViewCommand
 from .commands import GitGutterNextChangeCommand
 from .commands import GitGutterPrevChangeCommand
 from .commands import GitGutterReplaceTextCommand

@@ -246,3 +246,35 @@ class GitGutterReplaceTextCommand(sublime_plugin.TextCommand):
             self.view.show_at_center(start)
         self.view.sel().clear()
         self.view.sel().add(start)
+
+
+class GitGutterEnableViewCommand(sublime_plugin.TextCommand):
+
+    def is_checked(self):
+        """Return check mark state for menu items."""
+        return self.view.settings().get('git_gutter_enable', True)
+
+    def is_visible(self, enabled=None):
+        """The command is visible if it would change the setting.
+
+        Arguments:
+            enabled (bool):
+                The desired state of GitGutter if True or False.
+                If none the current state is toggled.
+        """
+        return enabled is None or enabled != self.is_checked()
+
+    def run(self, edit, enabled=None):
+        """Enable or disable GitGutter.
+
+        Arguments:
+            edit (sublime.Edit):
+                not used.
+            enabled (bool):
+                The desired state of GitGutter if True or False.
+                If none the current state is toggled.
+        """
+        if enabled is None:
+            enabled = not self.is_checked()
+        self.view.settings().set('git_gutter_enable', enabled)
+        self.view.run_command('git_gutter')
