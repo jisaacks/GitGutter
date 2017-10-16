@@ -486,15 +486,22 @@ The _Status Bar Text_ is rendered using a fully customizable template from `stat
 
 GitGutter provides the following variables to be used in the template.
 
- Variable     | Description
-:------------:|-------------------------------------------------------------
- {{repo}}     | repository name / folder name containing the .git directory
- {{branch}}   | checked out branch you are working on
- {{compare}}  | commit/branch/HEAD the file is compared to
- {{state}}    | One of committed/modified/ignored/untracked
- {{deleted}}  | number of deleted regions
- {{inserted}} | number of inserted lines
- {{modified}} | number of modified lines
+ Variable           | Description
+:------------------:|-------------------------------------------------------------
+ {{repo}}           | repository name / folder name containing the .git directory
+ {{branch}}         | checked out branch you are working on
+ {{remote}}         | tracked remote of current branch you are working on or `None`
+ {{ahead}}          | number of commits the local branch is ahead of remote
+ {{behind}}         | number of commits the local branch is behind remote
+ {{added_files}}    | number of untracked files added to working tree
+ {{deleted_files}}  | number of files deleted from working tree
+ {{modified_files}} | number of modified files in the working tree
+ {{staged_files}}   | number of files in the staging area
+ {{compare}}        | commit/branch/HEAD the file is compared to
+ {{state}}          | One of committed/modified/ignored/untracked
+ {{deleted}}        | number of deleted regions
+ {{inserted}}       | number of inserted lines
+ {{modified}}       | number of modified lines
 
 
 #### Themes

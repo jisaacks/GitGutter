@@ -122,7 +122,7 @@ class GitGutterShowDiff(object):
         if window and window.active_view().id() != self.git_handler.view.id():
             return
 
-        def set_status(branch_name):
+        def set_status(branch_status):
             _, _, inserted, modified, deleted = contents
             template = (
                 self.git_handler.settings.get('status_bar_text')
@@ -133,14 +133,15 @@ class GitGutterShowDiff(object):
                 text = jinja2.environment.Template(''.join(template)).render(
                     repo=self.git_handler.repository_name,
                     compare=self.git_handler.format_compare_against(),
-                    branch=branch_name, state=file_state, deleted=len(deleted),
-                    inserted=len(inserted), modified=len(modified))
+                    state=file_state, deleted=len(deleted),
+                    inserted=len(inserted), modified=len(modified),
+                    **branch_status)
             else:
                 # Render hardcoded text if jinja is not available.
                 parts = []
-                parts.append('On %s' % branch_name)
+                parts.append('On %s' % branch_status['branch'])
                 compare = self.git_handler.format_compare_against()
-                if compare not in ('HEAD', branch_name):
+                if compare not in ('HEAD', branch_status['branch']):
                     parts.append('Comparing against %s' % compare)
                 count = len(inserted)
                 if count:
@@ -155,7 +156,7 @@ class GitGutterShowDiff(object):
             # add text and try to be the left most one
             self.git_handler.view.set_status('00_git_gutter', text)
 
-        self.git_handler.git_current_branch().then(set_status)
+        self.git_handler.git_branch_status().then(set_status)
 
     def _contents_to_regions(self, contents):
         """Convert the diff contents to gutter regions.

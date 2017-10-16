@@ -27,6 +27,9 @@ ST3 = STVER >= 3000
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 
+_STATUS_RE = re.compile(
+    r'## ([-/\w]+)(?:\.{3}([-/\w]+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+
 
 class GitGutterHandler(object):
 
@@ -59,8 +62,8 @@ class GitGutterHandler(object):
         self._git_tree = None
         # relative file path in work tree
         self._git_path = None
-        # cached branch name
-        self._git_branch = None
+        # cached branch status
+        self._git_status = None
         # file is part of the git repository
         self.git_tracked = False
         # compare target commit hash
@@ -302,8 +305,7 @@ class GitGutterHandler(object):
     def invalidate_git_file(self):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
-        # cached branch name
-        self._git_branch = None
+        self._git_status = None
 
     def update_git_file(self):
         """Update file from git index and write it to a temporary file.
@@ -667,22 +669,47 @@ class GitGutterHandler(object):
         ]
         return self.execute_async(args)
 
-    def git_current_branch(self):
-        """Query the current branch of the file's repository."""
-        if self._git_branch:
-            return Promise.resolve(self._git_branch)
+    def git_branch_status(self):
+        """Query the current status of the file's repository."""
+        if self._git_status:
+            return Promise.resolve(self._git_status)
 
-        def cache_result(branch):
-            self._git_branch = branch
-            return branch
+        def parse_output(output):
+            """Parse output of git status and cache the value."""
+            added, deleted, modified, staged = 0, 0, 0, 0
+            try:
+                lines = output.split('\n')
+                # parse branch line
+                match = _STATUS_RE.match(lines[0])
+                branch, remote, ahead, behind = match.groups()
+                # parse file stats
+                for line in lines:
+                    if line:
+                        w = line[1]
+                        added += w == '?'
+                        deleted += w == 'D'
+                        modified += w == 'M'
+                        staged += line[0] in 'ADMR'
+            except:
+                branch, remote, ahead, behind = 'unknown', None, 0, 0
+
+            self._git_status = {
+                'branch': branch,
+                'remote': remote,
+                'ahead': int(ahead or 0),
+                'behind': int(behind or 0),
+                'added_files': added,
+                'deleted_files': deleted,
+                'modified_files': modified,
+                'staged_files': staged
+            }
+            return self._git_status
 
         args = [
             self.settings.git_binary,
-            'rev-parse',
-            '--abbrev-ref',
-            'HEAD'
+            'status', '-b', '-s', '-u', '--no-lock-index'
         ]
-        return self.execute_async(args).then(cache_result)
+        return self.execute_async(args).then(parse_output)
 
     def git_compare_commit(self, compare_against):
         """Query the commit hash of the compare target.
