@@ -707,7 +707,7 @@ class GitGutterHandler(object):
 
         args = [
             self.settings.git_binary,
-            'status', '-b', '-s', '-u', '--no-lock-index'
+            'status', '-b', '-s', '-u'
         ]
         return self.execute_async(args).then(parse_output)
 
