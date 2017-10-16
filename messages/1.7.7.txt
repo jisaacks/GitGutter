@@ -1,0 +1,59 @@
+1.7.7:
+------
+
+   A N N O U N C E M E N T
+
+   This release adds support for the following template variables to be used
+   to customize the status bar text.
+
+    {{remote}}         -- tracked remote of current branch or `None`
+    {{ahead}}          -- number of commits the local branch is ahead of remote
+    {{behind}}         -- number of commits the local branch is behind remote
+    {{added_files}}    -- number of untracked files added to working tree
+    {{deleted_files}}  -- number of files deleted from working tree
+    {{modified_files}} -- number of modified files in the working tree
+    {{staged_files}}   -- number of files in the staging area
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  Internal:
+   - Add setup.cfg to configure linters
+   - Drop support for mdpopups 1.x (2.0+ required)
+
+  Fix:
+   - Forwared arguments from commands to git_gutter
+
+  Enhancement:
+   - Add count and wrap arguments to goto commands. (Issue #458)
+   - Use own command to enable/disable GitGutter per view
+   - Add more status bar variables (Issue #457)
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
