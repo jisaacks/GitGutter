@@ -22,7 +22,6 @@ RE_COMMENT = re.compile(
         )
       | (?P<code>
             "(?:\\.|[^"\\])*"               # double quotes
-          | '(?:\\.|[^'\\])*'               # single quotes
           | .[^/"']*                        # everything else
         )
     ''',
@@ -44,7 +43,6 @@ RE_TRAILING_COMMA = re.compile(
         )
       | (?P<code>
             "(?:\\.|[^"\\])*"            # double quoted string
-          | '(?:\\.|[^'\\])*'            # single quoted string
           | .[^,"']*                     # everything else
         )
     ''',
