@@ -27,8 +27,19 @@ ST3 = STVER >= 3000
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 
-_STATUS_RE = re.compile(
-    r'## ([-/\w]+)(?:\.{3}([-/\w]+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+# Compiled regex pattern to parse first `git status -s -b` line.
+#
+#     (\S+(?=\.{3})|\S+(?!\.{3}$))
+#         The local branch consists of any none whitespace character followed
+#         by three dots or located at the end of string without containing them.
+#
+#     \.{3}(\S+)
+#         If three dots are found, the tracked remote follows them.
+#
+#     \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\]
+#         If a tracked remote exists, the number of commits the local branch is
+#         ahead and behind the remote is optionally available, too.
+_STATUS_RE = re.compile(r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
 
 
 class GitGutterHandler(object):
