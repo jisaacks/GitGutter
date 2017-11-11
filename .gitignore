@@ -1,6 +1,7 @@
 # Cache folders
 .cache/
 .mypy_cache/
+.ropeproject/
 __pycache__/
 var/
 
