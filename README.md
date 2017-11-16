@@ -152,11 +152,11 @@ All modules of GitGutter were moved to `modules` sub directory to present them t
 GitGutter handles Package Control's `post_upgrade` event to reload all its submodules once after upgrading. In rare cases some modules might not be recovered properly and thus require a restart of ST to make GitGutter work again.
 
 
-#### GitGutter keeps completely quite
+#### GitGutter keeps completely quiet
 
 GitGutter is installed and loads properly without any error messages printed to Sublime Text's console, but keeps completely disabled in some or all repositories. Neither gutter icons nor messages are displayed in the status bar.
 
-GitGutter is designed to keep quite in the following situations when evaluation is expected useless:
+GitGutter is designed to keep quiet in the following situations when evaluation is expected useless:
 
 - disabled in _Preferences.sublime-settings_, project settings or view settings (`"git_gutter_enabled": false`)
 - disabled in _GitGutter.sublime-settings_ (`"enabled": false`)
