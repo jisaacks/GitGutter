@@ -83,6 +83,8 @@ class GitGutterHandler(object):
         self._git_diff_cache = ''
         # PEP-440 conform git version (major, minor, patch)
         self._git_version = None
+        # local dictionary of environment variables
+        self._git_env = None
 
     def __del__(self):
         """Delete temporary files."""
@@ -317,6 +319,7 @@ class GitGutterHandler(object):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
         self._git_status = None
+        self._git_env = None
 
     def update_git_file(self):
         """Update file from git index and write it to a temporary file.
@@ -802,10 +805,17 @@ class GitGutterHandler(object):
             if os.name == 'nt':
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            if self._git_env is None:
+                self._git_env = os.environ.copy()
+                for key, value in self.settings.get('env', {}).items():
+                    if value is None:
+                        del self._git_env[key]
+                    else:
+                        self._git_env[key] = str(value)
             proc = subprocess.Popen(
                 args=args, cwd=self._git_tree, startupinfo=startupinfo,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE)
+                stdin=subprocess.PIPE, env=self._git_env)
             if _HAVE_TIMEOUT:
                 stdout, stderr = proc.communicate(timeout=30)
             else:
