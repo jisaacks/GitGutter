@@ -18,6 +18,18 @@
     //   },
     "git_binary": "",
 
+    // Additional environment variables to pass to git.
+    // This list is merged with the global set of environment variables
+    // provided by Sublime Text.
+    //
+    // Note:
+    // 1. Keys with value `None` are removed from the global environment.
+    // 2. If this dictionary is defined per view or project it is used
+    //    exclusively! It won't be merged with the global settings.
+    "env": {
+        "GIT_OPTIONAL_LOCKS": 0
+    },
+
     // The commit, branch, tag, or remote to compare against.
     // This setting changes the initial compare target and can
     // be temporarily overwritten by 'Compare against ...' commands
