@@ -118,6 +118,7 @@
     "protected_regions": [
         "sublimelinter-warning-gutter-marks",
         "sublimelinter-error-gutter-marks",
+        "sublime_linter.protected_regions",
         "bookmarks",
         "lsp_error",
         "lsp_warning",
