@@ -721,6 +721,7 @@ class GitGutterHandler(object):
 
         args = [
             self.settings.git_binary,
+            '-c', 'color.status=never',
             'status', '-b', '-s', '-u'
         ]
         return self.execute_async(args).then(parse_output)
