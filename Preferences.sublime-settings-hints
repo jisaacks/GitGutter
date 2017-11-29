@@ -145,6 +145,12 @@
         "lsp_info"
     ],
 
+    // Do not show the Diff Popup if a line contains these regions
+    // Useful for making sure GitGutter does not fight with other popups.
+    "git_gutter_diff_popup_protected_regions": [
+        "sublime_linter.protected_regions"
+    ],
+
     // The gutter theme defines the icons to show for the different events.
     "git_gutter_theme": "Default.gitgutter-theme"
 }

@@ -367,6 +367,20 @@ The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-p
 
 👉 User style settings are accessible via the settings menu.
 
+#### Diff Popup Protected Regions
+
+```
+"diff_popup_protected_regions": [
+  "sublime_linter.protected_regions"
+],
+```
+
+To avoid GitGutter's diff popup from figting with other popups while hovering the gutter a list of protected regions can be created. If the line under the mouse cursor is occupied by one of these regions, no diff popup is displayed.
+
+👉 You will need to figure out the names of the regions to protect.
+
+👉 You can still open the diff popup via key binding or command pallet.
+
 
 #### Untracked Files
 
