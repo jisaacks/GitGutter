@@ -69,10 +69,10 @@ def remove_global_message(fname):
 def update_global_message(version_history):
     # remove global message from previous release
     remove_global_message(
-        os.path.join(MESSAGE_PATH, version_history[-3] + '.txt'))
+        os.path.join(MESSAGE_PATH, version_history[-2] + '.txt'))
     # add global message to current release
     add_global_message(
-        os.path.join(MESSAGE_PATH, version_history[-2] + '.txt'))
+        os.path.join(MESSAGE_PATH, version_history[-1] + '.txt'))
 
 
 def built_messages_json(version_history):
@@ -92,7 +92,18 @@ def version_history():
             basename, ext = os.path.splitext(filename)
             if ext.lower() == '.txt':
                 yield basename
-    return tuple(generator())
+
+    def sortkey(key):
+        """Convert filename to version tuple (major, minor, patch)."""
+        try:
+            major, minor, patch = key.split('.', 2)
+            if '-' in patch:
+                patch, _ = patch.split('-')
+            return int(major), int(minor), int(patch)
+        except:
+            return 0, 0, 0
+
+    return sorted(tuple(generator()), key=sortkey)
 
 
 def git(*args):
@@ -120,7 +131,7 @@ def commit_release(version):
 def build_release():
     """Built the new release locally."""
     history = version_history()
-    version = history[-2]
+    version = history[-1]
     put_message(os.path.join(PACKAGE_PATH, 'VERSION'), version)
     update_global_message(history)
     built_messages_json(history)
@@ -130,8 +141,7 @@ def build_release():
 
 def publish_release(token):
     """Publish the new release."""
-    history = version_history()
-    version = history[-2]
+    version = get_message(os.path.join(PACKAGE_PATH, 'VERSION'))
 
     repo_url = 'https://github.com/jisaacks/GitGutter.git'
     # push master branch to server
