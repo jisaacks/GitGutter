@@ -429,6 +429,23 @@ It is valid to use environment variables in the setting value, and they will be 
 In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
 
 
+#### Git Environment Variables
+
+```
+"env": {
+  "GIT_OPTIONAL_LOCKS": 0
+}
+```
+
+With the `"env"` dictionary custom environment variables can be passed to git. The values overwrite the global environment variables Sublime Text is running with.
+
+👉 Keys with value `None` are removed from the local environment.
+
+👉 The `"git_gutter_env"` defined per view or project hides the global `"env"` dictionary.
+
+👉 Make sure to use the correct separator characters of your OS, if you manipulate the `$PATH`.
+
+
 #### Diff Algorithm
 
 `"diff_algorithm": "patience"`
