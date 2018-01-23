@@ -174,7 +174,7 @@ class ViewSettings(object):
                 One of (--minimal, --patience, --histogram)
                 or None if setting is invalid.
         """
-        return self._DIFF_ALGORITHM.get(self.get('algorithm'))
+        return self._DIFF_ALGORITHM.get(self.get('diff_algorithm'))
 
 
 class GitGutterOpenFileCommand(sublime_plugin.ApplicationCommand):
