@@ -221,7 +221,7 @@ def _built_toolbar_buttons(start, meta):
         'revert': '⟲',
         'disable_hl_diff': '≉',
         'enable_hl_diff': '≈',
-        'first_change':  '⤒',
+        'first_change': '⤒',
         'prev_change': '↑',
         'next_change': '↓'
     }
