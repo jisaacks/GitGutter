@@ -80,6 +80,8 @@ def reload_modules(main, modules, perform_reload=True):
         if name in modules:
             del sys.modules[name]
 
+    importlib.invalidate_caches()
+
     @FilteringImportHook.when(condition=lambda name: name in modules)
     def module_reloader(name):
         module = modules[name]
