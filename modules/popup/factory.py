@@ -137,11 +137,6 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         min_indent = _get_min_indent(del_lines, tab_width)
         source_content = '\n'.join(
             (line.expandtabs(tab_width)[min_indent:] for line in del_lines))
-        # common arguments used to highlight the content
-        popup_kwargs = {
-            'allow_code_wrap': code_wrap,
-            'language': mdpopups.get_language_from_view(view) or ''
-        }
         content = (
             '<div class="toolbar">'
             '{hide} '
@@ -149,7 +144,12 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
             '{enable_hl_diff} {copy} {revert}'
             '</div>'
             .format(**buttons)
-        ) + mdpopups.syntax_highlight(view, source_content, **popup_kwargs)
+        ) + mdpopups.syntax_highlight(
+            view,
+            source_content,
+            language=mdpopups.get_language_from_view(view) or '',
+            allow_code_wrap=code_wrap
+        )
 
     else:
         # (added) only show the button line without the copy button
@@ -169,8 +169,7 @@ def _show_diff_popup_impl(git_gutter, line, highlight_diff, flags, diff_info):
         'content': content,
         'md': False,
         'css': _load_popup_css(git_gutter.settings.theme_path),
-        'wrapper_class': 'git-gutter',
-        'allow_code_wrap': code_wrap
+        'wrapper_class': 'git-gutter'
     }
     # update visible popup
     if view.is_popup_visible():
