@@ -161,6 +161,7 @@ GitGutter is designed to keep quiet in the following situations when evaluation 
 - disabled in _Preferences.sublime-settings_, project settings or view settings (`"git_gutter_enabled": false`)
 - disabled in _GitGutter.sublime-settings_ (`"enabled": false`)
 - the current view
+  - shows a file which is not part of a git working tree
   - is not attached to a window
   - is read only
   - is a scratch view
@@ -169,6 +170,8 @@ GitGutter is designed to keep quiet in the following situations when evaluation 
   - has "Hexadecimal" encoding
 
 Please check if one of those states was applied to your view by one of your packages.
+
+👉 With `"debug": true` the reason for GitGutter to keep quite is printed to console.
 
 👉 _ConvertToUTF8_ package is known to mark views as scratch during conversion without reverting that state reliably.
 
