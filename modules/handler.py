@@ -4,7 +4,6 @@ import functools
 import os
 import re
 import subprocess
-import tempfile
 import threading
 
 try:
@@ -20,6 +19,7 @@ import sublime
 from . import path
 from . import utils
 from .promise import Promise
+from .tempfile import TempFile
 
 STVER = int(sublime.version())
 ST3 = STVER >= 3000
@@ -86,13 +86,6 @@ class GitGutterHandler(object):
         # local dictionary of environment variables
         self._git_env = None
 
-    def __del__(self):
-        """Delete temporary files."""
-        if self._git_temp_file:
-            os.unlink(self._git_temp_file)
-        if self._view_temp_file:
-            os.unlink(self._view_temp_file)
-
     def version(self, validate):
         """Return git executable version.
 
@@ -128,16 +121,6 @@ class GitGutterHandler(object):
                     utils.log_message(git_binary + ' not found or working!')
                     self._missing_binaries.add(git_binary)
         return self._git_version
-
-    @staticmethod
-    def tmp_file():
-        """Create a temp file and return the filepath to it.
-
-        CAUTION: Caller is responsible for clean up
-        """
-        file, filepath = tempfile.mkstemp(prefix='git_gutter_')
-        os.close(file)
-        return filepath
 
     @property
     def repository_name(self):
@@ -299,8 +282,8 @@ class GitGutterHandler(object):
         try:
             # Write the encoded content to file
             if not self._view_temp_file:
-                self._view_temp_file = self.tmp_file()
-            with open(self._view_temp_file, 'wb') as file:
+                self._view_temp_file = TempFile(mode='wb')
+            with self._view_temp_file as file:
                 if self.view.encoding() == "UTF-8 with BOM":
                     file.write(codecs.BOM_UTF8)
                 file.write(encoded)
@@ -382,9 +365,9 @@ class GitGutterHandler(object):
                 contents = contents.replace(b'\r', b'\n')
                 # Create temporary file
                 if not self._git_temp_file:
-                    self._git_temp_file = self.tmp_file()
+                    self._git_temp_file = TempFile(mode='wb')
                 # Write content to temporary file
-                with open(self._git_temp_file, 'wb') as file:
+                with self._git_temp_file as file:
                     file.write(contents)
             # Indicate success.
             self._git_compared_commit = compared_id
@@ -417,13 +400,16 @@ class GitGutterHandler(object):
         if not updated_git_file and not updated_view_file:
             return self.process_diff(self._git_diff_cache)
 
+        if not self._git_temp_file or not self._view_temp_file:
+            return self.process_diff(self._git_diff_cache)
+
         args = list(filter(None, (
             self.settings.git_binary,
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
-            self._git_temp_file,
-            self._view_temp_file,
+            self._git_temp_file.name,
+            self._view_temp_file.name,
         )))
         return self.execute_async(
             args=args, decode=False).then(self._decode_diff)
