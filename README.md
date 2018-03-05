@@ -453,7 +453,7 @@ With the `"env"` dictionary custom environment variables can be passed to git. T
 
 `"diff_algorithm": "patience"`
 
-GitGutter uses the "patience" diff algorithm by default. Set `diff_algorithm` to one of the follwoing values to change this behavior.
+Set `diff_algorithm` to one of the following values to change this behavior.
 
 value       | description
 :----------:|-----------------------------------------------
