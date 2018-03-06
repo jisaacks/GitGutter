@@ -2,7 +2,7 @@ import os
 import tempfile
 
 # The folder to place all temporary files into.
-TEMP_DIR = os.path.join(tempfile.tempdir, "GitGutter")
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "GitGutter")
 
 
 class TempFile(object):
