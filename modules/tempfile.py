@@ -2,7 +2,15 @@ import os
 import tempfile
 
 # The folder to place all temporary files into.
-TEMP_DIR = os.path.join(tempfile.gettempdir(), "GitGutter")
+TEMP_DIR = os.environ.get('XDG_RUNTIME_DIR')
+if TEMP_DIR:
+    # If available use the per user XDS_RUNTIME_DIR on unix based OSs.
+    TEMP_DIR = os.path.join(TEMP_DIR, 'GitGutter')
+else:
+    # Otherwise fallback to the default TEMP folder.
+    TEMP_DIR = os.path.join(tempfile.gettempdir(), 'GitGutter')
+    if hasattr(os, 'getuid'):
+        TEMP_DIR += '.%s' % os.getuid()
 
 
 class TempFile(object):
