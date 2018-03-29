@@ -24,13 +24,19 @@ def plugin_loaded():
     """
     now = time.time()
     max_age = 48 * 60 * 60
-    for name in os.listdir(TEMP_DIR):
-        try:
-            path = os.path.join(TEMP_DIR, name)
-            if now - os.path.getatime(path) > max_age:
-                    os.remove(path)
-        except OSError:
-            pass
+    try:
+        files = os.listdir(TEMP_DIR)
+    except FileNotFoundError:
+        # tempfolder does not exist
+        pass
+    else:
+        for name in files:
+            try:
+                path = os.path.join(TEMP_DIR, name)
+                if now - os.path.getatime(path) > max_age:
+                        os.remove(path)
+            except OSError:
+                pass
 
 
 class TempFile(object):
