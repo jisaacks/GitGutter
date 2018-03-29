@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 
 # The folder to place all temporary files into.
 TEMP_DIR = os.environ.get('XDG_RUNTIME_DIR')
@@ -11,6 +12,25 @@ else:
     TEMP_DIR = os.path.join(tempfile.gettempdir(), 'GitGutter')
     if hasattr(os, 'getuid'):
         TEMP_DIR += '.%s' % os.getuid()
+
+
+def plugin_loaded():
+    """Sublime Text plugin loaded callback.
+
+    Remove all temporary files older than 2 days. Looks like in some cases some
+    temporary files are not deleted, if ST is closed. So try to delete too old
+    ones upon startup. Wait 2 days to reduce the chance of deleting temporary
+    files of another open ST instance.
+    """
+    now = time.time()
+    max_age = 48 * 60 * 60
+    for name in os.listdir(TEMP_DIR):
+        try:
+            path = os.path.join(TEMP_DIR, name)
+            if now - os.path.getatime(path) > max_age:
+                    os.remove(path)
+        except OSError:
+            pass
 
 
 class TempFile(object):
