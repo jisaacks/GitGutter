@@ -2,7 +2,7 @@
 -------
 
   README:
-   - Add a reson for GitGutter to keep quite
+   - Add a reason for GitGutter to keep quiet
    - Fix documentation for `diff_algorithm`
 
   Enhancement:
