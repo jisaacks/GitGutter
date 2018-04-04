@@ -19,7 +19,7 @@ import sublime
 from . import path
 from . import utils
 from .promise import Promise
-from .tempfile import TempFile
+from .temp import TempFile
 
 STVER = int(sublime.version())
 ST3 = STVER >= 3000
