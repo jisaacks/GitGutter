@@ -97,7 +97,7 @@ div.git-gutter {
  * This rule is used to fix the font-family and font-size.
  **/
 .git-gutter div.toolbar symbol {
-    font-family: "Roboto Mono", "Segoe UI", monospace;
+    font-family: "Roboto Mono", "Segoe UI Symbol", monospace;
     font-size: 1.2rem;
     margin: 0;
     padding: 0.0rem 0.1rem 0.0rem 0.1em;
