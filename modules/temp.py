@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import errno
 import os
 import tempfile
 import time
@@ -51,17 +52,21 @@ class TempFile(object):
 
     def __init__(self, mode='r'):
         """Initialize TempFile object."""
-        try:
-            os.mkdir(TEMP_DIR)
-        except FileExistsError:
-            pass
-        self.name = tempfile.mktemp(dir=TEMP_DIR)
-        self._mode = mode
         self._file = None
         # Cache unlink to keep it available even though the 'os' module is
         # already None'd out whenever __del__() is called.
         # See python stdlib's tempfile.py for details.
         self._unlink = os.unlink
+
+        try:
+            os.mkdir(TEMP_DIR)
+        except OSError as e:
+            # Need to use OSError as FileExistsError is not supported by ST2!
+            if e.errno != errno.EEXIST:
+                raise
+
+        self.name = tempfile.mktemp(dir=TEMP_DIR)
+        self._mode = mode
 
     def __del__(self):
         """Destroy the TempFile object and remove the file from disk."""
