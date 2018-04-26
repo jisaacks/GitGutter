@@ -120,14 +120,14 @@ Some functions of GitGutter depend on the following external libraries to work p
 The most common reasons for the icons to not show up are:
 
 - GitGutter can't find the `git` executable on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
-- On Mac OS the "Xcode/iOS license" needs to be aggreed to make git work. 
+- On Mac OS the "Xcode/iOS license" needs to be aggreed to make git work.
 
 To check, whether git is found and working properly ...
 
 1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 2. Search for _GitGutter: Support Info_ and hit <kbd>Enter</kbd>.
 
-An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter. 
+An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter.
 
 If git was found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) and is working properly, the dialog contains a line like _git version 2.10.0.windows.1_. Otherwise some more detailed information about the reason for git not to work may be found in the console window, then. If not try again with `"debug": true` added to the GitGutter settings.
 
@@ -184,13 +184,13 @@ git 2.5+ allows configurations with .git directory not being located in the work
 If the `.git` directory is not located in the working tree root the following steps are required.
 
 1. Configure the repository to point to the custom working tree by calling
-   
+
    `git config --add core.worktree <path_to_worktree>`
 
    This step is required to let git use the custom working tree.
 
 2. Create a `.git` file in the root of the working tree which points to the repository's database.
-   
+
    ⓘ _The `.git` file must contain the line `gitdir: <path_to_git_dir>`._
 
    The file can be created using the following shell commands.
