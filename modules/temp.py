@@ -52,26 +52,25 @@ class TempFile(object):
 
     def __init__(self, mode='r'):
         """Initialize TempFile object."""
+        self.name = tempfile.mktemp(dir=TEMP_DIR)
         self._file = None
+        self._mode = mode
         # Cache unlink to keep it available even though the 'os' module is
         # already None'd out whenever __del__() is called.
         # See python stdlib's tempfile.py for details.
         self._unlink = os.unlink
 
         try:
-            os.mkdir(TEMP_DIR)
+            # ensure cache directory exists with write permissions
+            os.makedirs(TEMP_DIR, 0o555)
         except OSError as e:
-            # Need to use OSError as FileExistsError is not supported by ST2!
             if e.errno != errno.EEXIST:
                 raise
 
-        self.name = tempfile.mktemp(dir=TEMP_DIR)
-        self._mode = mode
-
     def __del__(self):
         """Destroy the TempFile object and remove the file from disk."""
-        self.close()
         try:
+            self.close()
             self._unlink(self.name)
         except OSError:
             pass
