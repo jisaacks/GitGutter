@@ -103,7 +103,7 @@ class GitGutterHandler(object):
         Returns:
             tuple: PEP-440 conform git version (major, minor, patch)
         """
-        if validate:
+        if validate and self._git_version is None:
             git_binary = self.settings.git_binary
             # Query git version synchronously
             git_version = self.execute([git_binary, '--version']) or ''
@@ -739,6 +739,9 @@ class GitGutterHandler(object):
         Returns:
             Promise: A promise to read the content of a file from git index.
         """
+        if not self._git_version:
+            return None
+
         args = [
             self.settings.git_binary,
             'cat-file',
@@ -808,11 +811,13 @@ class GitGutterHandler(object):
             else:
                 stdout, stderr = proc.communicate()
         except OSError as error:
+            self._git_version = None
             # Print out system error message in debug mode.
             if self.settings.get('debug'):
                 utils.log_message(
                     '"git %s" failed with "%s"' % (args[1], error))
         except TimeoutExpired:
+            self._git_version = None
             proc.kill()
             stdout, stderr = proc.communicate()
         # handle empty git output
