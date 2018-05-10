@@ -62,7 +62,7 @@ class TempFile(object):
 
         try:
             # ensure cache directory exists with write permissions
-            os.makedirs(TEMP_DIR, 0o555)
+            os.makedirs(TEMP_DIR, 0o700)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
