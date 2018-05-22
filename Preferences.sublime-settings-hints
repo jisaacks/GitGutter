@@ -47,31 +47,6 @@
     // "master@{upstream}": Compare against remote master branch
     "git_gutter_compare_against": "HEAD",
 
-    // Live mode evaluates changes every time file is modified,
-    // Set false to disable evaluation after each input
-    "git_gutter_live_mode": true,
-
-    // Focus Change mode evaluates changes every time a view gets the focus
-    // Set false to disable evaluation when changing views
-    "git_gutter_focus_change_mode": true,
-
-    // (ST3, Build 3119+ only)
-    // Enable an hover popup, which shows an diff of the
-    // changed lines.
-    "git_gutter_enable_hover_diff_popup": true,
-
-    // (ST3 only) The default mode to open the diff popup. This will be
-    // used for the hover popup, the command palette entry,
-    // and the default key binding.
-    // Possible modes are:
-    // "default": Show the previous git state in the popup
-    // "diff": Compare the git state to the working state and highlight
-    //         the differences in the popup
-    "git_gutter_diff_popup_default_mode": "default",
-
-    // Delay update of gutter icons by the following amount (in milliseconds).
-    "git_gutter_debounce_delay": 1000,
-
     // The algorithm used by git diff to determine the differences.
     // "default": let git decide (don't pass an algorithm)
     // "minimal": use minimal diff algorithm
@@ -87,8 +62,77 @@
     // Set "all" to ignore all white space
     "git_gutter_ignore_whitespace": "none",
 
+    //
+    // Gutter Area
+    //
+
+    // Delay update of gutter icons by the following amount (in milliseconds).
+    "git_gutter_debounce_delay": 1000,
+
+    // Focus Change mode evaluates changes every time a view gets the focus
+    // Set false to disable evaluation when changing views
+    "git_gutter_focus_change_mode": true,
+
+    // Live mode evaluates changes every time file is modified,
+    // Set false to disable evaluation after each input
+    "git_gutter_live_mode": true,
+
+    // Determines whether the git_gutter_next_change and git_gutter_prev_change
+    // commands wrap around on reaching the beginning/ending of the file.
+    "git_gutter_next_prev_change_wrap": true,
+
+    // Do not set GitGutter icons in these regions
+    // Useful for making sure GitGutter does not override other
+    // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
+    "git_gutter_protected_regions": [
+        "sublimelinter-warning-gutter-marks",
+        "sublimelinter-error-gutter-marks",
+        "sublime_linter.protected_regions",
+        "bookmarks",
+        "lsp_error",
+        "lsp_warning",
+        "lsp_info"
+    ],
+
+    // Show GitGutter information in the minimap
+    // =0: hide markers
+    // >0: width of markers
+    // -1: highlight full line
+    "git_gutter_show_in_minimap": 1,
+
     // Add a special marker on untracked files
     "git_gutter_show_markers_on_untracked_file": true,
+
+    // The gutter theme defines the icons to show for the different events.
+    "git_gutter_theme": "Default.gitgutter-theme"
+
+    //
+    // Diff Popup
+    //
+
+    // (ST3, Build 3119+ only)
+    // Enable an hover popup, which shows an diff of the
+    // changed lines.
+    "git_gutter_enable_hover_diff_popup": true,
+
+    // (ST3 only) The default mode to open the diff popup. This will be
+    // used for the hover popup, the command palette entry,
+    // and the default key binding.
+    // Possible modes are:
+    // "default": Show the previous git state in the popup
+    // "diff": Compare the git state to the working state and highlight
+    //         the differences in the popup
+    "git_gutter_diff_popup_default_mode": "default",
+
+    // Do not show the Diff Popup if a line contains these regions
+    // Useful for making sure GitGutter does not fight with other popups.
+    "git_gutter_diff_popup_protected_regions": [
+        "sublime_linter.protected_regions"
+    ],
+
+    //
+    // Status Bar
+    //
 
     // Determines whether GitGutter shows status information in the status bar.
     // Set false to disable status information.
@@ -120,37 +164,5 @@
         "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
         "{% if inserted != 0 %}, {{inserted}}+{% endif %}",
         "{% if modified != 0 %}, {{modified}}≠{% endif %}"
-    ],
-
-    // Show GitGutter information in the minimap
-    // =0: hide markers
-    // >0: width of markers
-    // -1: highlight full line
-    "git_gutter_show_in_minimap": 1,
-
-    // Determines whether the git_gutter_next_change and git_gutter_prev_change
-    // commands wrap around on reaching the beginning/ending of the file.
-    "git_gutter_next_prev_change_wrap": true,
-
-    // Do not set GitGutter icons in these regions
-    // Useful for making sure GitGutter does not override other
-    // regions, (e.g. Bookmarks, Linter/BracketHighlighter icons.)
-    "git_gutter_protected_regions": [
-        "sublimelinter-warning-gutter-marks",
-        "sublimelinter-error-gutter-marks",
-        "sublime_linter.protected_regions",
-        "bookmarks",
-        "lsp_error",
-        "lsp_warning",
-        "lsp_info"
-    ],
-
-    // Do not show the Diff Popup if a line contains these regions
-    // Useful for making sure GitGutter does not fight with other popups.
-    "git_gutter_diff_popup_protected_regions": [
-        "sublime_linter.protected_regions"
-    ],
-
-    // The gutter theme defines the icons to show for the different events.
-    "git_gutter_theme": "Default.gitgutter-theme"
+    ]
 }
