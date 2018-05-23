@@ -412,6 +412,9 @@ class GitGutterHandler(object):
 
         args = list(filter(None, (
             self._git_binary,
+            '-c', 'core.autocrlf=input',
+            '-c', 'core.eol=lf',
+            '-c', 'core.safecrlf=false',
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
@@ -751,6 +754,9 @@ class GitGutterHandler(object):
 
         args = [
             self._git_binary,
+            '-c', 'core.autocrlf=input',
+            '-c', 'core.eol=lf',
+            '-c', 'core.safecrlf=false',
             'cat-file',
             # smudge filters are supported with git 2.11.0+ only
             '--filters' if self._git_version >= (2, 11, 0) else '-p',
