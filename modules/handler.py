@@ -20,9 +20,8 @@ from . import path
 from . import utils
 from .promise import Promise
 from .temp import TempFile
-
-STVER = int(sublime.version())
-ST3 = STVER >= 3000
+from .utils import ST3
+from .utils import WIN32
 
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
@@ -792,7 +791,7 @@ class GitGutterHandler(object):
 
         try:
             startupinfo = None
-            if os.name == 'nt':
+            if WIN32:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             if self._git_env is None:

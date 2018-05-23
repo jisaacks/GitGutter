@@ -8,7 +8,9 @@ except ImportError:
 
 import sublime
 
-_ICON_EXT = '.png' if int(sublime.version()) >= 3000 else ''
+from .utils import ST3
+
+_ICON_EXT = '.png' if ST3 else ''
 
 
 class GitGutterShowDiff(object):
