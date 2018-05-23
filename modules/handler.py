@@ -80,6 +80,8 @@ class GitGutterHandler(object):
         self._git_compared_commit = None
         # cached git diff result for diff popup
         self._git_diff_cache = ''
+        # cached git binary checked for version
+        self._git_binary = None
         # PEP-440 conform git version (major, minor, patch)
         self._git_version = None
         # local dictionary of environment variables
@@ -102,23 +104,29 @@ class GitGutterHandler(object):
         Returns:
             tuple: PEP-440 conform git version (major, minor, patch)
         """
-        if validate and self._git_version is None:
-            git_binary = self.settings.git_binary
+        if not validate:
+            return self._git_version
+
+        # check if the git binary setting has changed
+        git_binary = self.settings.git_binary
+        if self._git_binary != git_binary:
+            self._git_binary = git_binary
+            self._git_version = None
+
+        if self._git_version is None:
             # Query git version synchronously
-            git_version = self.execute([git_binary, '--version']) or ''
+            git_version = self.execute([self._git_binary, '--version']) or ''
             # Parse version string like (git version 2.12.2.windows.1)
             match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
             if match:
                 # PEP-440 conform git version (major, minor, patch)
                 self._git_version = tuple(int(g) for g in match.groups())
-                if git_binary in self._missing_binaries:
-                    utils.log_message(git_binary + ' is back on duty!')
-                    self._missing_binaries.discard(git_binary)
-            else:
-                self._git_version = None
-                if git_binary not in self._missing_binaries:
-                    utils.log_message(git_binary + ' not found or working!')
-                    self._missing_binaries.add(git_binary)
+                if self._git_binary in self._missing_binaries:
+                    utils.log_message(self._git_binary + ' is back on duty!')
+                    self._missing_binaries.discard(self._git_binary)
+            elif self._git_binary not in self._missing_binaries:
+                utils.log_message(self._git_binary + ' not found or working!')
+                self._missing_binaries.add(self._git_binary)
         return self._git_version
 
     @property
@@ -403,7 +411,7 @@ class GitGutterHandler(object):
             return self.process_diff(self._git_diff_cache)
 
         args = list(filter(None, (
-            self.settings.git_binary,
+            self._git_binary,
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
@@ -594,7 +602,7 @@ class GitGutterHandler(object):
                 return bool(results)
 
             args = [
-                self.settings.git_binary,
+                self._git_binary,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
                 os.path.join(self._git_tree, self._git_path),
@@ -612,7 +620,7 @@ class GitGutterHandler(object):
             <date> (<time> ago)
         """
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'log', '--all',
             '--pretty=%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
@@ -629,7 +637,7 @@ class GitGutterHandler(object):
             <date> (<time> ago)
         """
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'log',
             '--pretty=%at\a%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000',
@@ -640,7 +648,7 @@ class GitGutterHandler(object):
     def git_branches(self):
         """Query all branches of the file's repository."""
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'for-each-ref',
             '--sort=-committerdate', (
                 '--format=%(refname)\a%(objectname:short) | %(subject)'
@@ -657,7 +665,7 @@ class GitGutterHandler(object):
         is valid for annoted and later for simple tags.
         """
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'for-each-ref',
             '--sort=-refname', (
                 '--format=%(refname)\a%(objectname:short) | %(subject)'
@@ -705,7 +713,7 @@ class GitGutterHandler(object):
             return self._git_status
 
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             '-c', 'color.status=never',
             'status', '-b', '-s', '-u'
         ]
@@ -718,7 +726,7 @@ class GitGutterHandler(object):
             compare_against  - The reference to compare against if not a hash.
         """
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'rev-parse',
             compare_against
         ]
@@ -742,7 +750,7 @@ class GitGutterHandler(object):
             return None
 
         args = [
-            self.settings.git_binary,
+            self._git_binary,
             'cat-file',
             # smudge filters are supported with git 2.11.0+ only
             '--filters' if self._git_version >= (2, 11, 0) else '-p',
