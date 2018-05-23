@@ -423,13 +423,14 @@ or it may be a dictionary keyed off what sublime.platform() returns, so it may b
 "git_binary": {
   "default": "",
   "linux": "/usr/bin/git",
+  "osx":  "/usr/bin/git",
   "windows": "C:/Program Files/Git/cmd/git.exe"
 }
 ```
 
-It is valid to use environment variables in the setting value, and they will be expanded appropriately.
+👉 It is valid to use environment variables in the setting value, and they will be expanded appropriately.
 
-In a POSIX environment you can run `which git` to find the path to git if it is in your path.  On Windows, you can use `where git` to do the equivalent.
+👉 In a POSIX environment you can run `which git` to find the path to git if it is in your path. On Windows, you can use `where git` to do the equivalent.
 
 
 #### Git Environment Variables
