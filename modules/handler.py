@@ -19,6 +19,7 @@ import sublime
 from . import path
 from . import utils
 from .promise import Promise
+from .promise import PromiseError
 from .temp import TempFile
 from .utils import ST3
 from .utils import WIN32
@@ -39,6 +40,11 @@ _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 #         If a tracked remote exists, the number of commits the local branch is
 #         ahead and behind the remote is optionally available, too.
 _STATUS_RE = re.compile(r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+
+try:
+    set_timeout = sublime.set_timeout_async
+except AttributeError:
+    set_timeout = sublime.set_timeout
 
 
 class GitGutterHandler(object):
@@ -349,39 +355,29 @@ class GitGutterHandler(object):
         if self._git_compared_commit == compared_id:
             return Promise.resolve(False)
         return self.git_read_file(compared_id).then(
-            functools.partial(self._write_git_file, compared_id))
+            functools.partial(self._check_git_file, compared_id))
 
-    def _write_git_file(self, compared_id, contents):
-        """Extract output and write it to a temporary file.
+    def _check_git_file(self, compared_id, output):
+        """Check the result of the git cat-file command.
 
         The function resolves the promise with True to indicate the
         updated git file.
 
         Arguments:
             compared_id (string): The new compare target's object id to store.
-            contents (string): The file contents read from git.
+            output (integer): The size of the file.
+                   (PromiseError): An error object indicating failure.
 
         Returns:
             bool: True if file was written to disc successfully.
         """
-        try:
-            self.git_tracked = bool(contents)
-            if self.git_tracked:
-                # Mangle end of lines
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-                # Create temporary file
-                if not self._git_temp_file:
-                    self._git_temp_file = TempFile(mode='wb')
-                # Write content to temporary file
-                with self._git_temp_file as file:
-                    file.write(contents)
-            # Indicate success.
-            self._git_compared_commit = compared_id
-            return self.git_tracked
-        except OSError as error:
-            print('GitGutter failed to create git cache: %s' % error)
+        if isinstance(output, PromiseError):
+            utils.log_message('failed to create git cache! %s' % output)
             return False
+
+        self._git_compared_commit = compared_id
+        self.git_tracked = output > 0
+        return self.git_tracked
 
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
@@ -748,10 +744,14 @@ class GitGutterHandler(object):
 
         Returns:
             Promise: A promise to read the content of a file from git index.
-        """
-        if not self._git_version:
-            return None
 
+            The Promise resolves with the number of bytes written to the cache
+            in case of success.
+
+            The Promise resolves with PromiseError if the cache file could not
+            be created, opened or written data to, if git failed to run or
+            returned a none-zero exit code other than 128 (file not found).
+        """
         args = [
             self._git_binary,
             '-c', 'core.autocrlf=input',
@@ -762,7 +762,46 @@ class GitGutterHandler(object):
             '--filters' if self._git_version >= (2, 11, 0) else '-p',
             ':'.join((commit, self._git_path))
         ]
-        return self.execute_async(args=args, decode=False)
+
+        if not self._git_temp_file:
+            self._git_temp_file = TempFile(mode='wb')
+
+        try:
+            proc = self.popen(args, self._git_temp_file.open())
+        except Exception as error:
+            self._git_temp_file.close()
+            return Promise.resolve(PromiseError(str(error)))
+
+        def poll(proc, resolve):
+            """Poll the process and resolve promise if finished."""
+            try:
+                returncode = proc.poll()
+                if returncode is None:
+                    # git is still busy, come here later again
+                    set_timeout(functools.partial(poll, proc, resolve), 50)
+                    return None
+
+                # file is still open for writing at this point
+                with self._git_temp_file as file:
+                    if returncode == 0:
+                        # resolve with the number of bytes got from git cat-file
+                        return resolve(file.tell())
+                    elif returncode == 128:
+                        # resolve with 0 bytes if file was not found in repo.
+                        return resolve(0)
+                    return resolve(PromiseError("git returned error %d: %s" % (
+                        returncode, proc.stderr.read().decode('utf-8'))))
+
+            except Exception as error:
+                # close the temporary file if anything goes wrong
+                self._git_temp_file.close()
+                raise
+
+        def executor(resolve):
+            """Start polling the process to query for its finish."""
+            set_timeout(functools.partial(poll, proc, resolve), 50)
+
+        return Promise(executor)
 
     def execute_async(self, args, decode=True):
         """Execute a git command asynchronously and return a Promise.

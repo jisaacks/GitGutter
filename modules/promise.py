@@ -3,6 +3,16 @@ import functools
 import threading
 
 
+class PromiseError(Exception):
+    """A failed Promise is to be resolved with this PromiseError.
+
+    Normal errors and exceptions can't be catched by the applicaiton due to
+    multithreading. Therefore a function should return PromiseError to indicate
+    a failure to be handled by `.then()`
+    """
+    pass
+
+
 class Promise(object):
     """A simple implementation of the Promise specification.
 
