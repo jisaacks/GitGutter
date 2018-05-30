@@ -4,7 +4,6 @@ import functools
 import os
 import re
 import subprocess
-import threading
 
 try:
     from subprocess import TimeoutExpired
@@ -21,7 +20,6 @@ from . import utils
 from .promise import Promise
 from .promise import PromiseError
 from .temp import TempFile
-from .utils import ST3
 from .utils import WIN32
 
 # The view class has a method called 'change_count()'
@@ -40,6 +38,8 @@ _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 #         If a tracked remote exists, the number of commits the local branch is
 #         ahead and behind the remote is optionally available, too.
 _STATUS_RE = re.compile(r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+
+_BUFSIZE = 2**15
 
 try:
     set_timeout = sublime.set_timeout_async
@@ -752,22 +752,21 @@ class GitGutterHandler(object):
             be created, opened or written data to, if git failed to run or
             returned a none-zero exit code other than 128 (file not found).
         """
-        args = [
-            self._git_binary,
-            '-c', 'core.autocrlf=input',
-            '-c', 'core.eol=lf',
-            '-c', 'core.safecrlf=false',
-            'cat-file',
-            # smudge filters are supported with git 2.11.0+ only
-            '--filters' if self._git_version >= (2, 11, 0) else '-p',
-            ':'.join((commit, self._git_path))
-        ]
-
         if not self._git_temp_file:
             self._git_temp_file = TempFile(mode='wb')
 
         try:
-            proc = self.popen(args, self._git_temp_file.open())
+            proc = self.popen([
+                self._git_binary,
+                '-c', 'core.autocrlf=input',
+                '-c', 'core.eol=lf',
+                '-c', 'core.safecrlf=false',
+                'cat-file',
+                # smudge filters are supported with git 2.11.0+ only
+                '--filters' if self._git_version >= (2, 11, 0) else '-p',
+                ':'.join((commit, self._git_path))
+            ], stdout=self._git_temp_file.open())
+
         except Exception as error:
             self._git_temp_file.close()
             return Promise.resolve(PromiseError(str(error)))
@@ -814,18 +813,52 @@ class GitGutterHandler(object):
         Returns:
             Promise: A promise to return the git output in the future.
         """
+        try:
+            proc = self.popen(args)
+        except Exception as error:
+            utils.log_message(str(error))
+            return Promise.resolve(None)
+
+        # inject some attributes into the proc object
+        setattr(proc, 'buffer', b'')
+
+        def poll(proc, resolve, decode):
+            """Poll the process and resolve promise if finished.
+
+            Arguments:
+                proc (subprocess.Popen):
+                    The running process' object to quiery for completion
+                resolve (callable):
+                    The function to be called to resolve the Promise.
+                decode (bool):
+                    True to decode the binary output to text.
+            """
+            chunk = proc.stdout.read(_BUFSIZE)
+            if chunk:
+                # need to read from stdout as process won't exit if buffer
+                # is full.
+                proc.buffer += chunk
+                if len(chunk) == _BUFSIZE:
+                    # git is still busy, come here later again
+                    set_timeout(functools.partial(
+                        poll, proc, resolve, decode), 20)
+                    return
+
+            if not proc.buffer and self.settings.get('debug'):
+                proc.wait()
+                # 0 = ok, 128 = file not found
+                if proc.returncode not in (0, 128):
+                    utils.log_message('%s failed with "%s"' % (
+                        ' '.join(args), proc.stderr.read().decode('utf-8').strip()))
+
+            # return decoded ouptut using utf-8 or binary output
+            if decode and proc.buffer is not None:
+                return resolve(proc.buffer.decode('utf-8').strip())
+            return resolve(proc.buffer)
+
         def executor(resolve):
-
-            def do_resolve():
-                """Resolve the promise with the output of git."""
-                return resolve(self.execute(args, decode))
-
-            if ST3:
-                # use real threads to run git in the background
-                threading.Thread(target=do_resolve).start()
-            else:
-                # ST2 API does not support threads
-                sublime.set_timeout(do_resolve, 10)
+            """Start polling the process to query for its finish."""
+            set_timeout(functools.partial(poll, proc, resolve, decode), 20)
 
         return Promise(executor)
 
@@ -904,6 +937,7 @@ class GitGutterHandler(object):
             args=args,
             cwd=self._git_tree,
             env=self._git_env,
+            bufsize=_BUFSIZE,
             startupinfo=startupinfo,
             stdin=subprocess.PIPE,   # python 3.3 bug on Win7
             stderr=subprocess.PIPE,
