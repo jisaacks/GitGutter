@@ -420,7 +420,7 @@ class GitGutterHandler(object):
         if not self._git_temp_file or not self._view_temp_file:
             return self.process_diff(self._git_diff_cache)
 
-        args = list(filter(None, (
+        return self.execute_async(list(filter(None, (
             self._git_binary,
             '-c', 'core.autocrlf=input',
             '-c', 'core.eol=lf',
@@ -430,9 +430,7 @@ class GitGutterHandler(object):
             self.settings.diff_algorithm,
             self._git_temp_file.name,
             self._view_temp_file.name,
-        )))
-        return self.execute_async(
-            args=args, decode=False).then(self._decode_diff)
+        ))), decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
         encoding = self._get_view_encoding()
@@ -614,14 +612,12 @@ class GitGutterHandler(object):
                 """
                 return bool(results)
 
-            args = [
+            return self.execute_async(list(filter(None, [
                 self._git_binary,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
                 os.path.join(self._git_tree, self._git_path),
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            return self.execute_async(args).then(is_nonempty)
+            ]))).then(is_nonempty)
         return Promise.resolve(False)
 
     def git_commits(self):
@@ -632,13 +628,12 @@ class GitGutterHandler(object):
             <name> <email>
             <date> (<time> ago)
         """
-        args = [
+        return self.execute_async([
             self._git_binary,
             'log', '--all',
             '--pretty=%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000'
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_file_commits(self):
         r"""Query all commits with changes to the attached file.
@@ -649,26 +644,24 @@ class GitGutterHandler(object):
             <name> <email>
             <date> (<time> ago)
         """
-        args = [
+        return self.execute_async([
             self._git_binary,
             'log',
             '--pretty=%at\a%h | %s\a%an <%aE>\a%ad (%ar)',
             '--date=local', '--max-count=9000',
             '--', self._git_path
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_branches(self):
         """Query all branches of the file's repository."""
-        args = [
+        return self.execute_async([
             self._git_binary,
             'for-each-ref',
             '--sort=-committerdate', (
                 '--format=%(refname)\a%(objectname:short) | %(subject)'
                 '\a%(committername) %(committeremail)\a%(committerdate)'),
             'refs/heads/'
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_tags(self):
         """Query all tags of the file's repository.
@@ -677,7 +670,7 @@ class GitGutterHandler(object):
         Both tagger- and committer- name/date are read because the first one
         is valid for annoted and later for simple tags.
         """
-        args = [
+        return self.execute_async([
             self._git_binary,
             'for-each-ref',
             '--sort=-refname', (
@@ -686,8 +679,7 @@ class GitGutterHandler(object):
                 '\a%(committername) %(committeremail)\a%(committerdate)'
             ),
             'refs/tags/'
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_branch_status(self):
         """Query the current status of the file's repository."""
@@ -725,12 +717,11 @@ class GitGutterHandler(object):
             }
             return self._git_status
 
-        args = [
+        return self.execute_async([
             self._git_binary,
             '-c', 'color.status=never',
             'status', '-b', '-s', '-u'
-        ]
-        return self.execute_async(args).then(parse_output)
+        ]).then(parse_output)
 
     def git_compare_commit(self, compare_against):
         """Query the commit hash of the compare target.
@@ -738,12 +729,8 @@ class GitGutterHandler(object):
         Arguments:
             compare_against  - The reference to compare against if not a hash.
         """
-        args = [
-            self._git_binary,
-            'rev-parse',
-            compare_against
-        ]
-        return self.execute_async(args)
+        return self.execute_async([
+            self._git_binary, 'rev-parse', compare_against])
 
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
