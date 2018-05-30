@@ -92,6 +92,8 @@ class GitGutterHandler(object):
         self._git_version = None
         # local dictionary of environment variables
         self._git_env = None
+        # git is accessed via WSL on Windows 10
+        self._git_wsl = False
 
     def version(self, validate):
         """Return git executable version.
@@ -118,6 +120,8 @@ class GitGutterHandler(object):
         if self._git_binary != git_binary:
             self._git_binary = git_binary
             self._git_version = None
+            # a unix like path on windows means running git via WSL
+            self._git_wsl = WIN32 and self._git_binary.startswith('/')
 
         if self._git_version is None:
             # Query git version synchronously
@@ -178,6 +182,34 @@ class GitGutterHandler(object):
                 self._git_tree, self._git_path = path.split_work_tree(file_name)
                 self.invalidate_git_file()
         return self._git_tree
+
+    def work_tree_supported(self):
+        """The path of the working directory is accessible by git.
+
+        Windows Subsystem for Linux automatically maps local drive letters to
+        /mnt only. UNC paths would need to be mounted manually, which is not
+        supported by GitGutter at the moment.
+
+        Returns:
+            bool:
+                True if not running in WSL mode or path is a local drive
+                False if the working tree is no local drive in WSL mode.
+        """
+        return not self._git_wsl or self._git_tree and self._git_tree[1] == ':'
+
+    def translate_path_to_wsl(self, filename):
+        """Translate filename to a WSL compatible unix path on demand.
+
+        Arguments:
+            filename (string):
+                The path string to optionally translate to unix style.
+
+        Returns:
+            string:
+                A unix like path if git is executed via Windows Subsystem for
+                Linux (WSL) on a Windows 10 machine or `filename` otherwise.
+        """
+        return path.translate_to_wsl(filename) if self._git_wsl else filename
 
     def get_compare_against(self):
         """Return the compare target for a view.
@@ -428,8 +460,8 @@ class GitGutterHandler(object):
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
-            self._git_temp_file.name,
-            self._view_temp_file.name,
+            self.translate_path_to_wsl(self._git_temp_file.name),
+            self.translate_path_to_wsl(self._view_temp_file.name)
         ))), decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
@@ -616,7 +648,8 @@ class GitGutterHandler(object):
                 self._git_binary,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
-                os.path.join(self._git_tree, self._git_path),
+                self.translate_path_to_wsl(
+                    os.path.join(self._git_tree, self._git_path)),
             ]))).then(is_nonempty)
         return Promise.resolve(False)
 
@@ -631,7 +664,7 @@ class GitGutterHandler(object):
         return self.execute_async([
             self._git_binary,
             'log', '--all',
-            '--pretty=%h | %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty="%h | %s\a%an <%aE>\a%ad (%ar)"',
             '--date=local', '--max-count=9000'
         ])
 
@@ -647,20 +680,20 @@ class GitGutterHandler(object):
         return self.execute_async([
             self._git_binary,
             'log',
-            '--pretty=%at\a%h | %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty="%at\a%h | %s\a%an <%aE>\a%ad (%ar)"',
             '--date=local', '--max-count=9000',
             '--', self._git_path
         ])
 
     def git_branches(self):
         """Query all branches of the file's repository."""
+        template = (
+            '--format="%(refname)\a%(objectname:short) | %(subject)'
+            '\a%(committername) %(committeremail)\a%(committerdate)"'
+        )
         return self.execute_async([
             self._git_binary,
-            'for-each-ref',
-            '--sort=-committerdate', (
-                '--format=%(refname)\a%(objectname:short) | %(subject)'
-                '\a%(committername) %(committeremail)\a%(committerdate)'),
-            'refs/heads/'
+            'for-each-ref', '--sort=-committerdate', template, 'refs/heads/'
         ])
 
     def git_tags(self):
@@ -670,15 +703,14 @@ class GitGutterHandler(object):
         Both tagger- and committer- name/date are read because the first one
         is valid for annoted and later for simple tags.
         """
+        template = (
+            '--format="%(refname)\a%(objectname:short) | %(subject)'
+            '\a%(taggername) %(taggeremail)\a%(taggerdate)'
+            '\a%(committername) %(committeremail)\a%(committerdate)"'
+        )
         return self.execute_async([
             self._git_binary,
-            'for-each-ref',
-            '--sort=-refname', (
-                '--format=%(refname)\a%(objectname:short) | %(subject)'
-                '\a%(taggername) %(taggeremail)\a%(taggerdate)'
-                '\a%(committername) %(committeremail)\a%(committerdate)'
-            ),
-            'refs/tags/'
+            'for-each-ref', '--sort=-refname', template, 'refs/tags/'
         ])
 
     def git_branch_status(self):
@@ -881,6 +913,10 @@ class GitGutterHandler(object):
         if WIN32:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+        # run git through wsl.exe
+        if self._git_wsl:
+            args.insert(0, "wsl")
 
         # update private environment
         if self._git_env is None:
