@@ -804,40 +804,69 @@ class GitGutterHandler(object):
         stdout, stderr = None, None
 
         try:
-            startupinfo = None
-            if WIN32:
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            if self._git_env is None:
-                self._git_env = os.environ.copy()
-                for key, value in self.settings.get('env', {}).items():
-                    if value is None:
-                        del self._git_env[key]
-                    else:
-                        self._git_env[key] = str(value)
-            proc = subprocess.Popen(
-                args=args, cwd=self._git_tree, startupinfo=startupinfo,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE, env=self._git_env)
+            proc = self.popen(args)
             if _HAVE_TIMEOUT:
                 stdout, stderr = proc.communicate(timeout=30)
             else:
                 stdout, stderr = proc.communicate()
+
         except OSError as error:
             self._git_version = None
             # Print out system error message in debug mode.
             if self.settings.get('debug'):
                 utils.log_message(
                     '"git %s" failed with "%s"' % (args[1], error))
+            return None
+
         except TimeoutExpired:
             self._git_version = None
             proc.kill()
             stdout, stderr = proc.communicate()
+
         # handle empty git output
         if stderr and not stdout and self.settings.get('debug'):
             utils.log_message('"git %s" failed with "%s"' % (
                 args[1], stderr.decode('utf-8').strip()))
+
         # return decoded ouptut using utf-8 or binary output
         if decode and stdout is not None:
             stdout = stdout.decode('utf-8').strip()
         return stdout
+
+    def popen(self, args, stdout=subprocess.PIPE):
+        """Prepare the environment and spawn the subprocess.
+
+        Arguments:
+            args (list):
+                A list of arguments to pass to `subprocess.Popen`.
+            stdout (int or stream):
+                The target of the output of the spawned subprocess.
+                It defaults to `subprocess.PIPE` to retrieve output via stdout,
+                but can also be a filestream to directly write the content to
+                a file on disk.
+        Returns:
+            subprocess.Popen: The object of the spawned subprocess.
+        """
+        startupinfo = None
+        if WIN32:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+        # update private environment
+        if self._git_env is None:
+            self._git_env = os.environ.copy()
+            for key, value in self.settings.get('env', {}).items():
+                if value is None:
+                    del self._git_env[key]
+                else:
+                    self._git_env[key] = str(value)
+
+        return subprocess.Popen(
+            args=args,
+            cwd=self._git_tree,
+            env=self._git_env,
+            startupinfo=startupinfo,
+            stdin=subprocess.PIPE,   # python 3.3 bug on Win7
+            stderr=subprocess.PIPE,
+            stdout=stdout
+        )
