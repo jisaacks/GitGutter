@@ -121,7 +121,19 @@ class GitGutterHandler(object):
 
         if self._git_version is None:
             # Query git version synchronously
-            git_version = self.execute([self._git_binary, '--version']) or ''
+            try:
+                proc = self.popen([self._git_binary, '--version'])
+                if _HAVE_TIMEOUT:
+                    proc.wait(0.5)
+                git_version = proc.stdout.read().decode('utf-8')
+
+            except TimeoutExpired as error:
+                proc.kill()
+                git_version = proc.stdout.read().decode('utf-8')
+
+            except Exception as error:
+                git_version = ''
+
             # Parse version string like (git version 2.12.2.windows.1)
             match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
             if match:
@@ -130,9 +142,11 @@ class GitGutterHandler(object):
                 if self._git_binary in self._missing_binaries:
                     utils.log_message(self._git_binary + ' is back on duty!')
                     self._missing_binaries.discard(self._git_binary)
+
             elif self._git_binary not in self._missing_binaries:
                 utils.log_message(self._git_binary + ' not found or working!')
                 self._missing_binaries.add(self._git_binary)
+
         return self._git_version
 
     @property
@@ -861,49 +875,6 @@ class GitGutterHandler(object):
             set_timeout(functools.partial(poll, proc, resolve, decode), 20)
 
         return Promise(executor)
-
-    def execute(self, args, decode=True):
-        """Execute a git command synchronously and return its output.
-
-        Arguments:
-            args (list): The command line arguments used to run git.
-            decode (bool): If True the git's output is decoded assuming utf-8
-                      which is the default output encoding of git.
-
-        Returns:
-            string: The decoded or undecoded output read from stdout.
-        """
-        stdout, stderr = None, None
-
-        try:
-            proc = self.popen(args)
-            if _HAVE_TIMEOUT:
-                stdout, stderr = proc.communicate(timeout=30)
-            else:
-                stdout, stderr = proc.communicate()
-
-        except OSError as error:
-            self._git_version = None
-            # Print out system error message in debug mode.
-            if self.settings.get('debug'):
-                utils.log_message(
-                    '"git %s" failed with "%s"' % (args[1], error))
-            return None
-
-        except TimeoutExpired:
-            self._git_version = None
-            proc.kill()
-            stdout, stderr = proc.communicate()
-
-        # handle empty git output
-        if stderr and not stdout and self.settings.get('debug'):
-            utils.log_message('"git %s" failed with "%s"' % (
-                args[1], stderr.decode('utf-8').strip()))
-
-        # return decoded ouptut using utf-8 or binary output
-        if decode and stdout is not None:
-            stdout = stdout.decode('utf-8').strip()
-        return stdout
 
     def popen(self, args, stdout=subprocess.PIPE):
         """Prepare the environment and spawn the subprocess.
