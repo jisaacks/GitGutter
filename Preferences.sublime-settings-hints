@@ -104,7 +104,7 @@
     "git_gutter_show_markers_on_untracked_file": true,
 
     // The gutter theme defines the icons to show for the different events.
-    "git_gutter_theme": "Default.gitgutter-theme"
+    "git_gutter_theme": "Default.gitgutter-theme",
 
     //
     // Diff Popup
