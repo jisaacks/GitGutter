@@ -200,7 +200,7 @@ class GitGutterOpenFileCommand(sublime_plugin.ApplicationCommand):
 
     @staticmethod
     def is_visible():
-        """Return True to to show the command in command pallet and menu."""
+        """Return True to to show the command in command palette and menu."""
         return STVER < 3124
 
 
@@ -217,5 +217,5 @@ class GitGutterEditSettingsCommand(sublime_plugin.ApplicationCommand):
 
     @staticmethod
     def is_visible():
-        """Return True to to show the command in command pallet and menu."""
+        """Return True to to show the command in command palette and menu."""
         return STVER >= 3124

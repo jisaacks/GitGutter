@@ -34,7 +34,7 @@ A [Sublime Text 2/3](http://www.sublimetext.com) plug-in to show information abo
 It is highly recommended to install GitGutter with [Package Control](https://packagecontrol.io) as it automatically installs required [dependencies](#dependencies) and keeps all packages up to date.
 
 1. [Install Package Control](https://packagecontrol.io/installation) if you haven't yet.
-2. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
+2. Open the Command Palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 3. Search for _Package Control: Install Package_ and hit <kbd>Enter</kbd>.
 4. Type `GitGutter` and press <kbd>Enter</kbd> to install it.
 
@@ -124,7 +124,7 @@ The most common reasons for the icons to not show up are:
 
 To check, whether git is found and working properly ...
 
-1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
+1. Open the Command Palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 2. Search for _GitGutter: Support Info_ and hit <kbd>Enter</kbd>.
 
 An dialog is displayed with version information of Sublime Text and all packages being used by GitGutter.
@@ -213,7 +213,7 @@ If the `.git` directory is not located in the working tree root the following st
 
 ### Diff Popup
 
-The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from command palette by `GitGutter: Show Diff Popup` or via a key binding.
+The diff popup appears by hovering the mouse over the gutter changes on Sublime Text 3 or can be called from Command Palette by `GitGutter: Show Diff Popup` or via a key binding.
 
 ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
@@ -280,7 +280,7 @@ GitGutter compares the working copy against the HEAD by default.
 
 To change the compare option:
 
-1. Open the command palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
+1. Open the Command Palette (<kbd>Ctrl+Shift+P</kbd> for Windows/Linux, <kbd>Cmd+Shift+P</kbd> for Mac OS)
 2. Start typing `GitGutter: Compare against`
 3. Select one of the 6 options with the keyboard and press <kbd>Enter</kbd>.
 4. Choose the branch/tag/commit to compare against.
@@ -346,7 +346,7 @@ GitGutter evaluates changes every time the file is modified by default. Set `fal
 
 ⓘ requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+
 
-GitGutter shows a diff popup, when hovering over changes in the gutter. Set `false` to disable this popup. You can still open it with a key binding and from the command palette.
+GitGutter shows a diff popup, when hovering over changes in the gutter. Set `false` to disable this popup. You can still open it with a key binding and from the Command Palette.
 
 
 #### Diff Popup Default Mode
@@ -382,7 +382,7 @@ To avoid GitGutter's diff popup from figting with other popups while hovering th
 
 👉 You will need to figure out the names of the regions to protect.
 
-👉 You can still open the diff popup via key binding or command pallet.
+👉 You can still open the diff popup via key binding or Command Palette.
 
 
 #### Untracked Files

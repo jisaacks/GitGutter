@@ -34,7 +34,7 @@ _2. an open issue exists for your problem._
 > 
 >   `Preferences->Package Settings->GitGutter->Support Info`.
 > 
-> or from the command pallet:
+> or from the Command Palette:
 > 
 >   `GitGutter: Support Info`
 > 
