@@ -94,3 +94,6 @@ class TempFile(object):
         if self._file is not None:
             self._file.close()
             self._file = None
+
+    def tell(self):
+        return self._file.tell()

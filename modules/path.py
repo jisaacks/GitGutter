@@ -92,3 +92,26 @@ def split_work_tree(file_path):
                     file_path, path).replace('\\', '/'))
             path, name = os.path.split(path)
     return (None, None)
+
+
+def translate_to_wsl(path):
+    """Translate a windows path to unix path for WSL.
+
+    WSL stands for Windows Subsystem for Linux and allows to run native linux
+    programs on windows. In order to access Windows' filesystem the local
+    drives are mounted to /mnt/<Drive> within the WSL shell. This little helper
+    function maps a windows path to such a WSL compatible unix path in order
+    to run WSL commands seemlessly.
+
+    Note:
+        This function works for local files only at the moment.
+
+    Arguments:
+        path (string): the windows path to translate to unix path
+
+    Returns
+        string: the unix path to be used by calls to programs running on WSL
+    """
+    if path[1] != ':':
+        raise FileNotFoundError("UNC paths are not supported by WSL!")
+    return '/mnt/{0}{1}'.format(path[0].lower(), path[2:].replace('\\', '/'))

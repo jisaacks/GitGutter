@@ -4,7 +4,6 @@ import functools
 import os
 import re
 import subprocess
-import threading
 
 try:
     from subprocess import TimeoutExpired
@@ -19,8 +18,8 @@ import sublime
 from . import path
 from . import utils
 from .promise import Promise
+from .promise import PromiseError
 from .temp import TempFile
-from .utils import ST3
 from .utils import WIN32
 
 # The view class has a method called 'change_count()'
@@ -39,6 +38,13 @@ _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 #         If a tracked remote exists, the number of commits the local branch is
 #         ahead and behind the remote is optionally available, too.
 _STATUS_RE = re.compile(r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+
+_BUFSIZE = 2**15
+
+try:
+    set_timeout = sublime.set_timeout_async
+except AttributeError:
+    set_timeout = sublime.set_timeout
 
 
 class GitGutterHandler(object):
@@ -86,6 +92,8 @@ class GitGutterHandler(object):
         self._git_version = None
         # local dictionary of environment variables
         self._git_env = None
+        # git is accessed via WSL on Windows 10
+        self._git_wsl = False
 
     def version(self, validate):
         """Return git executable version.
@@ -112,10 +120,24 @@ class GitGutterHandler(object):
         if self._git_binary != git_binary:
             self._git_binary = git_binary
             self._git_version = None
+            # a unix like path on windows means running git via WSL
+            self._git_wsl = WIN32 and self._git_binary.startswith('/')
 
         if self._git_version is None:
             # Query git version synchronously
-            git_version = self.execute([self._git_binary, '--version']) or ''
+            try:
+                proc = self.popen([self._git_binary, '--version'])
+                if _HAVE_TIMEOUT:
+                    proc.wait(0.5)
+                git_version = proc.stdout.read().decode('utf-8')
+
+            except TimeoutExpired as error:
+                proc.kill()
+                git_version = proc.stdout.read().decode('utf-8')
+
+            except Exception as error:
+                git_version = ''
+
             # Parse version string like (git version 2.12.2.windows.1)
             match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
             if match:
@@ -124,9 +146,11 @@ class GitGutterHandler(object):
                 if self._git_binary in self._missing_binaries:
                     utils.log_message(self._git_binary + ' is back on duty!')
                     self._missing_binaries.discard(self._git_binary)
+
             elif self._git_binary not in self._missing_binaries:
                 utils.log_message(self._git_binary + ' not found or working!')
                 self._missing_binaries.add(self._git_binary)
+
         return self._git_version
 
     @property
@@ -158,6 +182,34 @@ class GitGutterHandler(object):
                 self._git_tree, self._git_path = path.split_work_tree(file_name)
                 self.invalidate_git_file()
         return self._git_tree
+
+    def work_tree_supported(self):
+        """The path of the working directory is accessible by git.
+
+        Windows Subsystem for Linux automatically maps local drive letters to
+        /mnt only. UNC paths would need to be mounted manually, which is not
+        supported by GitGutter at the moment.
+
+        Returns:
+            bool:
+                True if not running in WSL mode or path is a local drive
+                False if the working tree is no local drive in WSL mode.
+        """
+        return not self._git_wsl or self._git_tree and self._git_tree[1] == ':'
+
+    def translate_path_to_wsl(self, filename):
+        """Translate filename to a WSL compatible unix path on demand.
+
+        Arguments:
+            filename (string):
+                The path string to optionally translate to unix style.
+
+        Returns:
+            string:
+                A unix like path if git is executed via Windows Subsystem for
+                Linux (WSL) on a Windows 10 machine or `filename` otherwise.
+        """
+        return path.translate_to_wsl(filename) if self._git_wsl else filename
 
     def get_compare_against(self):
         """Return the compare target for a view.
@@ -349,39 +401,29 @@ class GitGutterHandler(object):
         if self._git_compared_commit == compared_id:
             return Promise.resolve(False)
         return self.git_read_file(compared_id).then(
-            functools.partial(self._write_git_file, compared_id))
+            functools.partial(self._check_git_file, compared_id))
 
-    def _write_git_file(self, compared_id, contents):
-        """Extract output and write it to a temporary file.
+    def _check_git_file(self, compared_id, output):
+        """Check the result of the git cat-file command.
 
         The function resolves the promise with True to indicate the
         updated git file.
 
         Arguments:
             compared_id (string): The new compare target's object id to store.
-            contents (string): The file contents read from git.
+            output (integer): The size of the file.
+                   (PromiseError): An error object indicating failure.
 
         Returns:
             bool: True if file was written to disc successfully.
         """
-        try:
-            self.git_tracked = bool(contents)
-            if self.git_tracked:
-                # Mangle end of lines
-                contents = contents.replace(b'\r\n', b'\n')
-                contents = contents.replace(b'\r', b'\n')
-                # Create temporary file
-                if not self._git_temp_file:
-                    self._git_temp_file = TempFile(mode='wb')
-                # Write content to temporary file
-                with self._git_temp_file as file:
-                    file.write(contents)
-            # Indicate success.
-            self._git_compared_commit = compared_id
-            return self.git_tracked
-        except OSError as error:
-            print('GitGutter failed to create git cache: %s' % error)
+        if isinstance(output, PromiseError):
+            utils.log_message('failed to create git cache! %s' % output)
             return False
+
+        self._git_compared_commit = compared_id
+        self.git_tracked = output > 0
+        return self.git_tracked
 
     def diff(self):
         """Run git diff to check for inserted, modified and deleted lines.
@@ -410,7 +452,7 @@ class GitGutterHandler(object):
         if not self._git_temp_file or not self._view_temp_file:
             return self.process_diff(self._git_diff_cache)
 
-        args = list(filter(None, (
+        return self.execute_async(list(filter(None, (
             self._git_binary,
             '-c', 'core.autocrlf=input',
             '-c', 'core.eol=lf',
@@ -418,11 +460,9 @@ class GitGutterHandler(object):
             'diff', '-U0', '--no-color', '--no-index',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
-            self._git_temp_file.name,
-            self._view_temp_file.name,
-        )))
-        return self.execute_async(
-            args=args, decode=False).then(self._decode_diff)
+            self.translate_path_to_wsl(self._git_temp_file.name),
+            self.translate_path_to_wsl(self._view_temp_file.name)
+        ))), decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
         encoding = self._get_view_encoding()
@@ -604,14 +644,13 @@ class GitGutterHandler(object):
                 """
                 return bool(results)
 
-            args = [
+            return self.execute_async(list(filter(None, [
                 self._git_binary,
                 'ls-files', '--other', '--exclude-standard',
             ] + additional_args + [
-                os.path.join(self._git_tree, self._git_path),
-            ]
-            args = list(filter(None, args))  # Remove empty args
-            return self.execute_async(args).then(is_nonempty)
+                self.translate_path_to_wsl(
+                    os.path.join(self._git_tree, self._git_path)),
+            ]))).then(is_nonempty)
         return Promise.resolve(False)
 
     def git_commits(self):
@@ -622,13 +661,12 @@ class GitGutterHandler(object):
             <name> <email>
             <date> (<time> ago)
         """
-        args = [
+        return self.execute_async([
             self._git_binary,
             'log', '--all',
-            '--pretty=%h | %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty="%h | %s\a%an <%aE>\a%ad (%ar)"',
             '--date=local', '--max-count=9000'
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_file_commits(self):
         r"""Query all commits with changes to the attached file.
@@ -639,26 +677,24 @@ class GitGutterHandler(object):
             <name> <email>
             <date> (<time> ago)
         """
-        args = [
+        return self.execute_async([
             self._git_binary,
             'log',
-            '--pretty=%at\a%h | %s\a%an <%aE>\a%ad (%ar)',
+            '--pretty="%at\a%h | %s\a%an <%aE>\a%ad (%ar)"',
             '--date=local', '--max-count=9000',
             '--', self._git_path
-        ]
-        return self.execute_async(args)
+        ])
 
     def git_branches(self):
         """Query all branches of the file's repository."""
-        args = [
+        template = (
+            '--format="%(refname)\a%(objectname:short) | %(subject)'
+            '\a%(committername) %(committeremail)\a%(committerdate)"'
+        )
+        return self.execute_async([
             self._git_binary,
-            'for-each-ref',
-            '--sort=-committerdate', (
-                '--format=%(refname)\a%(objectname:short) | %(subject)'
-                '\a%(committername) %(committeremail)\a%(committerdate)'),
-            'refs/heads/'
-        ]
-        return self.execute_async(args)
+            'for-each-ref', '--sort=-committerdate', template, 'refs/heads/'
+        ])
 
     def git_tags(self):
         """Query all tags of the file's repository.
@@ -667,17 +703,15 @@ class GitGutterHandler(object):
         Both tagger- and committer- name/date are read because the first one
         is valid for annoted and later for simple tags.
         """
-        args = [
+        template = (
+            '--format="%(refname)\a%(objectname:short) | %(subject)'
+            '\a%(taggername) %(taggeremail)\a%(taggerdate)'
+            '\a%(committername) %(committeremail)\a%(committerdate)"'
+        )
+        return self.execute_async([
             self._git_binary,
-            'for-each-ref',
-            '--sort=-refname', (
-                '--format=%(refname)\a%(objectname:short) | %(subject)'
-                '\a%(taggername) %(taggeremail)\a%(taggerdate)'
-                '\a%(committername) %(committeremail)\a%(committerdate)'
-            ),
-            'refs/tags/'
-        ]
-        return self.execute_async(args)
+            'for-each-ref', '--sort=-refname', template, 'refs/tags/'
+        ])
 
     def git_branch_status(self):
         """Query the current status of the file's repository."""
@@ -715,12 +749,11 @@ class GitGutterHandler(object):
             }
             return self._git_status
 
-        args = [
+        return self.execute_async([
             self._git_binary,
             '-c', 'color.status=never',
             'status', '-b', '-s', '-u'
-        ]
-        return self.execute_async(args).then(parse_output)
+        ]).then(parse_output)
 
     def git_compare_commit(self, compare_against):
         """Query the commit hash of the compare target.
@@ -728,12 +761,8 @@ class GitGutterHandler(object):
         Arguments:
             compare_against  - The reference to compare against if not a hash.
         """
-        args = [
-            self._git_binary,
-            'rev-parse',
-            compare_against
-        ]
-        return self.execute_async(args)
+        return self.execute_async([
+            self._git_binary, 'rev-parse', compare_against])
 
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
@@ -748,21 +777,63 @@ class GitGutterHandler(object):
 
         Returns:
             Promise: A promise to read the content of a file from git index.
-        """
-        if not self._git_version:
-            return None
 
-        args = [
-            self._git_binary,
-            '-c', 'core.autocrlf=input',
-            '-c', 'core.eol=lf',
-            '-c', 'core.safecrlf=false',
-            'cat-file',
-            # smudge filters are supported with git 2.11.0+ only
-            '--filters' if self._git_version >= (2, 11, 0) else '-p',
-            ':'.join((commit, self._git_path))
-        ]
-        return self.execute_async(args=args, decode=False)
+            The Promise resolves with the number of bytes written to the cache
+            in case of success.
+
+            The Promise resolves with PromiseError if the cache file could not
+            be created, opened or written data to, if git failed to run or
+            returned a none-zero exit code other than 128 (file not found).
+        """
+        if not self._git_temp_file:
+            self._git_temp_file = TempFile(mode='wb')
+
+        try:
+            proc = self.popen([
+                self._git_binary,
+                '-c', 'core.autocrlf=input',
+                '-c', 'core.eol=lf',
+                '-c', 'core.safecrlf=false',
+                'cat-file',
+                # smudge filters are supported with git 2.11.0+ only
+                '--filters' if self._git_version >= (2, 11, 0) else '-p',
+                ':'.join((commit, self._git_path))
+            ], stdout=self._git_temp_file.open())
+
+        except Exception as error:
+            self._git_temp_file.close()
+            return Promise.resolve(PromiseError(str(error)))
+
+        def poll(proc, resolve):
+            """Poll the process and resolve promise if finished."""
+            try:
+                returncode = proc.poll()
+                if returncode is None:
+                    # git is still busy, come here later again
+                    set_timeout(functools.partial(poll, proc, resolve), 50)
+                    return None
+
+                # file is still open for writing at this point
+                with self._git_temp_file as file:
+                    if returncode == 0:
+                        # resolve with the number of bytes got from git cat-file
+                        return resolve(file.tell())
+                    elif returncode == 128:
+                        # resolve with 0 bytes if file was not found in repo.
+                        return resolve(0)
+                    return resolve(PromiseError("git returned error %d: %s" % (
+                        returncode, proc.stderr.read().decode('utf-8'))))
+
+            except Exception as error:
+                # close the temporary file if anything goes wrong
+                self._git_temp_file.close()
+                raise
+
+        def executor(resolve):
+            """Start polling the process to query for its finish."""
+            set_timeout(functools.partial(poll, proc, resolve), 50)
+
+        return Promise(executor)
 
     def execute_async(self, args, decode=True):
         """Execute a git command asynchronously and return a Promise.
@@ -775,69 +846,94 @@ class GitGutterHandler(object):
         Returns:
             Promise: A promise to return the git output in the future.
         """
+        try:
+            proc = self.popen(args)
+        except Exception as error:
+            utils.log_message(str(error))
+            return Promise.resolve(None)
+
+        # inject some attributes into the proc object
+        setattr(proc, 'buffer', b'')
+
+        def poll(proc, resolve, decode):
+            """Poll the process and resolve promise if finished.
+
+            Arguments:
+                proc (subprocess.Popen):
+                    The running process' object to quiery for completion
+                resolve (callable):
+                    The function to be called to resolve the Promise.
+                decode (bool):
+                    True to decode the binary output to text.
+            """
+            chunk = proc.stdout.read(_BUFSIZE)
+            if chunk:
+                # need to read from stdout as process won't exit if buffer
+                # is full.
+                proc.buffer += chunk
+                if len(chunk) == _BUFSIZE:
+                    # git is still busy, come here later again
+                    set_timeout(functools.partial(
+                        poll, proc, resolve, decode), 20)
+                    return
+
+            if not proc.buffer and self.settings.get('debug'):
+                proc.wait()
+                # 0 = ok, 128 = file not found
+                if proc.returncode not in (0, 128):
+                    utils.log_message('%s failed with "%s"' % (
+                        ' '.join(args), proc.stderr.read().decode('utf-8').strip()))
+
+            # return decoded ouptut using utf-8 or binary output
+            if decode and proc.buffer is not None:
+                return resolve(proc.buffer.decode('utf-8').strip())
+            return resolve(proc.buffer)
+
         def executor(resolve):
-
-            def do_resolve():
-                """Resolve the promise with the output of git."""
-                return resolve(self.execute(args, decode))
-
-            if ST3:
-                # use real threads to run git in the background
-                threading.Thread(target=do_resolve).start()
-            else:
-                # ST2 API does not support threads
-                sublime.set_timeout(do_resolve, 10)
+            """Start polling the process to query for its finish."""
+            set_timeout(functools.partial(poll, proc, resolve, decode), 20)
 
         return Promise(executor)
 
-    def execute(self, args, decode=True):
-        """Execute a git command synchronously and return its output.
+    def popen(self, args, stdout=subprocess.PIPE):
+        """Prepare the environment and spawn the subprocess.
 
         Arguments:
-            args (list): The command line arguments used to run git.
-            decode (bool): If True the git's output is decoded assuming utf-8
-                      which is the default output encoding of git.
-
+            args (list):
+                A list of arguments to pass to `subprocess.Popen`.
+            stdout (int or stream):
+                The target of the output of the spawned subprocess.
+                It defaults to `subprocess.PIPE` to retrieve output via stdout,
+                but can also be a filestream to directly write the content to
+                a file on disk.
         Returns:
-            string: The decoded or undecoded output read from stdout.
+            subprocess.Popen: The object of the spawned subprocess.
         """
-        stdout, stderr = None, None
+        startupinfo = None
+        if WIN32:
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
-        try:
-            startupinfo = None
-            if WIN32:
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            if self._git_env is None:
-                self._git_env = os.environ.copy()
-                for key, value in self.settings.get('env', {}).items():
-                    if value is None:
-                        del self._git_env[key]
-                    else:
-                        self._git_env[key] = str(value)
-            proc = subprocess.Popen(
-                args=args, cwd=self._git_tree, startupinfo=startupinfo,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                stdin=subprocess.PIPE, env=self._git_env)
-            if _HAVE_TIMEOUT:
-                stdout, stderr = proc.communicate(timeout=30)
-            else:
-                stdout, stderr = proc.communicate()
-        except OSError as error:
-            self._git_version = None
-            # Print out system error message in debug mode.
-            if self.settings.get('debug'):
-                utils.log_message(
-                    '"git %s" failed with "%s"' % (args[1], error))
-        except TimeoutExpired:
-            self._git_version = None
-            proc.kill()
-            stdout, stderr = proc.communicate()
-        # handle empty git output
-        if stderr and not stdout and self.settings.get('debug'):
-            utils.log_message('"git %s" failed with "%s"' % (
-                args[1], stderr.decode('utf-8').strip()))
-        # return decoded ouptut using utf-8 or binary output
-        if decode and stdout is not None:
-            stdout = stdout.decode('utf-8').strip()
-        return stdout
+        # run git through wsl.exe
+        if self._git_wsl:
+            args.insert(0, "wsl")
+
+        # update private environment
+        if self._git_env is None:
+            self._git_env = os.environ.copy()
+            for key, value in self.settings.get('env', {}).items():
+                if value is None:
+                    del self._git_env[key]
+                else:
+                    self._git_env[key] = str(value)
+
+        return subprocess.Popen(
+            args=args,
+            cwd=self._git_tree,
+            env=self._git_env,
+            bufsize=_BUFSIZE,
+            startupinfo=startupinfo,
+            stdin=subprocess.PIPE,   # python 3.3 bug on Win7
+            stderr=subprocess.PIPE,
+            stdout=stdout
+        )
