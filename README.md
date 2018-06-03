@@ -523,12 +523,15 @@ GitGutter displays status information about open files in the status bar by defa
 
 ```
 "status_bar_text": [
-  "In {{repo}} on {{branch}}",
-  "{% if compare != 'HEAD' %}, Comparing against {{compare}}{% endif %}",
-  ", File is {{state}}",
-  "{% if deleted != 0 %}, {{deleted}}-{% endif %}",
-  "{% if inserted != 0 %}, {{inserted}}+{% endif %}",
-  "{% if modified != 0 %}, {{modified}}≠{% endif %}"
+    "{% if repo and branch %}",
+    "{{repo}}/{{branch}}",
+    "{% if added_files + deleted_files + modified_files > 0 %}*{% endif %}",
+    "{% if compare not in ('HEAD', branch, None) %}, Comparing against {{compare}}{% endif %}",
+    "{% if state %}, File is {{state}}{% endif %}",
+    "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
+    "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
+    "{% if modified > 0 %}, {{modified}}≠{% endif %}",
+    "{% endif %}"
 ]
 ```
 

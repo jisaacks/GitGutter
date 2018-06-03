@@ -78,8 +78,6 @@ class GitGutterHandler(object):
         self._git_tree = None
         # relative file path in work tree
         self._git_path = None
-        # cached branch status
-        self._git_status = None
         # file is part of the git repository
         self.git_tracked = False
         # compare target commit hash
@@ -360,7 +358,6 @@ class GitGutterHandler(object):
     def invalidate_git_file(self):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
-        self._git_status = None
         self._git_env = None
 
     def update_git_file(self):
@@ -703,9 +700,6 @@ class GitGutterHandler(object):
 
     def git_branch_status(self):
         """Query the current status of the file's repository."""
-        if self._git_status:
-            return Promise.resolve(self._git_status)
-
         def parse_output(output):
             """Parse output of git status and cache the value."""
             added, deleted, modified, staged = 0, 0, 0, 0
@@ -725,7 +719,7 @@ class GitGutterHandler(object):
             except:
                 branch, remote, ahead, behind = 'unknown', None, 0, 0
 
-            self._git_status = {
+            return {
                 'branch': branch,
                 'remote': remote,
                 'ahead': int(ahead or 0),
@@ -735,7 +729,6 @@ class GitGutterHandler(object):
                 'modified_files': modified,
                 'staged_files': staged
             }
-            return self._git_status
 
         return self.execute_async([
             self._git_binary,

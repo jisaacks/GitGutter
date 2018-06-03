@@ -15,6 +15,8 @@ from . import settings
 from . import show_diff
 from . import utils
 
+from .statusbar import GitGutterStatusBar
+
 # the reason why evaluation is skipped, which is printed to console
 # if debug is set true and evaluation.
 DISABLED_REASON = {
@@ -54,7 +56,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.settings = settings.ViewSettings(self.view)
         self.git_handler = handler.GitGutterHandler(self.view, self.settings)
-        self.show_diff_handler = show_diff.GitGutterShowDiff(self.git_handler)
+        self.status_bar = GitGutterStatusBar(self.view, self.settings)
+        self.show_diff_handler = show_diff.GitGutterShowDiff(self.git_handler, self.status_bar)
+
         # Last enabled state for change detection
         self._state = -1
 
@@ -124,13 +128,24 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             assert command_func, 'Unhandled sub command "%s"' % action
             return command_func(self, **kwargs)
 
-        queued_events = kwargs.get('events', 0)
-        if not queued_events & (events.LOAD | events.MODIFIED):
-            # On 'load' the git file is not yet valid anyway.
-            # On 'modified' is sent when user is typing.
-            # The git repository will most likely not change then.
+        queued_events = kwargs.get('events', events.ACTIVATED)
+        if queued_events & (events.ACTIVATED | events.LOAD):
+            self.update_git_status()
+        if queued_events & events.ACTIVATED:
             self.git_handler.invalidate_git_file()
+
         self.show_diff_handler.run()
+
+    def update_git_status(self):
+        """Update git repository status."""
+        if self.status_bar.is_enabled():
+            self.git_handler.git_branch_status().then(
+                lambda branch_status: self.status_bar.update(
+                    repo=self.git_handler.repository_name,
+                    compare=self.git_handler.format_compare_against(),
+                    **branch_status
+                )
+            )
 
 
 class GitGutterBaseCommand(sublime_plugin.TextCommand):
