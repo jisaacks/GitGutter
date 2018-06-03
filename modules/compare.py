@@ -22,7 +22,7 @@ def set_against_commit(git_gutter, **kwargs):
             return sublime.message_dialog('No commits found in repository.')
 
         # Create the list of commits to show in the quick panel
-        items = [r.split('\a') for r in output.split('\n')]
+        items = [r[1:-1].split('\a') for r in output.split('\n')]
 
         def on_done(index):
             """Select new compare target according to user selection."""
@@ -58,7 +58,8 @@ def set_against_file_commit(git_gutter, **kwargs):
         # Sort items by author date in reversed order,
         # split each line by \a and strip time stamp from beginning
         items = [
-            r.split('\a')[1:] for r in sorted(output.split('\n'), reverse=True)
+            r[1:-1].split('\a')[1:]
+            for r in sorted(output.split('\n'), reverse=True)
         ]
 
         def on_done(index):
@@ -93,7 +94,7 @@ def set_against_branch(git_gutter, **kwargs):
 
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
-            branch, commit, name, date = result.split('\a')
+            branch, commit, name, date = result[1:-1].split('\a')
             branch = branch[11:]   # skip 'refs/heads/'
             return [branch, commit, name, date]
 
@@ -132,7 +133,7 @@ def set_against_tag(git_gutter, **kwargs):
 
         def parse_result(result):
             """Create a quick panel item for one line of git's output."""
-            tag, commit, tname, tdate, cname, cdate = result.split('\a')
+            tag, commit, tname, tdate, cname, cdate = result[1:-1].split('\a')
             tag = tag[10:]         # skip 'refs/heads/'
             return [tag, commit, tname.strip() or cname, tdate.strip() or cdate]
 

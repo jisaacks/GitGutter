@@ -411,10 +411,25 @@ GitGutter shows diffs in the minimap on Sublime Text 3 by default. Change `show_
 
 `"git_binary": ""`
 
-If `git` is not found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) by GitGutter the `git_binary` setting can be set to the location of the git binary. The value may be either a direct string to a git binary:
+GitGutter looks for the git binary in the [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) environment variable by default.
+
+The setting can be used to
+
+1. specify the path to a custom git installation which is not registered to [PATH](https://en.wikipedia.org/wiki/PATH_(variable)).
+2. run git via **W**indows **S**ubsystem for **L**inux (WSL) on Windows 10 by setting up a unix like path.
+
+The value may be either a direct string to a git binary:
+
+_Windows:_
 
 ```JavaScript
 "git_binary": "E:\\Portable\\git\\bin\\git.exe"
+```
+
+_Linux/OSX/WSL:_
+
+```JavaScript
+"git_binary": "/usr/bin/git"
 ```
 
 or it may be a dictionary keyed off what sublime.platform() returns, so it may be customized on a per-platform basis:

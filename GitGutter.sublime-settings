@@ -2,13 +2,19 @@
 // Default values for GitGutter.sublime-settings
 //
 {
-    // Custom path to git binary when not in PATH.  An empty string will search
-    // PATH for "git".  The setting may be a direct string to a git binary, e.g.:
+    // CUSTOM PATH TO GIT BINARY.
+    // An empty string will search the PATH environment for "git".
+    //
+    //   "git_binary": "",
+    //
+    // The setting may be a direct string to a git binary.
+    // An unix like path makes git run via Windows Subsystem for Linux
+    // on Windows 10. It fails if WSL is not available.
     //
     //   "git_binary": "/usr/bin/git",
     //
     // Or it may be a dictionary keyed off what sublime.platform() returns,
-    // so it may be customized on a per-platform basis.  e.g.:
+    // so it may be customized on a per-platform basis.
     //
     //   "git_binary": {
     //       "default": "",
