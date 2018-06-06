@@ -50,9 +50,10 @@ class EventListener(sublime_plugin.EventListener):
         Arguments:
             view (View): The view which received the event.
         """
-        key = view.id()
-        if key in self.view_events:
-            del self.view_events[key]
+        try:
+            del self.view_events[view.id()]
+        except KeyError:
+            pass
 
     def on_modified(self, view):
         """Run git_gutter for modified visible view.
@@ -126,9 +127,17 @@ class EventListener(sublime_plugin.EventListener):
             event_id (int): The event identifier
         """
         key = view.id()
-        if key not in self.view_events:
-            self.view_events[key] = ViewEventListener(view)
-        self.view_events[key].push(event_id)
+        try:
+            self.view_events[key].push(event_id)
+        except KeyError:
+            if view.buffer_id():
+                new_listener = ViewEventListener(view)
+                new_listener.push(event_id)
+                self.view_events[key] = new_listener
+            # do garbage connection
+            for vid in [vid for vid, listener in self.view_events.items()
+                        if listener.view.buffer_id() == 0]:
+                del self.view_events[vid]
 
 
 class ViewEventListener(object):
