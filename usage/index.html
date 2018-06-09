@@ -1,0 +1,858 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A Sublime Text plug-in to show information about files in a git repository.">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>Basic Usage - GitGutter Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="indigo" data-md-color-accent="red">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#usage" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="GitGutter Documentation" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon">description</i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                GitGutter Documentation
+              </span>
+              <span class="md-header-nav__topic">
+                Basic Usage
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/jisaacks/GitGutter/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon">description</i>
+      
+    </span>
+    GitGutter Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/jisaacks/GitGutter/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../install/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Basic Usage
+      </label>
+    
+    <a href="./" title="Basic Usage" class="md-nav__link md-nav__link--active">
+      Basic Usage
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#disable-evaluation" title="Disable Evaluation" class="md-nav__link">
+    Disable Evaluation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compare-against" title="Compare Against ..." class="md-nav__link">
+    Compare Against ...
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-diff-popup" title="Show Diff Popup" class="md-nav__link">
+    Show Diff Popup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goto-change" title="Goto Change" class="md-nav__link">
+    Goto Change
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#previous-change" title="Previous Change" class="md-nav__link">
+    Previous Change
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next-change" title="Next Change" class="md-nav__link">
+    Next Change
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copy-content-from-commit" title="Copy Content from Commit" class="md-nav__link">
+    Copy Content from Commit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revert-change-to-commit" title="Revert Change to Commit" class="md-nav__link">
+    Revert Change to Commit
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../settings/" title="Settings" class="md-nav__link">
+      Settings
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../coloring/" title="Coloring" class="md-nav__link">
+      Coloring
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../troubleshooting/" title="Troubleshooting" class="md-nav__link">
+      Troubleshooting
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#disable-evaluation" title="Disable Evaluation" class="md-nav__link">
+    Disable Evaluation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compare-against" title="Compare Against ..." class="md-nav__link">
+    Compare Against ...
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-diff-popup" title="Show Diff Popup" class="md-nav__link">
+    Show Diff Popup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goto-change" title="Goto Change" class="md-nav__link">
+    Goto Change
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#previous-change" title="Previous Change" class="md-nav__link">
+    Previous Change
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#next-change" title="Next Change" class="md-nav__link">
+    Next Change
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copy-content-from-commit" title="Copy Content from Commit" class="md-nav__link">
+    Copy Content from Commit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revert-change-to-commit" title="Revert Change to Commit" class="md-nav__link">
+    Revert Change to Commit
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/jisaacks/GitGutter/edit/master/docs/usage.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="usage">Usage</h1>
+<p>In order to enable your favourite work flow all major functions GitGutter has to offer are available via</p>
+<ul>
+<li>Main Menu</li>
+<li>Command Palette</li>
+<li>Key Bindings</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Command Palette</p>
+<ol>
+<li>Open the command palette via <em>Main &gt; Tools &gt; Command Palette &hellip;</em> or key binding <kbd>Ctrl + Shift + P</kbd> for Windows/Linux or <kbd>⌘ + ⇧ + P</kbd> for Mac OS</li>
+<li>Start typing <code>GitGutter:</code></li>
+<li>Select one of the listed commands with the keyboard and press <kbd>Enter</kbd>.</li>
+</ol>
+</div>
+<h2 id="disable-evaluation">Disable Evaluation</h2>
+<p>GitGutter tries best it can to decide automatically <a href="../troubleshooting/#gitgutter-keeps-completely-quiet">when to keep quiet</a>.</p>
+<p>To manually disable GitGutter for a certain View use:</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; View &gt; GitGutter &gt; Enabled for View</td>
+</tr>
+</tbody>
+</table>
+<h2 id="compare-against">Compare Against &hellip;</h2>
+<p>GitGutter compares the working copy against the HEAD commit of the checked out branch by default.</p>
+<p>To temporarily change the compare target for the whole repository use:</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; View &gt; GitGutter &gt; Compare Against <code>&lt;target&gt;</code></td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Compare Against <code>&lt;target&gt;</code></td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + Alt + c, <code>&lt;key&gt;</code></kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ + ⌥ + c, <code>&lt;key&gt;</code></kbd></td>
+</tr>
+</tbody>
+</table>
+<p>When using key bindings press one of the following keys after <kbd>Ctrl + Shift + Alt + c</kbd> to change the compare target.</p>
+<table>
+<thead>
+<tr>
+<th><code>&lt;key&gt;</code></th>
+<th><code>&lt;target&gt;</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><kbd>h</kbd></td>
+<td>HEAD</td>
+</tr>
+<tr>
+<td><kbd>b</kbd></td>
+<td>branch</td>
+</tr>
+<tr>
+<td><kbd>t</kbd></td>
+<td>tag</td>
+</tr>
+<tr>
+<td><kbd>c</kbd></td>
+<td>commit</td>
+</tr>
+<tr>
+<td><kbd>f</kbd></td>
+<td>file commit (<em>current file's history</em>)</td>
+</tr>
+<tr>
+<td><kbd>o</kbd></td>
+<td>origin (<em>@{upstream}</em>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="show-diff-popup">Show Diff Popup</h2>
+<p>The <em>Diff Popup</em> appears by hovering the mouse over the gutter area of Sublime Text or can be called from command palette or via a key binding.</p>
+<p>ⓘ <em>requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+</em></p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mouse</strong></td>
+<td>Hover the gutter area of a changed line</td>
+</tr>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; View &gt; GitGutter &gt; Diff Popup</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Show Diff Popup</td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + Alt + c, Ctrl + D</kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ + ⌥ + c, ⌘ + D</kbd></td>
+</tr>
+</tbody>
+</table>
+<h2 id="goto-change">Goto Change</h2>
+<p>The commands are used to quickly navigate between modifications.</p>
+<p>The <code>&quot;next_prev_change_wrap&quot;</code> setting controls whether to continue at document boundaries or not.</p>
+<p>The default step size of 1 can be customized by command arguments. You'd need to create your own custom key bindings to make use of it.</p>
+<h3 id="previous-change">Previous Change</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; Goto &gt; Goto Previous Change</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Goto Previous Change</td>
+</tr>
+<tr>
+<td><strong>Diff Popup</strong></td>
+<td><strong>↑</strong> toolbar button</td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + Alt + k</kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ + ⌥ + k</kbd></td>
+</tr>
+</tbody>
+</table>
+<h3 id="next-change">Next Change</h3>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; Goto &gt; Goto Next Change</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Goto Next Change</td>
+</tr>
+<tr>
+<td><strong>Diff Popup</strong></td>
+<td><strong>↓</strong> toolbar button</td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + Alt + j</kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ + ⌥ + j</kbd></td>
+</tr>
+</tbody>
+</table>
+<h2 id="copy-content-from-commit">Copy Content from Commit</h2>
+<p>The command copies the committed content of the changed hunk under the first cursor to the clipboard. The default key binding for this command is:</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; Edit &gt; Copy Content from Commit</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Copy Content from Commit</td>
+</tr>
+<tr>
+<td><strong>Diff Popup</strong></td>
+<td><strong>⎘</strong> toolbar button</td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + c</kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ c</kbd></td>
+</tr>
+</tbody>
+</table>
+<h2 id="revert-change-to-commit">Revert Change to Commit</h2>
+<p>The command reverts the text under the first cursor to the state in git. The default key binding for this command is:</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; Edit &gt; Revert Change to Commit</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>GitGutter: Revert Change to Commit</td>
+</tr>
+<tr>
+<td><strong>Diff Popup</strong></td>
+<td><strong>⟲</strong> toolbar button</td>
+</tr>
+<tr>
+<td><strong>Key Bindings Linux/Windows</strong></td>
+<td><kbd>Ctrl + Shift + Alt + z</kbd></td>
+</tr>
+<tr>
+<td><strong>Key Bindings OSX</strong></td>
+<td><kbd>⌘ + ⇧ + ⌥ + z</kbd></td>
+</tr>
+</tbody>
+</table>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../install/" title="Installation" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Installation
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../settings/" title="Settings" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Settings
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2012 - ...
+<a href="https://github.com/jisaacks">JD Isaacks</a> &amp;
+<a href="https://github.com/deathaxe">DeathAxe</a>
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
+      
+      <script>app.initialize({version:"0.17.3",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>

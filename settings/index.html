@@ -1,0 +1,1339 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A Sublime Text plug-in to show information about files in a git repository.">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.3, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>Settings - GitGutter Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="indigo" data-md-color-accent="red">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#settings" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href=".." title="GitGutter Documentation" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon">description</i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                GitGutter Documentation
+              </span>
+              <span class="md-header-nav__topic">
+                Settings
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/jisaacks/GitGutter/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon">description</i>
+      
+    </span>
+    GitGutter Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/jisaacks/GitGutter/" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      GitHub
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../install/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../usage/" title="Basic Usage" class="md-nav__link">
+      Basic Usage
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Settings
+      </label>
+    
+    <a href="./" title="Settings" class="md-nav__link md-nav__link--active">
+      Settings
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-user-project-and-view-settings" title="Syntax, User, Project and View Settings" class="md-nav__link">
+    Syntax, User, Project and View Settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general" title="General" class="md-nav__link">
+    General
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-or-disable-evaluation" title="Enable or Disable Evaluation" class="md-nav__link">
+    Enable or Disable Evaluation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#git-binary" title="Git Binary" class="md-nav__link">
+    Git Binary
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows" title="Windows" class="md-nav__link">
+    Windows
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linuxosxwsl" title="Linux/OSX/WSL" class="md-nav__link">
+    Linux/OSX/WSL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" title="Environment Variables" class="md-nav__link">
+    Environment Variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-against" title="Compare Against" class="md-nav__link">
+    Compare Against
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diff-algorithm" title="Diff Algorithm" class="md-nav__link">
+    Diff Algorithm
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignore-whitespace" title="Ignore Whitespace" class="md-nav__link">
+    Ignore Whitespace
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-gutter" title="Diff Gutter" class="md-nav__link">
+    Diff Gutter
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debounce-delay" title="Debounce Delay" class="md-nav__link">
+    Debounce Delay
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#focus-change-mode" title="Focus Change Mode" class="md-nav__link">
+    Focus Change Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-mode" title="Live Mode" class="md-nav__link">
+    Live Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-regions" title="Protected Regions" class="md-nav__link">
+    Protected Regions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-markers-on-untracked-files" title="Show Markers on Untracked Files" class="md-nav__link">
+    Show Markers on Untracked Files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-markers-in-minimap" title="Show Markers in Minimap" class="md-nav__link">
+    Show Markers in Minimap
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#themes" title="Themes" class="md-nav__link">
+    Themes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-popup" title="Diff Popup" class="md-nav__link">
+    Diff Popup
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-hover" title="Enable Hover" class="md-nav__link">
+    Enable Hover
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-mode" title="Default Mode" class="md-nav__link">
+    Default Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-regions_1" title="Protected Regions" class="md-nav__link">
+    Protected Regions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stylesheet" title="Stylesheet" class="md-nav__link">
+    Stylesheet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syntax-highlighting" title="Syntax Highlighting" class="md-nav__link">
+    Syntax Highlighting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status-bar-text" title="Status Bar Text" class="md-nav__link">
+    Status Bar Text
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-status-bar-text" title="Show Status Bar Text" class="md-nav__link">
+    Show Status Bar Text
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-bar-text-template" title="Status Bar Text Template" class="md-nav__link">
+    Status Bar Text Template
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../coloring/" title="Coloring" class="md-nav__link">
+      Coloring
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../troubleshooting/" title="Troubleshooting" class="md-nav__link">
+      Troubleshooting
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-user-project-and-view-settings" title="Syntax, User, Project and View Settings" class="md-nav__link">
+    Syntax, User, Project and View Settings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general" title="General" class="md-nav__link">
+    General
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-or-disable-evaluation" title="Enable or Disable Evaluation" class="md-nav__link">
+    Enable or Disable Evaluation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#git-binary" title="Git Binary" class="md-nav__link">
+    Git Binary
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#windows" title="Windows" class="md-nav__link">
+    Windows
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linuxosxwsl" title="Linux/OSX/WSL" class="md-nav__link">
+    Linux/OSX/WSL
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" title="Environment Variables" class="md-nav__link">
+    Environment Variables
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-against" title="Compare Against" class="md-nav__link">
+    Compare Against
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diff-algorithm" title="Diff Algorithm" class="md-nav__link">
+    Diff Algorithm
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ignore-whitespace" title="Ignore Whitespace" class="md-nav__link">
+    Ignore Whitespace
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-gutter" title="Diff Gutter" class="md-nav__link">
+    Diff Gutter
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#debounce-delay" title="Debounce Delay" class="md-nav__link">
+    Debounce Delay
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#focus-change-mode" title="Focus Change Mode" class="md-nav__link">
+    Focus Change Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-mode" title="Live Mode" class="md-nav__link">
+    Live Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-regions" title="Protected Regions" class="md-nav__link">
+    Protected Regions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-markers-on-untracked-files" title="Show Markers on Untracked Files" class="md-nav__link">
+    Show Markers on Untracked Files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-markers-in-minimap" title="Show Markers in Minimap" class="md-nav__link">
+    Show Markers in Minimap
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#themes" title="Themes" class="md-nav__link">
+    Themes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-popup" title="Diff Popup" class="md-nav__link">
+    Diff Popup
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-hover" title="Enable Hover" class="md-nav__link">
+    Enable Hover
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-mode" title="Default Mode" class="md-nav__link">
+    Default Mode
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-regions_1" title="Protected Regions" class="md-nav__link">
+    Protected Regions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stylesheet" title="Stylesheet" class="md-nav__link">
+    Stylesheet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syntax-highlighting" title="Syntax Highlighting" class="md-nav__link">
+    Syntax Highlighting
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status-bar-text" title="Status Bar Text" class="md-nav__link">
+    Status Bar Text
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-status-bar-text" title="Show Status Bar Text" class="md-nav__link">
+    Show Status Bar Text
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-bar-text-template" title="Status Bar Text Template" class="md-nav__link">
+    Status Bar Text Template
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/jisaacks/GitGutter/edit/master/docs/settings.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="settings">Settings</h1>
+<p>Package settings are accessed via Main Menu or Command Palette.</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Menu</strong></td>
+<td>Main &gt; Preferences &gt; Package Settings &gt; GitGutter</td>
+</tr>
+<tr>
+<td><strong>Command Palette</strong></td>
+<td>Preferences: GitGutter Settings</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Default settings should not be modified, as they are overwritten when GitGutter updates. Copy the relevant settings into GitGutter's user settings file instead.</p>
+</div>
+<h2 id="syntax-user-project-and-view-settings">Syntax, User, Project and View Settings</h2>
+<p>All GitGutter settings can be placed in any of <a href="https://www.sublimetext.com/docs/3/settings.html">Sublime Text's settings files</a> to provide syntax-, user-, project- or view-specific setups.</p>
+<p>The setting keys found in the <a href="https://github.com/jisaacks/GitGutter/blob/master/GitGutter.sublime-settings">GitGutter.sublime-settings</a> need to be prefixed using <code>git_gutter_</code> to do that. Each of those settings overrides the value from the GitGutter.sublime-settings.</p>
+<p>To modify GitGutter settings for an open Project just open <kbd>Project</kbd> &gt; <kbd>Edit Project</kbd> menu and add the <code>settings</code> key as shown.</p>
+<div class="codehilite"><pre><span class="p">{</span>
+    <span class="s2">&quot;folders&quot;</span><span class="o">:</span>
+    <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;path&quot;</span><span class="o">:</span> <span class="s2">&quot;src&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;settings&quot;</span><span class="o">:</span>
+    <span class="p">{</span>
+        <span class="c1">// git_binary is the only setting not being prefixed</span>
+        <span class="s2">&quot;git_binary&quot;</span><span class="o">:</span> <span class="s2">&quot;/path/to/project/specific/git&quot;</span>
+
+        <span class="c1">// git_gutter settings</span>
+        <span class="s2">&quot;git_gutter_live_mode&quot;</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="s2">&quot;git_gutter_ignore_whitespace&quot;</span><span class="o">:</span> <span class="s2">&quot;space&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<div class="admonition info">
+<p class="admonition-title">Preferences</p>
+<p>All correctly prefixed settings can be placed into <code>Preferences.sublime-settings</code> instead of <code>GitGutter.sublime-settings</code>.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Plugin-API</p>
+<p>Settings can be modified temporarily per view by calls like <code>view.settings().set(&quot;git_gutter_enable&quot;, False)</code></p>
+</div>
+<h2 id="general">General</h2>
+<h3 id="enable-or-disable-evaluation">Enable or Disable Evaluation</h3>
+<div class="codehilite"><pre><span class="s2">&quot;git_gutter_enable&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter evaluates changes every time the file is loaded, saved, activated or modified by default. Set <code>false</code> to disable evaluation and hide all gutter icons, status message and minimap markers.</p>
+<div class="admonition warning">
+<p class="admonition-title">Caution</p>
+<p>This setting must be set as syntax- user- project- or view-specific setting! It is ignored when put into <em>GitGutter.sublime-settings</em>.</p>
+</div>
+<h3 id="git-binary">Git Binary</h3>
+<div class="codehilite"><pre><span class="s2">&quot;git_binary&quot;</span><span class="err">:</span> <span class="s2">&quot;&quot;</span>
+</pre></div>
+
+<p>GitGutter looks for the git binary in the <a href="https://en.wikipedia.org/wiki/PATH_(variable)">PATH</a> environment variable by default.</p>
+<p>The setting can be used to</p>
+<ol>
+<li>specify the path to a custom git installation which is not registered to <a href="https://en.wikipedia.org/wiki/PATH_(variable)">PATH</a>.</li>
+<li>run git via <strong>W</strong>indows <strong>S</strong>ubsystem for <strong>L</strong>inux (WSL) on Windows 10 by setting up a unix like path.</li>
+</ol>
+<p>The value may be either a direct string to a git binary:</p>
+<h6 id="windows">Windows</h6>
+<div class="codehilite"><pre><span class="s2">&quot;git_binary&quot;</span><span class="err">:</span> <span class="s2">&quot;E:\\Portable\\git\\bin\\git.exe&quot;</span>
+</pre></div>
+
+<h6 id="linuxosxwsl">Linux/OSX/WSL</h6>
+<div class="codehilite"><pre><span class="s2">&quot;git_binary&quot;</span><span class="err">:</span> <span class="s2">&quot;/usr/bin/git&quot;</span>
+</pre></div>
+
+<p>or it may be a dictionary keyed off what sublime.platform() returns, so it may be customized on a per-platform basis:</p>
+<div class="codehilite"><pre><span class="s2">&quot;git_binary&quot;</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;linux&quot;</span><span class="p">:</span> <span class="s2">&quot;/usr/bin/git&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;osx&quot;</span><span class="p">:</span>  <span class="s2">&quot;/usr/bin/git&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;windows&quot;</span><span class="p">:</span> <span class="s2">&quot;C:/Program Files/Git/cmd/git.exe&quot;</span>
+<span class="p">}</span>
+</pre></div>
+
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<ol>
+<li>It is valid to use environment variables in the setting value, and they will be expanded appropriately.</li>
+<li>In a POSIX environment you can run <code>which git</code> to find the path to git if it is in your path. On Windows, you can use <code>where git</code> to do the equivalent.</li>
+</ol>
+</div>
+<h3 id="environment-variables">Environment Variables</h3>
+<div class="codehilite"><pre><span class="s2">&quot;env&quot;</span><span class="err">:</span> <span class="p">{</span>
+    <span class="nt">&quot;GIT_OPTIONAL_LOCKS&quot;</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>With the <code>&quot;env&quot;</code> dictionary custom environment variables can be passed to git. The values overwrite the global environment variables Sublime Text is running with.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<ol>
+<li>Keys with value <code>None</code> are removed from the local environment.</li>
+<li>The <code>&quot;git_gutter_env&quot;</code> defined per view or project hides the global <code>&quot;env&quot;</code> dictionary.</li>
+<li>Make sure to use the correct separator characters of your OS, if you manipulate the <code>$PATH</code>.</li>
+</ol>
+</div>
+<h3 id="compare-against">Compare Against</h3>
+<div class="codehilite"><pre><span class="s2">&quot;compare_against&quot;</span><span class="err">:</span> <span class="s2">&quot;HEAD&quot;</span>
+</pre></div>
+
+<p>GitGutter compares the content of the view against the HEAD of the checked out branch by default. To change this default behaviour the <code>compare_against</code> setting can be changed to any tag, branch or commit hash git understands.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<p>This setting is overridden by the <a href="../usage/#comare-against-">Compare Against Command</a></p>
+</div>
+<h3 id="diff-algorithm">Diff Algorithm</h3>
+<div class="codehilite"><pre><span class="s2">&quot;diff_algorithm&quot;</span><span class="err">:</span> <span class="s2">&quot;patience&quot;</span>
+</pre></div>
+
+<p>Set <code>diff_algorithm</code> to one of the following values to change this behaviour.</p>
+<table>
+<thead>
+<tr>
+<th align="center">value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">"default"</td>
+<td>The basic greedy diff algorithm. Currently, this is the default.</td>
+</tr>
+<tr>
+<td align="center">"minimal"</td>
+<td>Spend extra time to make sure the smallest possible diff is produced.</td>
+</tr>
+<tr>
+<td align="center">"patience"</td>
+<td>Use "patience diff" algorithm when generating patches.</td>
+</tr>
+<tr>
+<td align="center">"histogram"</td>
+<td>This algorithm extends the patience algorithm to "support low-occurrence common elements".</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ignore-whitespace">Ignore Whitespace</h3>
+<div class="codehilite"><pre><span class="s2">&quot;ignore_whitespace&quot;</span><span class="err">:</span> <span class="s2">&quot;none&quot;</span>
+</pre></div>
+
+<p>GitGutter includes all whitespace when evaluating modifications by default. Set <code>ignore_whitespace</code> to one of the following values to change this behaviour.</p>
+<table>
+<thead>
+<tr>
+<th align="center">value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">"none"</td>
+<td>don't ignore any whitespace changes</td>
+</tr>
+<tr>
+<td align="center">"eol"</td>
+<td>ignore whitespace changes at the end of line</td>
+</tr>
+<tr>
+<td align="center">"space"</td>
+<td>ignore changed amount of whitespace</td>
+</tr>
+<tr>
+<td align="center">"all"</td>
+<td>ignore all whitespace</td>
+</tr>
+</tbody>
+</table>
+<h2 id="diff-gutter">Diff Gutter</h2>
+<h3 id="debounce-delay">Debounce Delay</h3>
+<div class="codehilite"><pre><span class="s2">&quot;debounce_delay&quot;</span><span class="err">:</span> <span class="mi">1000</span>
+</pre></div>
+
+<p>Delays update of gutter icons by the following amount (in milliseconds). Useful for performance issues. Default 1000 (1 second).</p>
+<h3 id="focus-change-mode">Focus Change Mode</h3>
+<div class="codehilite"><pre><span class="s2">&quot;focus_change_mode&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter evaluates changes every time a view gets the focus by default. Set <code>false</code> to disable evaluation when changing views.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<p>This setting has effect with <code>&quot;live_mode&quot;: false</code> only.</p>
+<p>GitGutter always evaluates changes after <em>loading</em> and <em>saving</em> a document.</p>
+</div>
+<h3 id="live-mode">Live Mode</h3>
+<div class="codehilite"><pre><span class="s2">&quot;live_mode&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter evaluates changes every time the file is modified by default. Set <code>false</code> to disable evaluation after each input.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<p>GitGutter always evaluates changes after <em>loading</em> and <em>saving</em> a document.</p>
+</div>
+<h3 id="protected-regions">Protected Regions</h3>
+<p>To avoid GitGutter from overriding more important gutter icons a list of protected regions can be created, which GitGutter won't add gutter icons to.</p>
+<div class="codehilite"><pre><span class="s2">&quot;protected_regions&quot;</span><span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;sublimelinter-warning-gutter-marks&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;sublimelinter-error-gutter-marks&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;bookmarks&quot;</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<p>You will need to figure out the names of the regions to protect.</p>
+</div>
+<h3 id="show-markers-on-untracked-files">Show Markers on Untracked Files</h3>
+<div class="codehilite"><pre><span class="s2">&quot;show_markers_on_untracked_file&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter shows icons on each line for untracked and ignored files by default. Set to <code>false</code> to hide those icons.</p>
+<div class="admonition warning">
+<p class="admonition-title">Scopes</p>
+<p>You may need to add scopes (<code>markup.ignored.git_gutter</code> and <code>markup.untracked.git_gutter</code>) to your color scheme to color the icons.</p>
+</div>
+<h3 id="show-markers-in-minimap">Show Markers in Minimap</h3>
+<div class="codehilite"><pre><span class="s2">&quot;show_in_minimap&quot;</span><span class="err">:</span> <span class="mi">1</span>
+</pre></div>
+
+<p>GitGutter shows diffs in the minimap on Sublime Text 3 by default. Change <code>show_in_minimap</code> to one of the following values to disable this feature or change the width of the markers.</p>
+<table>
+<thead>
+<tr>
+<th align="center">value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">=0</td>
+<td>hide markers</td>
+</tr>
+<tr>
+<td align="center">&gt;1</td>
+<td>width of markers</td>
+</tr>
+<tr>
+<td align="center">-1</td>
+<td>highlight full line</td>
+</tr>
+</tbody>
+</table>
+<h3 id="themes">Themes</h3>
+<div class="codehilite"><pre><span class="s2">&quot;theme&quot;</span><span class="err">:</span> <span class="s2">&quot;Default.gitgutter-theme&quot;</span>
+</pre></div>
+
+<p>GitGutter provides support for custom gutter icons and diff popup style sheets coming with theme packages. Set <code>theme</code> to a valid theme file name to activate a different icon set.</p>
+<p>GitGutter includes following themes:</p>
+<ul>
+<li>Bars.gitgutter-theme</li>
+<li>Bars Thin.gitgutter-theme</li>
+<li>Default.gitgutter-theme</li>
+<li>Default HiDPI.gitgutter-theme (<em>for ST2 and old ST3 dev builds</em>)</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Custom Themes</p>
+<p>To provide a custom theme developers need to add a folder with all required icons and optionally a <code>gitgutter_popup.css</code> file to their package. An empty JSON file <code>&lt;ThemeName&gt;.gitgutter-theme</code> must exist to mark this folder a resource for GitGutter icons.</p>
+</div>
+<h2 id="diff-popup">Diff Popup</h2>
+<p>ⓘ <em>requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+</em></p>
+<h3 id="enable-hover">Enable Hover</h3>
+<div class="codehilite"><pre><span class="s2">&quot;enable_hover_diff_popup&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter shows a diff popup, when hovering over changes in the gutter. Set <code>false</code> to disable the hovering feature.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<p>You can still open it with a <a href="../usage/#show-diff-popup">key binding or command palette</a>.</p>
+</div>
+<h3 id="default-mode">Default Mode</h3>
+<div class="codehilite"><pre><span class="s2">&quot;diff_popup_default_mode&quot;</span><span class="err">:</span> <span class="s2">&quot;default&quot;</span>
+</pre></div>
+
+<p>The popup displays the previous state of the content under the cursor by <code>&quot;default&quot;</code> but can be set to <code>&quot;diff&quot;</code> to highlight the differences between the git state and the editor state.</p>
+<h3 id="protected-regions_1">Protected Regions</h3>
+<div class="codehilite"><pre><span class="s2">&quot;diff_popup_protected_regions&quot;</span><span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;sublime_linter.protected_regions&quot;</span>
+<span class="p">]</span><span class="err">,</span>
+</pre></div>
+
+<p>To avoid GitGutter's diff popup from figting with other popups while hovering the gutter a list of protected regions can be created. If the line under the mouse cursor is occupied by one of these regions, no diff popup is displayed.</p>
+<div class="admonition info">
+<p class="admonition-title">Tips</p>
+<ol>
+<li>
+<p>You will need to figure out the names of the regions to protect.</p>
+</li>
+<li>
+<p>You can still open it with a <a href="../usage/#show-diff-popup">key binding or command palette</a>.</p>
+</li>
+</ol>
+</div>
+<h3 id="stylesheet">Stylesheet</h3>
+<p>The default style of the <em>Diff Popup</em> is defined by <em>mdpopups</em>´s <strong>default.css</strong> and GitGutter´s <strong>gitgutter_popup.css</strong>. Both try their best to adapt the popup´s apeareance to the active color scheme automatically.</p>
+<p>The apeareance can be customized by</p>
+<ol>
+<li>an embedded stylesheet in the color scheme</li>
+<li>editing the <em>Packages/User/mdpopups.css</em></li>
+<li>editing the <em>Packages/User/gitgutter_popup.css</em></li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Edit gitgutter_popup.css</p>
+<p>GitGutter´s style settings are accessible via</p>
+<ol>
+<li>
+<p><strong>Menu:</strong> Main &gt; Preferences &gt; Package Settings &gt; GitGutter &gt; Popup Stylesheet</p>
+</li>
+<li>
+<p><strong>Command Palette</strong>: Preferences: GitGutter Popup Stylesheet</p>
+</li>
+</ol>
+</div>
+<h3 id="syntax-highlighting">Syntax Highlighting</h3>
+<p>The popup uses the <a href="https://github.com/facelessuser/sublime-markdown-popups">mdpopups</a> library to render its content, which includes syntax highlighting.</p>
+<p>Please refer to <a href="http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings">mdpopups settings documentation</a> for settings to change this behaviour.</p>
+<h2 id="status-bar-text">Status Bar Text</h2>
+<h3 id="show-status-bar-text">Show Status Bar Text</h3>
+<div class="codehilite"><pre><span class="s2">&quot;show_status_bar_text&quot;</span><span class="err">:</span> <span class="kc">true</span>
+</pre></div>
+
+<p>GitGutter displays status information about open files in the status bar by default. Set to <code>false</code> to hide the information.</p>
+<h3 id="status-bar-text-template">Status Bar Text Template</h3>
+<div class="codehilite"><pre><span class="s2">&quot;status_bar_text&quot;</span><span class="err">:</span> <span class="p">[</span>
+    <span class="s2">&quot;{% if repo and branch %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{{repo}}/{{branch}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if added_files + deleted_files + modified_files &gt; 0 %}*{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if compare not in (&#39;HEAD&#39;, branch, None) %}, Comparing against {{compare}}{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if state %}, File is {{state}}{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if deleted &gt; 0 %}, {{deleted}}-{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if inserted &gt; 0 %}, {{inserted}}+{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% if modified &gt; 0 %}, {{modified}}≠{% endif %}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;{% endif %}&quot;</span>
+<span class="p">]</span>
+</pre></div>
+
+<p>The <em>Status Bar Text</em> is rendered using a fully customizable template from <code>status_bar_text</code>. The setting is organized as an array of strings for better readability. It is joined and then passed to <a href="http://jinja.pocoo.org/docs/">jinja2</a>.</p>
+<div class="admonition info">
+<p class="admonition-title">disable jinja2</p>
+<p>Set <code>&quot;line_annotation_text&quot;: null</code> to disable <a href="http://jinja.pocoo.org/docs/">jinja2</a> engine.</p>
+<p>The message is formatted with a fixed template which is also used if <a href="http://jinja.pocoo.org/docs/">jinja2</a> is not available.</p>
+</div>
+<p>The following variables can be used to customize the template:</p>
+<table>
+<thead>
+<tr>
+<th align="center">Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>{{repo}}</code></td>
+<td>repository name / folder name containing the .git directory</td>
+</tr>
+<tr>
+<td align="center"><code>{{branch}}</code></td>
+<td>checked out branch you are working on</td>
+</tr>
+<tr>
+<td align="center"><code>{{remote}}</code></td>
+<td>tracked remote of current branch you are working on or <code>None</code></td>
+</tr>
+<tr>
+<td align="center"><code>{{ahead}}</code></td>
+<td>number of commits the local branch is ahead of remote</td>
+</tr>
+<tr>
+<td align="center"><code>{{behind}}</code></td>
+<td>number of commits the local branch is behind remote</td>
+</tr>
+<tr>
+<td align="center"><code>{{added_files}}</code></td>
+<td>number of untracked files added to working tree</td>
+</tr>
+<tr>
+<td align="center"><code>{{deleted_files}}</code></td>
+<td>number of files deleted from working tree</td>
+</tr>
+<tr>
+<td align="center"><code>{{modified_files}}</code></td>
+<td>number of modified files in the working tree</td>
+</tr>
+<tr>
+<td align="center"><code>{{staged_files}}</code></td>
+<td>number of files in the staging area</td>
+</tr>
+<tr>
+<td align="center"><code>{{compare}}</code></td>
+<td>commit/branch/HEAD the file is compared to</td>
+</tr>
+<tr>
+<td align="center"><code>{{state}}</code></td>
+<td>One of committed/modified/ignored/untracked</td>
+</tr>
+<tr>
+<td align="center"><code>{{deleted}}</code></td>
+<td>number of deleted regions</td>
+</tr>
+<tr>
+<td align="center"><code>{{inserted}}</code></td>
+<td>number of inserted lines</td>
+</tr>
+<tr>
+<td align="center"><code>{{modified}}</code></td>
+<td>number of modified lines</td>
+</tr>
+</tbody>
+</table>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../usage/" title="Basic Usage" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Basic Usage
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../coloring/" title="Coloring" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Coloring
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2012 - ...
+<a href="https://github.com/jisaacks">JD Isaacks</a> &amp;
+<a href="https://github.com/deathaxe">DeathAxe</a>
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
+      
+      <script>app.initialize({version:"0.17.3",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>

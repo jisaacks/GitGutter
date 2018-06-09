@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    
+    <url>
+     <loc>/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/install/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/usage/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/settings/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/coloring/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/troubleshooting/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>/license/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+</urlset>
