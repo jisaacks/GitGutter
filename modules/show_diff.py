@@ -254,7 +254,7 @@ class GitGutterShowDiff(object):
         start = 0
         regions = []
         protected = self._get_protected_regions()
-        for line in self.git_handler.view_cache.splitlines():
+        for line in self.git_handler.view_cache.text.splitlines():
             end = start + len(line)
             if start not in protected:
                 region = sublime.Region(
