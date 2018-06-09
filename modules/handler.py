@@ -21,6 +21,7 @@ from .promise import Promise
 from .promise import PromiseError
 from .temp import TempFile
 from .utils import WIN32
+from .view import GitGutterViewCache
 
 # The view class has a method called 'change_count()'
 _HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
@@ -64,12 +65,10 @@ class GitGutterHandler(object):
         self.settings = settings
         # attached view being tracked
         self.view = view
+        # the view content being mirrored to disk
+        self.view_cache = GitGutterViewCache(view)
         # cached view file name to detect renames
         self._view_file_name = None
-        # path to temporary file with view content
-        self._view_temp_file = None
-        # last view change count
-        self._view_change_count = -1
         # path to temporary file with git index content
         self._git_temp_file = None
         # temporary file contains up to date information
@@ -261,30 +260,6 @@ class GitGutterHandler(object):
             comparing = comparing.replace(repl, '')
         return comparing
 
-    def _get_view_encoding(self):
-        """Read view encoding and transform it for use with python.
-
-        This method reads `origin_encoding` used by ConvertToUTF8 plugin and
-        goes on with ST's encoding setting if required. The encoding is
-        transformed to work with python's `codecs` module.
-
-        Returns:
-            string: python compatible view encoding
-        """
-        encoding = self.view.settings().get('origin_encoding')
-        if not encoding:
-            encoding = self.view.encoding()
-            if encoding == "Undefined":
-                encoding = self.view.settings().get('default_encoding')
-            begin = encoding.find('(')
-            if begin > -1:
-                encoding = encoding[begin + 1:-1]
-            encoding = encoding.replace('with BOM', '')
-            encoding = encoding.replace('Windows', 'cp')
-            encoding = encoding.replace('-', '_')
-        encoding = encoding.replace(' ', '')
-        return encoding
-
     def in_repo(self):
         """Return true, if the most recent `git show` returned any content.
 
@@ -292,64 +267,6 @@ class GitGutterHandler(object):
         all lines added state and the view's file is most commonly untracked.
         """
         return self.git_tracked
-
-    def view_file_changed(self):
-        """Check whether the content of the view changed."""
-        return (
-            _HAVE_VIEW_CHANGE_COUNT and
-            self._view_change_count != self.view.change_count()
-        )
-
-    def invalidate_view_file(self):
-        """Reset change_count and force writing the view cache file.
-
-        The view content is written to a temporary file for use with git diff,
-        if the view.change_count() has changed. This method forces the update
-        on the next call of update_view_file().
-        """
-        self._view_change_count = -1
-
-    def update_view_file(self):
-        """Write view's content to a temporary file as source for git diff.
-
-        The file is updated only if the view.change_count() has changed to
-        reduce the number of required disk writes.
-
-        Returns:
-            bool: True indicates updated file.
-                  False is returned if file is up to date.
-        """
-        change_count = 0
-        if _HAVE_VIEW_CHANGE_COUNT:
-            # write view buffer to file only, if changed
-            change_count = self.view.change_count()
-            if self._view_change_count == change_count:
-                return False
-        # Read from view buffer
-        chars = self.view.size()
-        region = sublime.Region(0, chars)
-        contents = self.view.substr(region)
-        # Try conversion
-        try:
-            encoding = self._get_view_encoding()
-            encoded = contents.encode(encoding)
-        except (LookupError, UnicodeError):
-            # Fallback to utf8-encoding
-            encoded = contents.encode('utf-8')
-        try:
-            # Write the encoded content to file
-            if not self._view_temp_file:
-                self._view_temp_file = TempFile(mode='wb')
-            with self._view_temp_file as file:
-                if self.view.encoding() == "UTF-8 with BOM":
-                    file.write(codecs.BOM_UTF8)
-                file.write(encoded)
-        except OSError as error:
-            print('GitGutter failed to create view cache: %s' % error)
-            return False
-        # Update internal change counter after job is done
-        self._view_change_count = change_count
-        return True
 
     def is_git_file_valid(self):
         """Return True if temporary file is marked up to date."""
@@ -442,11 +359,11 @@ class GitGutterHandler(object):
                 the modifications of the file.
             None: Returns None if nothing has changed since last call.
         """
-        updated_view_file = self.update_view_file()
+        updated_view_file = self.view_cache.update()
         if not updated_git_file and not updated_view_file:
             return self.process_diff(self._git_diff_cache)
 
-        if not self._git_temp_file or not self._view_temp_file:
+        if not self._git_temp_file:
             return self.process_diff(self._git_diff_cache)
 
         return self.execute_async(list(filter(None, (
@@ -458,11 +375,11 @@ class GitGutterHandler(object):
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
             self.translate_path_to_wsl(self._git_temp_file.name),
-            self.translate_path_to_wsl(self._view_temp_file.name)
+            self.translate_path_to_wsl(self.view_cache.name)
         ))), decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
-        encoding = self._get_view_encoding()
+        encoding = self.view_cache.python_friendly_encoding()
         try:
             decoded_results = results.decode(encoding)
         except AttributeError:

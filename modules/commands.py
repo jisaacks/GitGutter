@@ -109,7 +109,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             # File moved out of work-tree or repository gone
             if not valid:
                 self.show_diff_handler.clear()
-                self.git_handler.invalidate_view_file()
+                self.git_handler.view_cache.invalidate()
                 if settings.get('debug'):
                     utils.log_message('disabled for "%s" because %s' % (
                         os.path.basename(self.view.file_name() or 'untitled'),
