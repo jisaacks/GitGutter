@@ -5,6 +5,10 @@ gh-pages/ export-ignore
 *.gitignore export-ignore
 *.gitattributes export-ignore
 
+## mkdocs sources
+docs/ export-ignore
+mkdocs.yml export-ignore
+
 ## release scripts
 makefile export-ignore
 release.py export-ignore

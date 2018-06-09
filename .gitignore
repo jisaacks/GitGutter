@@ -3,6 +3,7 @@
 .mypy_cache/
 .ropeproject/
 __pycache__/
+site/
 var/
 
 # Cache files

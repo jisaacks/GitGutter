@@ -1,0 +1,66 @@
+%YAML 1.2
+---
+site_name: GitGutter Documentation
+repo_url: https://github.com/jisaacks/GitGutter
+site_description: A Sublime Text plug-in to show information about files in a git repository.
+copyright: |-
+  Copyright &copy; 2012 - ...
+  <a href="https://github.com/jisaacks">JD Isaacks</a> &amp;
+  <a href="https://github.com/deathaxe">DeathAxe</a>
+
+pages:
+  - Overview: index.md
+  - Installation: install.md
+  - Basic Usage: usage.md
+  - Settings: settings.md
+  - Coloring: coloring.md
+  - Troubleshooting: troubleshooting.md
+  - License: license.md
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: red
+  logo:
+    icon: description
+
+markdown_extensions:
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - pymdownx.extrarawhtml:
+  - pymdownx.superfences:
+  - pymdownx.highlight:
+      css_class: codehilite
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+  - pymdownx.inlinehilite:
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      user: jisaacks
+      repo: GitGutter
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_png
+  - pymdownx.escapeall:
+      hardbreak: true
+      nbsp: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.striphtml:
+      strip_attributes: ''
+  - pymdownx.keys:
+      separator: "\uff0b"
+  - pymdownx.details:
