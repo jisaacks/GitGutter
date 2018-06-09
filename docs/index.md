@@ -1,4 +1,4 @@
-# GitGutter
+# Overview
 
 A [Sublime Text](http://www.sublimetext.com) plug-in to show information about files in a git repository:
 
@@ -15,7 +15,7 @@ and provides some commands like:
 
 ## Gutter Icons & Status Bar Text
 
-![screenshot](docs/assets/images/gutter_and_status.gif)
+![screenshot](assets/images/gutter_and_status.gif)
 
 The icons of the default theme have the following meaning:
 
@@ -27,11 +27,11 @@ The icons of the default theme have the following meaning:
 ![ignored][]   | ignored file
 ![untracked][] | untracked file
 
-[changed]: <docs/assets/images/gutter_changed.png>
-[deleted]: <docs/assets/images/gutter_deleted.png>
-[ignored]: <docs/assets/images/gutter_ignored.png>
-[inserted]: <docs/assets/images/gutter_inserted.png>
-[untracked]: <docs/assets/images/gutter_untracked.png>
+[changed]: <assets/images/gutter_changed.png>
+[deleted]: <assets/images/gutter_deleted.png>
+[ignored]: <assets/images/gutter_ignored.png>
+[inserted]: <assets/images/gutter_inserted.png>
+[untracked]: <assets/images/gutter_untracked.png>
 
 
 ## Diff Popup
@@ -40,7 +40,7 @@ The diff popup shows the orignal content from the commit or the differences betw
 
 ⓘ _requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+_
 
-![diff_popup_screenshot](docs/assets/images/diff_popup.gif)
+![diff_popup_screenshot](assets/images/diff_popup.gif)
 
 The toolbar provides some commands to interact with or modify the changes.
 
@@ -54,12 +54,4 @@ The toolbar provides some commands to interact with or modify the changes.
  ⎘      | copy the orignial content from the commit
  ⟲      | revert a modified hunk to the original state in a commit
 
-
-## Documentaion
-
-Please read https://jisaacks.github.io/GitGutter/ for detailed information about
-
-- [Installation](https://jisaacks.github.io/GitGutter/install)
-- [Usage](https://jisaacks.github.io/GitGutter/usage)
-- [Settings](https://jisaacks.github.io/GitGutter/settings)
-- [Troubleshooting](https://jisaacks.github.io/GitGutter/troubleshooting)
+To learn about how to show the diff popup and to use those commands directly please refere to the [Basic Usage](usage.md#show-diff-popup) section.
