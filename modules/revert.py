@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .utils import line_from_kwargs
 
 
 def revert_change(git_gutter, **kwargs):
@@ -16,18 +17,10 @@ def revert_change(git_gutter, **kwargs):
                 line (int): zero-based line number within the hunk to copy
                 point (int): zero based text position within the hunk to copy
     """
-    view = git_gutter.view
-    line = kwargs.get('line')
-    if line is None:
-        point = kwargs.get('point')
-        if point is None:
-            selection = view.sel()
-            if not selection:
-                return
-            point = selection[0].end()
-        # get line number from text point
-        line = view.rowcol(point)[0]
-    revert_change_impl(view, git_gutter.git_handler.diff_line_change(line + 1))
+    line = line_from_kwargs(git_gutter.view, kwargs)
+    revert_change_impl(
+        git_gutter.view,
+        git_gutter.git_handler.diff_line_change(line + 1))
 
 
 def revert_change_impl(view, diff_info):

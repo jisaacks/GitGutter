@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import sublime
 
+from .utils import line_from_kwargs
+
 
 def copy_from_commit(git_gutter, **kwargs):
     """Copy the content from commit.
@@ -17,17 +19,7 @@ def copy_from_commit(git_gutter, **kwargs):
                 line (int): zero-based line number within the hunk to copy
                 point (int): zero based text position within the hunk to copy
     """
-    view = git_gutter.view
-    line = kwargs.get('line')
-    if line is None:
-        point = kwargs.get('point')
-        if point is None:
-            selection = view.sel()
-            if not selection:
-                return
-            point = selection[0].end()
-        # get line number from text point
-        line = view.rowcol(point)[0]
+    line = line_from_kwargs(git_gutter.view, kwargs)
     del_lines, _, _, _ = git_gutter.git_handler.diff_line_change(line + 1)
     del_text = '\n'.join(del_lines or '')
     sublime.set_clipboard(del_text)
