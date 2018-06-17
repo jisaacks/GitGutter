@@ -1,0 +1,76 @@
+1.8.0:
+======
+
+   A N N O U N C E M E N T
+
+   This pre-release adds enables usage of Windows Subsystem for Linux (WSL).
+
+   To enable WSL just setup a unix-like path in the "git_binary" setting.
+
+       "git_binary": "/usr/bin/git"
+
+   Known Issues:
+    1. Git via WSL runs 2 to 3 times slower than Git for Windows, which may
+       cause some reasonable delayes here and there.
+    2. The WSL seems to have some issues with passing long texts through the
+       stdio interface. The content is simply truncated sometimes. This issue
+       is worked around by reading the commited file content directly into the
+       cache file, but the result of a `git diff` may still be truncated on
+       large files. So GitGutter may not see some of the changes in a file.
+
+       This WSL issue which can't be fixed by GitGutter at the moment.
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  Enhancement:
+   - Sort settings by categories
+   - Directly write git cache file to disk
+   - Improve status bar text rendering
+
+  Internal:
+   - Directly start asynchronous processes
+   - Create GitGutterViewCache class
+   - some others ...
+
+  Fix:
+   - Check git version after settings change.
+   - Always checkout files with LF on any OS.
+   - Ensure not to leave zombie event listeners
+   - Don't overwrite global settings in EventListener
+   - Enable GitGutter via Preferences only.
+
+  README:
+   - Update git_binary settings section
+
+  Feature:
+   - Add WSL support (#500)
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
