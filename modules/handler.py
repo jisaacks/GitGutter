@@ -208,6 +208,11 @@ class GitGutterHandler(object):
         """
         return path.translate_to_wsl(filename) if self._git_wsl else filename
 
+    def is_rebase_active(self):
+        """Returns True if a rebase is active in the repository."""
+        return os.path.exists(
+            os.path.join(self._git_tree, '.git', 'rebase-merge'))
+
     def get_compare_against(self):
         """Return the compare target for a view.
 

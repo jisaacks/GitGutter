@@ -29,7 +29,8 @@ DISABLED_REASON = {
     7: 'view encoding is Hexadecimal',
     8: 'file not in a working tree',
     9: 'git is not working',
-    10: 'UNC paths not supported by WSL'
+    10: 'UNC paths not supported by WSL',
+    11: 'git rebase is active'
 }
 
 
@@ -102,6 +103,9 @@ class GitGutterCommand(sublime_plugin.TextCommand):
             # In WSL mode the repo must be located on a drive like (C:\path)
             elif not self.git_handler.work_tree_supported():
                 state = 10
+            # Keep quite if a rebase operation is on the fly
+            elif self.git_handler.is_rebase_active():
+                state = 11
 
         # Handle changed state
         valid = state == 0
