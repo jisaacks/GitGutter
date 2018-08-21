@@ -1,18 +1,5 @@
 # -*- coding: utf-8 -*-
-import weakref
-
-try:
-    # avoid exceptions if dependency is not yet satisfied
-    from jinja2 import Template
-    from jinja2 import TemplateSyntaxError
-    _HAVE_JINJA2 = True
-except ImportError:
-    _HAVE_JINJA2 = False
-
-from .utils import log_message
-
-# template cache to reuse existing templates
-templates_cache = weakref.WeakValueDictionary()
+from . import templates
 
 
 class SimpleStatusBarTemplate(object):
@@ -130,44 +117,7 @@ class GitGutterStatusBar(object):
 
         if want_update:
             if not self.template:
-                self.template = self.validate_template()
+                self.template = templates.create(
+                    self.settings, 'status_bar_text', SimpleStatusBarTemplate)
             self.view.set_status(
                 '00_git_gutter', self.template.render(**self.vars))
-
-    def validate_template(self):
-        """Create a template from source and store a weak reference as cache.
-
-        Instead of creating a `Template` per view, the source of the template
-        is used to identify the template and reuse one `Template` object for
-        each matching source read from the view's settings.
-
-        If no custom (view-, syntax-, project-specific) statusbar text is set
-        up anywhere this dictionary holds only one `Template` normally.
-
-        Returns:
-            jinja2.Template:
-                if jinja2 is available and a valid template is defined
-            SimpleStatusBarTemplate:
-                if jinnja2 is not present or failed loading the Template
-        """
-        if _HAVE_JINJA2:
-            # read the template from settings
-            source = self.settings.get('status_bar_text')
-            if source:
-                # join a list of lines to a single source.
-                if isinstance(source, list):
-                    source = ''.join(source)
-
-                key = hash(source)
-                try:
-                    # try the cached template
-                    return templates_cache[key]
-                except KeyError:
-                    try:
-                        # create new template
-                        templates_cache[key] = Template(source)
-                        return templates_cache[key]
-                    except TemplateSyntaxError:
-                        log_message(
-                            '"status_bar_text" contains malformed template!')
-        return SimpleStatusBarTemplate()
