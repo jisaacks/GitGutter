@@ -667,6 +667,18 @@ class GitGutterHandler(object):
         return self.execute_async([
             self._git_binary, 'rev-parse', compare_against])
 
+    def git_blame(self, row):
+        """Call git blame to find out who changed a specific line of code"""
+        return self.execute_async([
+            self._git_binary,
+            '-c', 'core.autocrlf=input',
+            '-c', 'core.eol=lf',
+            '-c', 'core.safecrlf=false',
+            'blame', '-p', '-L%d,%d' % (row + 1, row + 1),
+            '--contents', self.translate_path_to_wsl(self.view_cache.name),
+            '--', self._git_path
+        ])
+
     def git_read_file(self, commit):
         """Read the content of the file from specific commit.
 

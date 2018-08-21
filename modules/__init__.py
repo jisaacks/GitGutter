@@ -3,8 +3,9 @@
 
 Define all API classes here, which need to be exported to Sublime Text.
 """
-
+from .events import BlameEventListener
 from .events import EventListener
+from .commands import GitGutterBlameCommand
 from .commands import GitGutterCommand
 from .commands import GitGutterCompareBranchCommand
 from .commands import GitGutterCompareCommitCommand

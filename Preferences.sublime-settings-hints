@@ -137,6 +137,50 @@
     ],
 
     //
+    // Line Annotation
+    //
+
+    // (ST3, Build 3124+ only)
+    // Display a phantom text at the end of the active line with information
+    // about who changed it using the output of `git blame`.
+    //   "auto"  -- show line annotation if word wrap is disabled (default)
+    //   "true"  -- always show line annotation
+    //   "false" -- never show line annotation
+    "git_gutter_show_line_annotation": "auto",
+
+    // (ST3, Build 3124+ only)
+    // The 1 based ruler index to align the line annotation text to.
+    //
+    // If no ruler is available the phantom is aligned to the end of line.
+    // If the selected ruler does not exist the most right one is used.
+    //
+    // Valid values are:
+    //   "False"  -- align to end of line (default)
+    //   "1"      -- align to first ruler
+    //   "2"      -- align of second ruler
+    //   ...
+    "git_gutter_line_annotation_ruler": false,
+
+    // LINE ANNOTATION TEXT TEMPLATE
+    // If the value is an array it is joined to a single string and passed to
+    // jinja2 template engine (if available) to render the blame message text.
+    // GitGutter provides the following variables:
+    //   {{line_author}}        -- the author, who introduced the change
+    //   {{line_author_mail}}   -- the e-mail address of the author
+    //   {{line_author_age}}    -- the time elapsed since the change
+    //   {{line_author_time}}   -- the time string of the change
+    //   {{line_author_tz}}     -- the timezone string of the change
+    //   {{line_commit}}        -- the hash of the changing committing
+    //   {{line_committer}}     -- the committer, who added the change to the repo
+    //   {{line_committer_mail}}-- the e-mail address of the committer
+    //   {{line_committer_age}} -- the time elapsed since the change
+    //   {{line_committer_time} -- the time string of commit
+    //   {{line_committer_tz}   -- the timezone string of commit
+    //   {{line_summary}}       -- the first line of the commit message
+    //   {{line_previous}}      -- the hash of the previous commit
+    "git_gutter_line_annotation_text": "{{line_author}} ({{line_author_age}}) · {{line_summary}}",
+
+    //
     // Status Bar
     //
 
@@ -149,21 +193,34 @@
     // The array is joined to a single string and passed to jinja2 template
     // engine to render the status message text. The template can be modified using
     // jinja2 supported syntax. GitGutter provides the following variables:
-    //   {{repo}}     -- repository name / folder name containing the .git directory
-    //   {{branch}}   -- checked out branch you are working on
-    //   {{remote}}   -- tracked remote of current branch you are working on or `None`
-    //   {{ahead}}    -- number of commits the local branch is ahead of remote
-    //   {{behind}}   -- number of commits the local branch is behind remote
-    //   {{added_files}}    -- number of untracked files added to working tree
-    //   {{deleted_files}}  -- number of files deleted from working tree
-    //   {{modified_files}} -- number of modified files in the working tree
-    //   {{staged_files}}   -- number of files in the staging area
-    //   {{compare}}  -- commit/branch/HEAD the file is compared to
-    //   {{state}}    -- One of committed/modified/ignored/untracked
-    //   {{deleted}}  -- number of deleted regions
-    //   {{inserted}} -- number of inserted lines
-    //   {{modified}} -- number of modified lines
-    "git_gutter_status_bar_text": [
+    //   {{repo}}               -- repository name / folder name containing the .git directory
+    //   {{branch}}             -- checked out branch you are working on
+    //   {{remote}}             -- tracked remote of current branch you are working on or `None`
+    //   {{ahead}}              -- number of commits the local branch is ahead of remote
+    //   {{behind}}             -- number of commits the local branch is behind remote
+    //   {{added_files}}        -- number of untracked files added to working tree
+    //   {{deleted_files}}      -- number of files deleted from working tree
+    //   {{modified_files}}     -- number of modified files in the working tree
+    //   {{staged_files}}       -- number of files in the staging area
+    //   {{compare}}            -- commit/branch/HEAD the file is compared to
+    //   {{state}}              -- One of committed/modified/ignored/untracked
+    //   {{deleted}}            -- number of deleted regions
+    //   {{inserted}}           -- number of inserted lines
+    //   {{modified}}           -- number of modified lines
+    //   {{line_author}}        -- the author, who introduced the change
+    //   {{line_author_mail}}   -- the e-mail address of the author
+    //   {{line_author_age}}    -- the time elapsed since the change
+    //   {{line_author_time}}   -- the time string of the change
+    //   {{line_author_tz}}     -- the timezone string of the change
+    //   {{line_commit}}        -- the hash of the changing committing
+    //   {{line_committer}}     -- the committer, who added the change to the repo
+    //   {{line_committer_mail}}-- the e-mail address of the committer
+    //   {{line_committer_age}} -- the time elapsed since the change
+    //   {{line_committer_time} -- the time string of commit
+    //   {{line_committer_tz}   -- the timezone string of commit
+    //   {{line_summary}}       -- the first line of the commit message
+    //   {{line_previous}}      -- the hash of the previous commit
+    "status_bar_text": [
         "{% if repo and branch %}",
         "{{repo}}/{{branch}}",
         "{% if added_files + deleted_files + modified_files > 0 %}*{% endif %}",
@@ -172,6 +229,7 @@
         "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
         "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
         "{% if modified > 0 %}, {{modified}}≠{% endif %}",
+        "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
         "{% endif %}"
     ]
 }

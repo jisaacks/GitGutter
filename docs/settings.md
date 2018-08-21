@@ -342,6 +342,84 @@ The popup uses the [mdpopups](https://github.com/facelessuser/sublime-markdown-p
 Please refer to [mdpopups settings documentation](http://facelessuser.github.io/sublime-markdown-popups/usage/#global-user-settings) for settings to change this behaviour.
 
 
+## Line Annotation
+
+The active line of the active view is annotated with information about who changed it when. Its behaviour and the look & feel can be modified with the following settings.
+
+
+### Show Line Annotation
+
+```JSON
+"show_line_annotation": "auto"
+```
+
+ⓘ _requires Sublime Text 3 Build 3124+_
+
+GitGutter displays information about the author of a change right next to the line using a phantom text if word wrapping is disabled. The behaviour can be modified by setting `show_line_annotation` to one of the following values:
+
+ Value   | Description
+:-------:|--------------------------------------------------
+ "auto"  | show Line Annotation if word wrap is disabled (default)
+ true    | always show Line Annotation
+ false   | never show Line Annotation
+
+
+### Line Annotation Template
+
+```JSON
+"line_annotation_text": "{{line_author}} ({{line_author_age}}) · {{line_summary}}"
+```
+
+The _Line Annotation_ is rendered by [jinja2](http://jinja.pocoo.org/docs/) using a fully customizable template from the `line_annotation_text` setting. 
+
+!!! info "disable jinja2"
+
+    Set `"line_annotation_text": null` to disable [jinja2](http://jinja.pocoo.org/docs/) engine.
+    
+    The message is formatted with a fixed template which is also used if [jinja2](http://jinja.pocoo.org/docs/) is not available.
+
+!!! info "multiline templates"
+
+    The setting can organized as an array of strings for better readability. It is joined and then passed to [jinja2](http://jinja.pocoo.org/docs/).
+    
+    **Example**
+    
+    ```JSON
+    "line_annotation_text": [
+        "{{line_author}}",
+        " ({{line_author_age}})",
+        " · {{line_summary}}"
+    ]
+    ```
+
+The following variables can be used to customize the template:
+
+ Variable                  | Description
+:-------------------------:|--------------------------------------------------
+ `{{line_author}}`         | the author, who introduced the change
+ `{{line_author_mail}}`    | the e-mail address of the author
+ `{{line_author_age}}`     | the time elapsed since the change
+ `{{line_author_time}}`    | the time string of the change
+ `{{line_author_tz}}`      | the timezone string of the change
+ `{{line_commit}}`         | the hash of the changing committing
+ `{{line_committer}}`      | the committer, who added the change to the repo
+ `{{line_committer_mail}}` | the e-mail address of the committer
+ `{{line_committer_age}}`  | the time elapsed since the change
+ `{{line_committer_time} ` | the time string of commit
+ `{{line_committer_tz} `   | the timezone string of commit
+ `{{line_summary}}`        | the first line of the commit message
+ `{{line_previous}}`       | the hash of the previous commit
+
+
+### Line Annotation Ruler
+
+```JSON
+"line_annotation_ruler": false
+```
+
+The _Line Annotation_ is aligned to the end of a line with a predefined distance by default. To align the Line Annotation to the first ruler instead, you can set `line_annotation_ruler` to `1`. A value of `2` aligns the text to the second ruler if available and so forth.
+
+
 ## Status Bar Text
 
 ### Show Status Bar Text
@@ -365,6 +443,7 @@ GitGutter displays status information about open files in the status bar by defa
     "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
     "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
     "{% if modified > 0 %}, {{modified}}≠{% endif %}",
+    "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
     "{% endif %}"
 ]
 ```
@@ -395,3 +474,16 @@ The following variables can be used to customize the template:
  `{{deleted}}`             | number of deleted regions
  `{{inserted}}`            | number of inserted lines
  `{{modified}}`            | number of modified lines
+ `{{line_author}}`         | the author, who introduced the change
+ `{{line_author_mail}}`    | the e-mail address of the author
+ `{{line_author_age}}`     | the time elapsed since the change
+ `{{line_author_time}}`    | the time string of the change
+ `{{line_author_tz}}`      | the timezone string of the change
+ `{{line_commit}}`         | the hash of the changing committing
+ `{{line_committer}}`      | the committer, who added the change to the repo
+ `{{line_committer_mail}}` | the e-mail address of the committer
+ `{{line_committer_age}}`  | the time elapsed since the change
+ `{{line_committer_time} ` | the time string of commit
+ `{{line_committer_tz} `   | the timezone string of commit
+ `{{line_summary}}`        | the first line of the commit message
+ `{{line_previous}}`       | the hash of the previous commit

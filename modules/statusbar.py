@@ -7,7 +7,7 @@ class SimpleStatusBarTemplate(object):
 
     @staticmethod
     def render(repo=None, branch=None, compare=None, inserted=0, deleted=0,
-               modified=0, **kwargs):
+               modified=0, line_author=None, line_author_age=None, **kwargs):
         """Format the status bar text using a static set of rules.
 
         Arguments:
@@ -17,6 +17,8 @@ class SimpleStatusBarTemplate(object):
             inserted (int): The amount of inserted lines
             deleted (int): The amount of deleted lines
             modified (int): The amount of modified lines
+            line_author (string): The author of the active line
+            line_author_age (string): The age of the active line's change
 
         Returns:
             string: The formatted message to display in the status bar.
@@ -37,6 +39,10 @@ class SimpleStatusBarTemplate(object):
             parts.append('{deleted}-')
         if modified:
             parts.append(u'{modified}≠')
+
+        # blame message
+        if line_author and line_author_age:
+            parts.append(u'⟢ {line_author} ({line_author_age})')
 
         # join template and fill with locals
         return ', '.join(parts).format(**locals())
@@ -84,6 +90,23 @@ class GitGutterStatusBar(object):
             'deleted': 0,
             'inserted': 0,
             'modified': 0,
+
+            # inline blame information
+            'line_commit': None,
+            'line_previous': None,
+            'line_summary': None,
+
+            'line_author': None,
+            'line_author_mail': None,
+            'line_author_age': None,
+            'line_author_time': None,
+            'line_author_tz': None,
+
+            'line_committer': None,
+            'line_committer_mail': None,
+            'line_committer_age': None,
+            'line_committer_time': None,
+            'line_committer_tz': None,
         }
 
     def is_enabled(self):

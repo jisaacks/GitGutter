@@ -5,6 +5,7 @@ import sublime
 import sublime_plugin
 
 from . import settings
+from .annotation import erase_line_annotation
 
 # binary representation of all ST events
 NEW = 1
@@ -238,3 +239,71 @@ class ViewEventListener(object):
                 if active_view and active_view.id() == view_id:
                     return True
         return False
+
+
+class BlameEventListener(sublime_plugin.EventListener):
+    """An EventListener to track caret movement and update blame messages."""
+
+    def __init__(self):
+        """Initialize n BlameEventListener object."""
+        # last blame call
+        self.latest_blame_time = 0.0
+        # a dictionary with active rows of each view
+        self.last_blame_row = {}
+
+    def on_close(self, view):
+        """Clean up the debounce dictionary.
+
+        Arguments:
+            view (View): The view which received the event.
+        """
+        key = view.id()
+        if key in self.last_blame_row:
+            del self.last_blame_row[key]
+
+    def on_activated(self, view):
+        """Run blame if the view is activated."""
+        self._run_blame(view, True)
+
+    def on_deactivated(self, view):
+        """Remove inline blame text if view is deactivated."""
+        erase_line_annotation(view)
+
+    def on_modified(self, view):
+        """Remove inline blame text if user starts typing."""
+        erase_line_annotation(view)
+
+    def on_selection_modified(self, view):
+        """Run blame if the caret moves to another row."""
+        self._run_blame(view, False)
+
+    def _run_blame(self, view, force):
+        """Run blame if the caret moves to another row."""
+
+        # check if caret is present
+        selection = view.sel()
+        if not selection:
+            return
+
+        # do nothing if row didn't change
+        row, _ = view.rowcol(selection[0].begin())
+        if not force and row == self.last_blame_row.get(view.id(), -1):
+            return
+        self.last_blame_row[view.id()] = row
+
+        # remove existing phantoms
+        erase_line_annotation(view)
+
+        # ignore empty lines
+        if not view.line(view.text_point(row, 0)):
+            return
+
+        # initiate debounce timer
+        blame_time = time.time()
+        self.latest_blame_time = blame_time
+
+        def on_time():
+            if self.latest_blame_time == blame_time:
+                view.run_command('git_gutter_blame')
+        # don't call blame if selected row changes too quickly
+        sublime.set_timeout(on_time, 400)

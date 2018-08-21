@@ -4,6 +4,7 @@ import os
 import sublime
 import sublime_plugin
 
+from . import blame
 from . import compare
 from . import copy
 from . import events
@@ -15,6 +16,7 @@ from . import settings
 from . import show_diff
 from . import utils
 
+from .annotation import GitGutterLineAnnotation
 from .statusbar import GitGutterStatusBar
 
 # the reason why evaluation is skipped, which is printed to console
@@ -38,6 +40,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
 
     # The map of sub commands and their implementation
     commands = {
+        'blame': blame.run_blame,
         'jump_to_next_change': goto.next_change,
         'jump_to_prev_change': goto.prev_change,
         'compare_against_commit': compare.set_against_commit,
@@ -57,6 +60,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         sublime_plugin.TextCommand.__init__(self, *args, **kwargs)
         self.settings = settings.ViewSettings(self.view)
         self.git_handler = handler.GitGutterHandler(self.view, self.settings)
+        self.line_annotation = GitGutterLineAnnotation(self.view, self.settings)
         self.status_bar = GitGutterStatusBar(self.view, self.settings)
         self.show_diff_handler = show_diff.GitGutterShowDiff(self.git_handler, self.status_bar)
 
@@ -164,6 +168,10 @@ class GitGutterBaseCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         kwargs['action'] = self.ACTION
         self.view.run_command('git_gutter', kwargs)
+
+
+class GitGutterBlameCommand(GitGutterBaseCommand):
+    ACTION = 'blame'
 
 
 class GitGutterShowCompareCommand(GitGutterBaseCommand):
