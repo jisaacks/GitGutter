@@ -121,6 +121,9 @@ class GitGutterHandler(object):
             self._git_wsl = WIN32 and self._git_binary.startswith('/')
 
         if self._git_version is None:
+            is_missing = self._git_binary in self._missing_binaries
+            git_version = ''
+
             # Query git version synchronously
             try:
                 proc = self.popen([self._git_binary, '--version'])
@@ -131,21 +134,26 @@ class GitGutterHandler(object):
             except TimeoutExpired as error:
                 proc.kill()
                 git_version = proc.stdout.read().decode('utf-8')
+                raise
 
             except Exception as error:
-                git_version = ''
+                if not is_missing and self.settings.get('debug'):
+                    utils.log_message(str(error))
 
             # Parse version string like (git version 2.12.2.windows.1)
             match = re.match(r'git version (\d+)\.(\d+)\.(\d+)', git_version)
             if match:
                 # PEP-440 conform git version (major, minor, patch)
                 self._git_version = tuple(int(g) for g in match.groups())
-                if self._git_binary in self._missing_binaries:
+                if is_missing:
                     utils.log_message(self._git_binary + ' is back on duty!')
                     self._missing_binaries.discard(self._git_binary)
 
-            elif self._git_binary not in self._missing_binaries:
+            elif not is_missing:
                 utils.log_message(self._git_binary + ' not found or working!')
+                if self.settings.get('debug'):
+                    utils.log_message(
+                        '"git --version" returned "{}"'.format(git_version))
                 self._missing_binaries.add(self._git_binary)
 
         return self._git_version
