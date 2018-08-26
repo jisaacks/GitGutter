@@ -4,6 +4,22 @@ from functools import partial
 
 from .utils import line_from_kwargs
 
+# A set of all supported variables
+BLAME_VARIABLES = {
+    'line_commit',
+    'line_previous',
+    'line_summary',
+    'line_author',
+    'line_author_mail',
+    'line_author_age',
+    'line_author_time',
+    'line_author_tz',
+    'line_committer',
+    'line_committer_mail',
+    'line_committer_age',
+    'line_committer_time',
+    'line_committer_tz'
+}
 
 def run_blame(git_gutter, **kwargs):
     """Call git blame for the requested or active row and add phantom.
@@ -25,7 +41,10 @@ def run_blame(git_gutter, **kwargs):
     """
     # check if feature is enabled
     show_inline = git_gutter.line_annotation.is_enabled()
-    show_status = git_gutter.status_bar.is_enabled()
+    show_status = (
+        git_gutter.status_bar.is_enabled() and
+        git_gutter.status_bar.has(BLAME_VARIABLES)
+    )
     if not show_inline and not show_status:
         return
 

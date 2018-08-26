@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
+from . import blame
 from . import templates
 
 
 class SimpleStatusBarTemplate(object):
     """A simple template class with the same interface as jinja2's one."""
+
+    # a list of variables used by this template
+    variables = {
+        'repo', 'branch', 'compare', 'inserted', 'deleted', 'modified',
+        'line_author', 'line_author_age'
+    }
 
     @staticmethod
     def render(repo=None, branch=None, compare=None, inserted=0, deleted=0,
@@ -90,24 +97,10 @@ class GitGutterStatusBar(object):
             'deleted': 0,
             'inserted': 0,
             'modified': 0,
-
-            # inline blame information
-            'line_commit': None,
-            'line_previous': None,
-            'line_summary': None,
-
-            'line_author': None,
-            'line_author_mail': None,
-            'line_author_age': None,
-            'line_author_time': None,
-            'line_author_tz': None,
-
-            'line_committer': None,
-            'line_committer_mail': None,
-            'line_committer_age': None,
-            'line_committer_time': None,
-            'line_committer_tz': None,
         }
+        # declare all blame variables
+        for var in blame.BLAME_VARIABLES:
+            self.vars[var] = None
 
     def is_enabled(self):
         """Return whether status bar text is enabled in settings or not."""
@@ -117,6 +110,23 @@ class GitGutterStatusBar(object):
             self.vars['repo'] = None
             self.erase()
         return enabled
+
+    def has(self, variables):
+        """Check if a set of variables is used by the user defined template.
+
+        Arguments:
+            variables (iter):
+                An iterateable object with all the variables to check for
+                existence within the active template.
+        Returns:
+            bool:
+                True - if at least one variable is used by the template.
+                False - if no variable is used by the template.
+        """
+        try:
+            return any(var in self.template.variables for var in variables)
+        except:
+            return False
 
     def erase(self):
         """Erase status bar text."""

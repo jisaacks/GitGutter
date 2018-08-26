@@ -6,12 +6,16 @@ available but keep running smoothly if not.
 """
 try:
     # avoid exceptions if dependency is not yet satisfied
+    from jinja2 import meta
+    from jinja2 import Environment
     from jinja2 import Template
     from jinja2 import TemplateSyntaxError
     from weakref import WeakValueDictionary
 
     from .utils import log_message
 
+    # jinja environment to use to create templates
+    _jinja_env = Environment()
     # template cache to reuse existing templates
     _templates_cache = WeakValueDictionary()
 
@@ -55,9 +59,13 @@ try:
             return _templates_cache[key]
         except KeyError:
             try:
-                # create new template
-                _templates_cache[key] = Template(source)
-                return _templates_cache[key]
+                # create the template from source string
+                template = _jinja_env.from_string(source)
+                # generate a list of all variables being in use by the template
+                setattr(template, 'variables', set(
+                    meta.find_undeclared_variables(_jinja_env.parse(source))))
+                _templates_cache[key] = template
+                return template
             except TemplateSyntaxError:
                 log_message('"{}" contains malformed template!'.format(key))
         return simple_template()
