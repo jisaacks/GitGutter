@@ -128,13 +128,14 @@ class GitGutterHandler(object):
             try:
                 proc = self.popen([self._git_binary, '--version'])
                 if _HAVE_TIMEOUT:
-                    proc.wait(0.5)
+                    proc.wait(1.0)
                 git_version = proc.stdout.read().decode('utf-8')
 
             except TimeoutExpired as error:
                 proc.kill()
                 git_version = proc.stdout.read().decode('utf-8')
-                raise
+                if not is_missing and self.settings.get('debug'):
+                    utils.log_message(str(error))
 
             except Exception as error:
                 if not is_missing and self.settings.get('debug'):
