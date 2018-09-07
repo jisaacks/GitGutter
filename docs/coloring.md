@@ -1,6 +1,6 @@
-# Icon Coloring
+# Coloring
 
-The colors come from your _color scheme_ file.
+The colors of gutter icons and the line annotation come from your _color scheme_ file.
 
 
 ## Sublime Text Color Scheme Format
@@ -49,6 +49,10 @@ If a color scheme file does not define the appropriate colors (or you want to ed
         {
             "scope": "markup.untracked.git_gutter",
             "foreground": "#565656"
+        },
+        {
+            "scope": "comment.line.annotation.git_gutter",
+            "foreground": "#eee",
         }
     ]
 }
@@ -129,6 +133,17 @@ If a color scheme file does not define the appropriate colors (or you want to ed
     <key>foreground</key>
     <string>#565656</string>
   </dict>
+</dict>
+<dict>
+  <key>name</key>
+  <string>GitGutter line annotation</string>
+  <key>scope</key>
+  <string>comment.line.annotation.git_gutter</string>
+  <key>settings</key>
+  <dict>
+    <key>foreground</key>
+    <string>#eee</string>
+  </dict>  
 </dict>
 ```
 
