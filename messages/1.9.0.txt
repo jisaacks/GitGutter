@@ -1,0 +1,71 @@
+1.9.0:
+======
+   A N N O U N C E M E N T
+
+   This release introduces git blame annotations so quickly see who changed
+   a line. If you don't like it at all, you can disable line annotations
+   in GitGutter.sublime-settings:
+
+       "show_line_annotation": false
+
+   or in Preferences.sublime-settings:
+
+       "git_gutter_show_line_annotation": false
+
+   The line annotation is displayed if word wrap is disabled by default due to some
+   rendering issues caused by the underlying phantom text.
+
+   The blame message is also displayed in the status bar by default.
+
+   Both the status bar text and the line annotations can be customized via jinja2
+   templates. GitGutter therefore provides a couple more variables.
+
+   For a more detailed description of the settings, please refer to the documentation.
+
+     http://jisaacks.github.io/GitGutter/settings/#line-annotation
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  README:
+   - Move Documentation to GitHub Pages
+
+  Fix:
+   - Skip evaluation if rebase is active (Issue #508)
+   - Increase timeout for git version (#510)
+
+  Feature:
+   - Display git blame message of active line (#487)
+
+  Enhancement:
+   - Print more debugging info
+   - Add support for diff --ignore-cr-at-eol (requires git 2.18+)
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
