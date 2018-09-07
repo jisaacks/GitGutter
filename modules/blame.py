@@ -21,6 +21,7 @@ BLAME_VARIABLES = {
     'line_committer_tz'
 }
 
+
 def run_blame(git_gutter, **kwargs):
     """Call git blame for the requested or active row and add phantom.
 
@@ -41,18 +42,16 @@ def run_blame(git_gutter, **kwargs):
     """
     # check if feature is enabled
     show_inline = git_gutter.line_annotation.is_enabled()
-    show_status = (
-        git_gutter.status_bar.is_enabled() and
-        git_gutter.status_bar.has(BLAME_VARIABLES)
-    )
+    status_bar = git_gutter.status_bar
+    show_status = (status_bar.is_enabled() and status_bar.has(BLAME_VARIABLES))
     if not show_inline and not show_status:
-        return
+        return None
 
     # ignore empty lines as cursor jumps off
     view = git_gutter.view
     line = line_from_kwargs(view, kwargs)
     if not view.line(view.text_point(line, 0)):
-        return
+        return None
 
     # run git blame and print its output to the desired targets
     return git_gutter.git_handler.git_blame(line).then(
@@ -107,26 +106,25 @@ def format_ago(timestamp):
     st = time.gmtime(time.time() - timestamp)
     if st.tm_year - 1970 > 1:
         return '{0} years ago'.format(st.tm_year - 1970)
-    elif st.tm_year - 1970 == 1:
+    if st.tm_year - 1970 == 1:
         return 'a year ago'
-    elif st.tm_mon - 1 > 1:
+    if st.tm_mon - 1 > 1:
         return '{0} months ago'.format(st.tm_mon - 1)
-    elif st.tm_mon - 1 == 1:
+    if st.tm_mon - 1 == 1:
         return 'a month ago'
-    elif st.tm_mday - 1 > 1:
+    if st.tm_mday - 1 > 1:
         return '{0} days ago'.format(st.tm_mday - 1)
-    elif st.tm_mday - 1 == 1:
+    if st.tm_mday - 1 == 1:
         return 'a day ago'
-    elif st.tm_hour > 1:
+    if st.tm_hour > 1:
         return '{0} hours ago'.format(st.tm_hour)
-    elif st.tm_hour == 1:
+    if st.tm_hour == 1:
         return 'an hour ago'
-    elif st.tm_min > 1:
+    if st.tm_min > 1:
         return '{0} minutes ago'.format(st.tm_min)
-    elif st.tm_min == 1:
+    if st.tm_min == 1:
         return 'a minute ago'
-    else:
-        return 'just now'
+    return 'just now'
 
 
 def format_time(timestamp):
