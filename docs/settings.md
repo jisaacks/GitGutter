@@ -360,9 +360,9 @@ GitGutter displays information about the author of a change right next to the li
 
  Value   | Description
 :-------:|--------------------------------------------------
- "auto"  | show Line Annotation if word wrap is disabled (default)
- true    | always show Line Annotation
- false   | never show Line Annotation
+ "auto"  | show line annotation if word wrap is disabled (default)
+ true    | always show line annotation
+ false   | never show line annotation
 
 
 ### Line Annotation Template
