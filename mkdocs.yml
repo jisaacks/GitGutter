@@ -8,7 +8,7 @@ copyright: |-
   <a href="https://github.com/jisaacks">JD Isaacks</a> &amp;
   <a href="https://github.com/deathaxe">DeathAxe</a>
 
-pages:
+nav:
   - Overview: index.md
   - Installation: install.md
   - Basic Usage: usage.md
