@@ -163,7 +163,8 @@ GitGutter includes all whitespace when evaluating modifications by default. Set 
 value   | description
 :------:|-----------------------------------------------
 "none"  | don't ignore any whitespace changes
-"eol"   | ignore whitespace changes at the end of line
+"cr"    | ignore the carriage return at the end of lines (git 2.18+)
+"eol"   | ignore whitespace changes at the end of lines
 "space" | ignore changed amount of whitespace
 "all"   | ignore all whitespace
 

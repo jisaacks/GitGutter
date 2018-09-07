@@ -63,6 +63,7 @@
 
     // Determines whether GitGutter ignores whitespace in modified files.
     // Set "none" to ensure whitespace is considered in the diff
+    // Set "cr" to only ignore the carriage return at the end of lines (git 2.18+)
     // Set "eol" to only ignore whitespace at the end of lines
     // Set "space" to ignore changes in amount of white space
     // Set "all" to ignore all white space

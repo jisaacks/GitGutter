@@ -71,6 +71,7 @@ class ViewSettings(object):
     # A map to translate between settings and git arguments
     _IGNORE_WHITESPACE = {
         'none': '',
+        'cr': '--ignore-cr-at-eol',
         'eol': '--ignore-space-at-eol',
         'space': '-b',
         'all': '-w'
