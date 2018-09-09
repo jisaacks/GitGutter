@@ -76,8 +76,9 @@ class GitGutterLineAnnotation(object):
             return False
         show_phantoms = self.settings.get('show_line_annotation', 'auto')
         if show_phantoms == 'auto':
-            show_phantoms = not self.view.settings().get('word_wrap') or \
-                self.view.match_selector(0, 'source')
+            word_wrap = self.view.settings().get('word_wrap')
+            show_phantoms = word_wrap is False or \
+                word_wrap == 'auto' and self.view.match_selector(0, 'source')
         if not show_phantoms:
             self.template = None
         return show_phantoms is True
