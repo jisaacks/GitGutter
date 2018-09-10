@@ -69,10 +69,14 @@ class GitGutterLineAnnotation(object):
     def is_enabled(self):
         """Check if blame phantom text is enabled.
 
+        Note:
+            Keep disabled if `draw_centered` is True because ST3176 does not
+            place the phantom to the correct place then.
+
         Returns:
             bool: True if blame phantom text is enabled, False otherwise.
         """
-        if not _HAVE_PHANTOMS:
+        if not _HAVE_PHANTOMS or self.settings.get('draw_centered'):
             return False
         show_phantoms = self.settings.get('show_line_annotation', 'auto')
         if show_phantoms == 'auto':
