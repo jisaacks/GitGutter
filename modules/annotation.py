@@ -17,7 +17,7 @@ class SimpleLineAnnotationTemplate(object):
     TEMPLATE = '⟢ {line_author} ({line_author_age}) · {line_summary}'
 
     # a list of variables used by this template
-    variables = {'line_author', 'line_author_age', 'line_summary'}
+    variables = frozenset(['line_author', 'line_author_age', 'line_summary'])
 
     @classmethod
     def render(cls, **kwargs):

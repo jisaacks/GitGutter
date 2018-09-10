@@ -5,7 +5,7 @@ from functools import partial
 from .utils import line_from_kwargs
 
 # A set of all supported variables
-BLAME_VARIABLES = {
+BLAME_VARIABLES = frozenset([
     'line_commit',
     'line_previous',
     'line_summary',
@@ -19,7 +19,7 @@ BLAME_VARIABLES = {
     'line_committer_age',
     'line_committer_time',
     'line_committer_tz'
-}
+])
 
 
 def run_blame(git_gutter, **kwargs):

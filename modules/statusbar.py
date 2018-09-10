@@ -7,10 +7,10 @@ class SimpleStatusBarTemplate(object):
     """A simple template class with the same interface as jinja2's one."""
 
     # a list of variables used by this template
-    variables = {
+    variables = frozenset([
         'repo', 'branch', 'compare', 'inserted', 'deleted', 'modified',
         'line_author', 'line_author_age'
-    }
+    ])
 
     @staticmethod
     def render(repo=None, branch=None, compare=None, inserted=0, deleted=0,
