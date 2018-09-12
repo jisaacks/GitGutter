@@ -97,7 +97,8 @@ class GitGutterLineAnnotation(object):
                 The dictionary with the information about the blame, which are
                 provided as variables for the message template.
         """
-        if not _HAVE_PHANTOMS:
+        # blame message is useful for committed content only
+        if not _HAVE_PHANTOMS or kwargs['line_summary'] == 'not committed yet':
             return False
 
         font_style, padding = 'normal', '5rem'
@@ -134,16 +135,17 @@ class GitGutterLineAnnotation(object):
             self.template = templates.create(
                 self.settings, 'line_annotation_text', SimpleLineAnnotationTemplate)
 
-        # add the phantom
+        # update the phantom
         self.view.erase_phantoms('git_gutter_line_annotation')
-        self.view.add_phantom(
-            'git_gutter_line_annotation',
-            sublime.Region(point, point + 1),
-            self.HTML_TEMPLATE.format(
-                foreground=foreground,
-                font_style=font_style,
-                padding=padding,
-                text=self.template.render(kwargs)
-            ),
-            sublime.LAYOUT_INLINE
-        )
+        text = self.template.render(kwargs)
+        if text:
+            self.view.add_phantom(
+                key='git_gutter_line_annotation',
+                region=sublime.Region(point, point + 1),
+                content=self.HTML_TEMPLATE.format(
+                    foreground=foreground,
+                    font_style=font_style,
+                    padding=padding,
+                    text=text),
+                layout=sublime.LAYOUT_INLINE
+            )
