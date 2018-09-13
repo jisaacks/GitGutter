@@ -44,6 +44,8 @@ class GitGutterLineAnnotation(object):
                 background-color: transparent;
                 color: {foreground};
                 font-style: {font_style};
+                margin: 0;
+                padding: 0;
             }}
             body {{
                 margin-left: {padding};
