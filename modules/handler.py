@@ -678,12 +678,18 @@ class GitGutterHandler(object):
 
     def git_blame(self, row):
         """Call git blame to find out who changed a specific line of code"""
+        if self.settings.get('line_annotation_ignore_whitespace'):
+            ignore_ws = ['-w']
+        else:
+            ignore_ws = []
+
         return self.execute_async([
             self._git_binary,
             '-c', 'core.autocrlf=input',
             '-c', 'core.eol=lf',
             '-c', 'core.safecrlf=false',
-            'blame', '-p', '-L%d,%d' % (row + 1, row + 1),
+            'blame', '-p', '-L%d,%d' % (row + 1, row + 1)
+        ] + ignore_ws + [
             '--contents', self.translate_path_to_wsl(self.view_cache.name),
             '--', self._git_path
         ])
