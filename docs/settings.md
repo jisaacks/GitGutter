@@ -421,6 +421,15 @@ The following variables can be used to customize the template:
 The _Line Annotation_ is aligned to the end of a line with a predefined distance by default. To align the Line Annotation to the first ruler instead, you can set `line_annotation_ruler` to `1`. A value of `2` aligns the text to the second ruler if available and so forth.
 
 
+### Line Annotation Inore Whitespace
+
+```JSON
+"line_annotation_ignore_whitespace": false
+```
+
+Line annotations display any change including whitespace by default. Set to `true` to ignore whitespace when comparing the parent’s version and the child’s to find where the lines came from.
+
+
 ## Status Bar Text
 
 ### Show Status Bar Text

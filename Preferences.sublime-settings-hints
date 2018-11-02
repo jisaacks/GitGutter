@@ -162,6 +162,14 @@
     //   ...
     "git_gutter_line_annotation_ruler": false,
 
+    // (ST3, Build 3124+ only)
+    // Whether to ignore whitespace changes when showing line annotations.
+    //
+    // Valid values are:
+    //   "false"  -- don't ignore whitespace changes (default)
+    //   "true"   -- ignore whitespace changes
+    "git_gutter_line_annotation_ignore_whitespace": false,
+
     // LINE ANNOTATION TEXT TEMPLATE
     // If the value is an array it is joined to a single string and passed to
     // jinja2 template engine (if available) to render the blame message text.
