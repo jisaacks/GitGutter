@@ -9,7 +9,7 @@ A [Sublime Text](http://www.sublimetext.com) plug-in to show information about f
 and provides some commands like:
 
 1. _Goto Change_ to navigate between modified lines
-2. _Copy from Commit_ to copy the orignial content from the commit
+2. _Copy from Commit_ to copy the original content from the commit
 3. _Revert to Commit_ to revert a modified hunk to the original state in a commit
 
 
@@ -36,7 +36,7 @@ The icons of the default theme have the following meaning:
 
 ## Diff Popup
 
-The diff popup shows the orignal content from the commit or the differences between it and the working content.
+The diff popup shows the original content from the commit or the differences between it and the working content.
 
 ⓘ _requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+_
 
@@ -51,7 +51,7 @@ The toolbar provides some commands to interact with or modify the changes.
  ↑      | goto to previous change
  ↓      | goto to next change
  ≈, ≉   | enable/disable difference highlighting
- ⎘      | copy the orignial content from the commit
+ ⎘      | copy the original content from the commit
  ⟲      | revert a modified hunk to the original state in a commit
 
 
