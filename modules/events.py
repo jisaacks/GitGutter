@@ -280,30 +280,34 @@ class BlameEventListener(sublime_plugin.EventListener):
     def _run_blame(self, view, force):
         """Run blame if the caret moves to another row."""
 
-        # check if caret is present
-        selection = view.sel()
-        if not selection:
-            return
-
-        # do nothing if row didn't change
-        row, _ = view.rowcol(selection[0].begin())
-        if not force and row == self.last_blame_row.get(view.id(), -1):
-            return
-        self.last_blame_row[view.id()] = row
-
         # remove existing phantoms
         erase_line_annotation(view)
-
-        # ignore empty lines
-        if not view.line(view.text_point(row, 0)):
-            return
 
         # initiate debounce timer
         blame_time = time.time()
         self.latest_blame_time = blame_time
 
         def on_time():
-            if self.latest_blame_time == blame_time:
-                view.run_command('git_gutter_blame')
+            if self.latest_blame_time != blame_time:
+                return
+            try:
+                sel = view.sel()
+                # do nothing if not exactly one cursor is visible
+                if len(sel) != 1:
+                    return
+                sel = sel[0]
+                # do nothing is selection not empty or line is empty
+                if not sel.empty() or not view.line(sel.b):
+                    return
+                row, _ = view.rowcol(sel.b)
+                # do nothing if row didn't change
+                if not force and row == self.last_blame_row.get(view.id(), -1):
+                    return
+                self.last_blame_row[view.id()] = row
+            except (AttributeError, IndexError, TypeError):
+                pass
+            else:
+                view.run_command('git_gutter_blame', {'line': row})
+
         # don't call blame if selected row changes too quickly
         sublime.set_timeout(on_time, 400)
