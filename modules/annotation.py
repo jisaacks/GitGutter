@@ -101,7 +101,7 @@ class GitGutterLineAnnotation(object):
         """
         # blame message is useful for committed content only
         if not _HAVE_PHANTOMS or kwargs['line_summary'] == 'not committed yet':
-            return False
+            return
 
         font_style, padding = 'normal', '5rem'
 
