@@ -1,0 +1,44 @@
+1.9.5:
+======
+
+  Enhancement:
+   - Add line_annotation_ignore_whitespace setting (#526)
+   - Disable line annotation if multiple cursors are visible
+   - Disable line annotation if selection is not empty
+   - Hide line annotation if caret moves horizontally
+   - Debounce all evaluations which decide whether line annotation is displayed
+
+  Fix:
+   - IndexError thrown every time ST starts (#528)
+
+  README:
+   - Fix typos
+
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
