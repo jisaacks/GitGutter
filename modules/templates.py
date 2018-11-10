@@ -8,7 +8,6 @@ try:
     # avoid exceptions if dependency is not yet satisfied
     from jinja2 import meta
     from jinja2 import Environment
-    from jinja2 import Template
     from jinja2 import TemplateSyntaxError
     from weakref import WeakValueDictionary
 
