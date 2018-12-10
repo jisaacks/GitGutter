@@ -90,7 +90,8 @@
         "bookmarks",
         "lsp_error",
         "lsp_warning",
-        "lsp_info"
+        "lsp_info",
+        "ecc"
     ],
 
     // Show GitGutter information in the minimap
