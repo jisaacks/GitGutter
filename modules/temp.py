@@ -15,30 +15,27 @@ else:
     if hasattr(os, 'getuid'):
         TEMP_DIR += '.%s' % os.getuid()
 
-
-def plugin_loaded():
-    """Sublime Text plugin loaded callback.
-
-    Remove all temporary files older than 2 days. Looks like in some cases some
-    temporary files are not deleted, if ST is closed. So try to delete too old
-    ones upon startup. Wait 2 days to reduce the chance of deleting temporary
-    files of another open ST instance.
-    """
-    now = time.time()
-    max_age = 48 * 60 * 60
-    try:
-        files = os.listdir(TEMP_DIR)
-    except FileNotFoundError:
-        # tempfolder does not exist
-        pass
-    else:
-        for name in files:
-            try:
-                path = os.path.join(TEMP_DIR, name)
-                if now - os.path.getatime(path) > max_age:
-                        os.remove(path)
-            except OSError:
-                pass
+"""
+Remove all temporary files older than 2 days. Looks like in some cases some
+temporary files are not deleted, if ST is closed. So try to delete too old
+ones upon startup. Wait 2 days to reduce the chance of deleting temporary
+files of another open ST instance.
+"""
+now = time.time()
+max_age = 48 * 60 * 60
+try:
+    files = os.listdir(TEMP_DIR)
+except FileNotFoundError:
+    # tempfolder does not exist
+    pass
+else:
+    for name in files:
+        try:
+            path = os.path.join(TEMP_DIR, name)
+            if now - os.path.getatime(path) > max_age:
+                    os.remove(path)
+        except OSError:
+            pass
 
 
 class TempFile(object):
