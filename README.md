@@ -55,7 +55,7 @@ The toolbar provides some commands to interact with or modify the changes.
  ⟲      | revert a modified hunk to the original state in a commit
 
 
-## Documentaion
+## Documentation
 
 Please read https://jisaacks.github.io/GitGutter/ for detailed information about
 
