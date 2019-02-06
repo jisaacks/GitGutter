@@ -16,6 +16,7 @@ class GitGutterShowDiff(object):
         self.status_bar = status_bar
         self._line_height = 0
         self._minimap_size = 1
+        self._mini_diff = False
         # True if diff is running
         self._busy = False
 
@@ -83,6 +84,7 @@ class GitGutterShowDiff(object):
             view = self.git_handler.view
             self._line_height = view.line_height()
             self._minimap_size = self.git_handler.settings.show_in_minimap
+            self._mini_diff = view.settings().get("mini_diff", False)
             regions = self._contents_to_regions(contents)
             if not self.git_handler.view_cache.is_changed():
                 for name, region in zip(self.region_names, regions):
@@ -280,7 +282,12 @@ class GitGutterShowDiff(object):
                 scope = 'markup.deleted.git_gutter'
             else:
                 scope = 'markup.%s.git_gutter' % event
-            icon = self._icon_path(event)
+
+            if self._mini_diff:
+                icon = ''
+            else:
+                icon = self._icon_path(event)
+
             if self._minimap_size:
                 flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
             else:
