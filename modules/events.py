@@ -307,7 +307,7 @@ class BlameEventListener(sublime_plugin.EventListener):
             except (AttributeError, IndexError, TypeError):
                 pass
             else:
-                view.run_command('git_gutter_blame', {'line': row})
+                view.run_command('git_gutter_blame', {'is_event': True, 'line': row})
 
         # don't call blame if selected row changes too quickly
         sublime.set_timeout(on_time, 400)

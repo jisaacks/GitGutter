@@ -65,6 +65,21 @@ Control                        | Description
 **Key Bindings OSX**           | <kbd>⌘ + ⇧ + ⌥ + c, ⌘ + D</kbd>
 
 
+## Show Line Annotation
+
+The _Line Annotation_ appears by moving the caret to a new line by default or can be called from command palette or via a key binding.
+
+ⓘ _requires Sublime Text 3 Build 3124+ and mdpopups 2.0.0+_
+
+Control                        | Description
+-------------------------------|---------------------------------------------
+**Mouse**                      | Hover the gutter area of a changed line
+**Menu**                       | Main > View > GitGutter > Show Line Annotation
+**Command Palette**            | GitGutter: Show Line Annotation
+**Key Bindings Linux/Windows** | <kbd>Ctrl + Shift + Alt + c, Ctrl + B</kbd>
+**Key Bindings OSX**           | <kbd>⌘ + ⇧ + ⌥ + c, ⌘ + B</kbd>
+
+
 ## Goto Change
 
 The commands are used to quickly navigate between modifications.

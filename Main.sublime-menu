@@ -33,6 +33,10 @@
                     },
                     { "caption": "-" },
                     {
+                        "caption": "Show Line Annotation",
+                        "command": "git_gutter_blame"
+                    },
+                    {
                         "caption": "Show Diff Popup",
                         "command": "git_gutter_diff_popup"
                     },
