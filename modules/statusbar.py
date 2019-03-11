@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sublime
+
 from . import blame
 from . import templates
 
@@ -73,6 +75,8 @@ class GitGutterStatusBar(object):
 
         # the variables to use to render the status bar
         self.vars = {
+            # sublime text version
+            'sublime_version': int(sublime.version()),
             # the repository name
             'repo': None,
             # the active branch name
