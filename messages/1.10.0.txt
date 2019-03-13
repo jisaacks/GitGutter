@@ -1,0 +1,73 @@
+1.10.0:
+======
+
+   A N N O U N C E M E N T
+
+  This release introduces some changes to ensure GitGutter to coexist well
+  with the new Incremental Diff feature of Sublime Text 3200.
+
+  If `"mini_diff"` is set to `"auto"` or `True` in Preferences.sublime-settings
+  GitGutter will no longer add icons to the normal gutter.
+
+  Please note:
+
+  1. GitGutter themes don't have any effect anymore if ST's mini_diff is enabled.
+  2. The results of ST's mini_diff and GitGutter's diff popup or the markers
+     in the minimap may differ a little bit.
+
+  The status bar text template was tweaked to no longer show the branch name
+  if Sublime Text 3189+ is detected.
+
+  All other features keep untouched so far in order to not break any existing
+  feature.
+
+  As most of the main features of this plugin have been moved to ST's core,
+  this plugin seems to become deprecated / obsolete for ST3200+ in its current
+  form.
+
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  Fix:
+   - Invalid key binding templates (#530)
+   - Temporary files no longer cleaned when using ST 3189
+
+  Other:
+   - Typo fix
+   - Make EasyClangComplete regions protected by default
+
+  Enhancement:
+   - Show line annotation manually via `ctrl+shift+alt+c, ctrl+b`
+   - Don't add gutter icons, if ST's `mini diff` is enabled
+   - Add Compara Against support to mini_diff
+   - Don't show branch in status bar for ST3189+
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
