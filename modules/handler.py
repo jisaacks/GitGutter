@@ -350,14 +350,15 @@ class GitGutterHandler(object):
             utils.log_message('failed to create git cache! %s' % output)
             return False
 
-        if _HAVE_MINI_DIFF and self.view.settings().get('mini_diff', False):
+        self._git_compared_commit = compared_id
+        self.git_tracked = output > 0
+
+        if _HAVE_MINI_DIFF and self.git_tracked and self.view.settings().get('mini_diff', False):
             # file is still open for writing at this point
             with open(self._git_temp_file.name, mode='r',
                       encoding=self.view_cache.python_friendly_encoding()) as file:
                 self.view.set_reference_document(file.read())
 
-        self._git_compared_commit = compared_id
-        self.git_tracked = output > 0
         return self.git_tracked
 
     def diff(self):
