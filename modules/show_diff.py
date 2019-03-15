@@ -51,8 +51,15 @@ class GitGutterShowDiff(object):
             self._busy = False
             return
 
+        # cache settings
+        view = self.git_handler.view
+        self._line_height = view.line_height()
+        self._minimap_size = self.git_handler.settings.show_in_minimap
+        self._mini_diff = view.settings().get("mini_diff", False)
+
         if not self.git_handler.in_repo():
-            show_untracked = self.git_handler.settings.get(
+
+            show_untracked = not self._mini_diff and self.git_handler.settings.get(
                 'show_markers_on_untracked_file', False)
 
             def bind_ignored_or_untracked(is_ignored):
@@ -81,10 +88,6 @@ class GitGutterShowDiff(object):
                 Scheme: (first, last, [inserted], [modified], [deleted])
         """
         try:
-            view = self.git_handler.view
-            self._line_height = view.line_height()
-            self._minimap_size = self.git_handler.settings.show_in_minimap
-            self._mini_diff = view.settings().get("mini_diff", False)
             regions = self._contents_to_regions(contents)
             if not self.git_handler.view_cache.is_changed():
                 for name, region in zip(self.region_names, regions):
