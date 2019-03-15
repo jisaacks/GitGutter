@@ -75,8 +75,8 @@ class GitGutterStatusBar(object):
 
         # the variables to use to render the status bar
         self.vars = {
-            # sublime text version
-            'sublime_version': int(sublime.version()),
+            # sublime text git integration enabled
+            'st_git_status': view.settings().get('show_git_status', False),
             # the repository name
             'repo': None,
             # the active branch name

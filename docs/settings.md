@@ -470,6 +470,7 @@ The following variables can be used to customize the template:
 
  Variable                  | Description
 :-------------------------:|-------------------------------------------------------------
+ `{{st_git_status}}`       | reflects `"show_git_status": true` in Preferences of ST 3189+
  `{{repo}}`                | repository name / folder name containing the .git directory
  `{{branch}}`              | checked out branch you are working on
  `{{remote}}`              | tracked remote of current branch you are working on or `None`
