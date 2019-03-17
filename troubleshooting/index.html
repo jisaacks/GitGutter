@@ -358,6 +358,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#gitgutter-doesnt-add-gutter-icons-any-more" title="GitGutter doesn't add gutter icons any more" class="md-nav__link">
+    GitGutter doesn't add gutter icons any more
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitgutter-doesnt-show-the-repobranch-name-in-status-bar" title="GitGutter doesn't show the repo/branch name in status bar" class="md-nav__link">
+    GitGutter doesn't show the repo/branch name in status bar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gitgutter-doesnt-recognize-working-tree" title="GitGutter doesn't recognize working tree" class="md-nav__link">
     GitGutter doesn't recognize working tree
   </a>
@@ -436,6 +450,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#gitgutter-doesnt-add-gutter-icons-any-more" title="GitGutter doesn't add gutter icons any more" class="md-nav__link">
+    GitGutter doesn't add gutter icons any more
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitgutter-doesnt-show-the-repobranch-name-in-status-bar" title="GitGutter doesn't show the repo/branch name in status bar" class="md-nav__link">
+    GitGutter doesn't show the repo/branch name in status bar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gitgutter-doesnt-recognize-working-tree" title="GitGutter doesn't recognize working tree" class="md-nav__link">
     GitGutter doesn't recognize working tree
   </a>
@@ -507,6 +535,14 @@
 <p class="admonition-title">known issues</p>
 <p><em>ConvertToUTF8</em> package is known to mark views as scratch during conversion without reverting that state reliably.</p>
 </div>
+<h2 id="gitgutter-doesnt-add-gutter-icons-any-more">GitGutter doesn't add gutter icons any more</h2>
+<p>This is expected behaviour if GitGutter runs on Sublime Text 3189+ with <code>&quot;mini_diff&quot;: true</code> or <code>&quot;mini_diff&quot;: &quot;auto&quot;</code> being set in <em>Preferences.sublime-settings</em> in order to not interfere with the new <a href="https://www.sublimetext.com/docs/3/incremental_diff.html">Incremental Diff</a> feature of Sublime Text 3.2+. In this situation GitGutter leaves the gutter to other plugins like SublimeLinter.</p>
+<p>We don't need two indicators about modifications at a time.</p>
+<p>GitGutter still works in the background to add modification indicators to the minimap as <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/sublimehq" title="GitHub User: sublimehq">@sublimehq</a> decided not to add this feature to the <a href="https://www.sublimetext.com/docs/3/incremental_diff.html">Incremental Diff</a>.</p>
+<p>If you prefer GitGutter's file modification icons in the gutter, you need to set <code>&quot;mini_diff&quot;: false</code> in your <em>Preferences.sublime-settings</em>.</p>
+<h2 id="gitgutter-doesnt-show-the-repobranch-name-in-status-bar">GitGutter doesn't show the repo/branch name in status bar</h2>
+<p>The default <a href="../settings/#status-bar-text-template">Status Bar Text Template</a> was modified to draw the repository name and the branch name only if the git integration of Sublime Text 3.2+ is disabled.</p>
+<p>If you still want to see them without disabling the git integration, you need to modify the <a href="../settings/#status-bar-text-template">Status Bar Text Template</a>.</p>
 <h2 id="gitgutter-doesnt-recognize-working-tree">GitGutter doesn't recognize working tree</h2>
 <p>git 2.5+ allows configurations with .git directory not being located in the working tree root. You may also checkout multiple working trees from one repository. No matter which configuration is used, GitGutter expects a <code>.git</code> directory or a <code>.git</code> file in the root of a working tree to recognize it as such.</p>
 <p>If the <code>.git</code> directory is not located in the working tree root the following steps are required.</p>

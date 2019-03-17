@@ -1382,14 +1382,16 @@
 <h3 id="status-bar-text-template">Status Bar Text Template</h3>
 <div class="codehilite"><pre><span class="s2">&quot;status_bar_text&quot;</span><span class="err">:</span> <span class="p">[</span>
     <span class="s2">&quot;{% if repo and branch %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{{repo}}/{{branch}}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if added_files + deleted_files + modified_files &gt; 0 %}*{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if compare not in (&#39;HEAD&#39;, branch, None) %}, Comparing against {{compare}}{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if state %}, File is {{state}}{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if deleted &gt; 0 %}, {{deleted}}-{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if inserted &gt; 0 %}, {{inserted}}+{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if modified &gt; 0 %}, {{modified}}≠{% endif %}&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if not st_git_status %}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;{{repo}}/{{branch}}&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;{% if added_files + deleted_files + modified_files &gt; 0 %}*{% endif %}, &quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if compare not in (&#39;HEAD&#39;, branch, None) %}Comparing against {{compare}}, {% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if state %}File is {{state}}{% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if deleted &gt; 0 %}, {{deleted}}-{% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if inserted &gt; 0 %}, {{inserted}}+{% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if modified &gt; 0 %}, {{modified}}≠{% endif %}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}&quot;</span><span class="p">,</span>
     <span class="s2">&quot;{% endif %}&quot;</span>
 <span class="p">]</span>
 </pre></div>
