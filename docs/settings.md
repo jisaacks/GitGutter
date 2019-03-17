@@ -446,14 +446,16 @@ GitGutter displays status information about open files in the status bar by defa
 ```JSON
 "status_bar_text": [
     "{% if repo and branch %}",
-    "{{repo}}/{{branch}}",
-    "{% if added_files + deleted_files + modified_files > 0 %}*{% endif %}",
-    "{% if compare not in ('HEAD', branch, None) %}, Comparing against {{compare}}{% endif %}",
-    "{% if state %}, File is {{state}}{% endif %}",
-    "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
-    "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
-    "{% if modified > 0 %}, {{modified}}≠{% endif %}",
-    "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
+        "{% if not st_git_status %}",
+            "{{repo}}/{{branch}}",
+            "{% if added_files + deleted_files + modified_files > 0 %}*{% endif %}, ",
+        "{% endif %}",
+        "{% if compare not in ('HEAD', branch, None) %}Comparing against {{compare}}, {% endif %}",
+        "{% if state %}File is {{state}}{% endif %}",
+        "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
+        "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
+        "{% if modified > 0 %}, {{modified}}≠{% endif %}",
+        "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
     "{% endif %}"
 ]
 ```

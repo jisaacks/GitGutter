@@ -65,6 +65,24 @@ Please check if one of those states was applied to your view by one of your pack
     _ConvertToUTF8_ package is known to mark views as scratch during conversion without reverting that state reliably.
 
 
+## GitGutter doesn't add gutter icons any more
+
+This is expected behaviour if GitGutter runs on Sublime Text 3189+ with `"mini_diff": true` or `"mini_diff": "auto"` being set in _Preferences.sublime-settings_ in order to not interfere with the new [Incremental Diff](https://www.sublimetext.com/docs/3/incremental_diff.html) feature of Sublime Text 3.2+. In this situation GitGutter leaves the gutter to other plugins like SublimeLinter.
+
+We don't need two indicators about modifications at a time.
+
+GitGutter still works in the background to add modification indicators to the minimap as @sublimehq decided not to add this feature to the [Incremental Diff](https://www.sublimetext.com/docs/3/incremental_diff.html).
+
+If you prefer GitGutter's file modification icons in the gutter, you need to set `"mini_diff": false` in your _Preferences.sublime-settings_.
+
+
+## GitGutter doesn't show the repo/branch name in status bar
+
+The default [Status Bar Text Template](settings.md#status-bar-text-template) was modified to draw the repository name and the branch name only if the git integration of Sublime Text 3.2+ is disabled.
+
+If you still want to see them without disabling the git integration, you need to modify the [Status Bar Text Template](settings.md#status-bar-text-template).
+
+
 ## GitGutter doesn't recognize working tree
 
 git 2.5+ allows configurations with .git directory not being located in the working tree root. You may also checkout multiple working trees from one repository. No matter which configuration is used, GitGutter expects a `.git` directory or a `.git` file in the root of a working tree to recognize it as such.
