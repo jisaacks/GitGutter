@@ -48,6 +48,7 @@ class GitGutterLineAnnotation(object):
                 padding: 0;
             }}
             body {{
+                font-size: 0.85rem;
                 margin-left: {padding};
             }}
             a {{
