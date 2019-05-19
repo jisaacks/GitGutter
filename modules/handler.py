@@ -19,6 +19,7 @@ from . import path
 from . import utils
 from .promise import Promise
 from .promise import PromiseError
+from .tasks import execute_async
 from .temp import TempFile
 from .utils import WIN32
 from .view import GitGutterViewCache
@@ -39,14 +40,10 @@ _HAVE_MINI_DIFF = hasattr(sublime.View, "set_reference_document")
 #     \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\]
 #         If a tracked remote exists, the number of commits the local branch is
 #         ahead and behind the remote is optionally available, too.
-_STATUS_RE = re.compile(r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
+_STATUS_RE = re.compile(
+    r'## (\S+(?=\.{3})|\S+(?!\.{3}$))(?:\.{3}(\S+)(?: \[(?:ahead (\d+))?(?:, )?(?:behind (\d+))?\])?)?')
 
 _BUFSIZE = 2**15
-
-try:
-    set_timeout = sublime.set_timeout_async
-except AttributeError:
-    set_timeout = sublime.set_timeout
 
 
 class GitGutterHandler(object):
@@ -729,55 +726,47 @@ class GitGutterHandler(object):
             be created, opened or written data to, if git failed to run or
             returned a none-zero exit code other than 128 (file not found).
         """
-        if not self._git_temp_file:
-            self._git_temp_file = TempFile(mode='wb')
+        def task_fn(resolve, commit):
+            """The task to run asynchronously which resolves the Promise.
 
-        try:
-            proc = self.popen([
-                self._git_binary,
-                '-c', 'core.autocrlf=input',
-                '-c', 'core.eol=lf',
-                '-c', 'core.safecrlf=false',
-                'cat-file',
-                # smudge filters are supported with git 2.11.0+ only
-                '--filters' if self._git_version >= (2, 11, 0) else '-p',
-                ':'.join((commit, self._git_path))
-            ], stdout=self._git_temp_file.open())
+            Arguments:
+                resolve (callable):
+                    The function to call to resolve the Promise.
 
-        except Exception as error:
-            self._git_temp_file.close()
-            return Promise.resolve(PromiseError(str(error)))
-
-        def poll(proc, resolve):
-            """Poll the process and resolve promise if finished."""
+                commit (string):
+                    The identifier of the commit to read file from.
+            """
             try:
-                returncode = proc.poll()
-                if returncode is None:
-                    # git is still busy, come here later again
-                    set_timeout(functools.partial(poll, proc, resolve), 50)
-                    return None
+                if not self._git_temp_file:
+                    self._git_temp_file = TempFile(mode='wb')
 
-                # file is still open for writing at this point
-                with self._git_temp_file as file:
-                    if returncode == 0:
+                with self._git_temp_file as temp_file:
+                    proc = self.popen([
+                        self._git_binary,
+                        '-c', 'core.autocrlf=input',
+                        '-c', 'core.eol=lf',
+                        '-c', 'core.safecrlf=false',
+                        'cat-file',
+                        # smudge filters are supported with git 2.11.0+ only
+                        '--filters' if self._git_version >= (2, 11, 0) else '-p',
+                        ':'.join((commit, self._git_path))
+                    ], stdout=temp_file)
+
+                    proc.wait()
+
+                    if proc.returncode == 0:
                         # resolve with the number of bytes got from git cat-file
-                        return resolve(file.tell())
-                    elif returncode == 128:
+                        return resolve(temp_file.tell())
+                    elif proc.returncode == 128:
                         # resolve with 0 bytes if file was not found in repo.
                         return resolve(0)
                     return resolve(PromiseError("git returned error %d: %s" % (
-                        returncode, proc.stderr.read().decode('utf-8'))))
+                        proc.returncode, proc.stderr.read().decode('utf-8'))))
 
             except Exception as error:
-                # close the temporary file if anything goes wrong
-                self._git_temp_file.close()
-                raise
+                return resolve(PromiseError(str(error)))
 
-        def executor(resolve):
-            """Start polling the process to query for its finish."""
-            set_timeout(functools.partial(poll, proc, resolve), 50)
-
-        return Promise(executor)
+        return execute_async(task_fn, commit)
 
     def execute_async(self, args, decode=True):
         """Execute a git command asynchronously and return a Promise.
@@ -790,38 +779,25 @@ class GitGutterHandler(object):
         Returns:
             Promise: A promise to return the git output in the future.
         """
-        try:
-            proc = self.popen(args)
-        except Exception as error:
-            utils.log_message(str(error))
-            return Promise.resolve(None)
-
-        # inject some attributes into the proc object
-        setattr(proc, 'buffer', b'')
-
-        def poll(proc, resolve, decode):
-            """Poll the process and resolve promise if finished.
+        def task_fn(resolve, decode, args):
+            """The task to run asynchronously which resolves the Promise.
 
             Arguments:
-                proc (subprocess.Popen):
-                    The running process' object to quiery for completion
                 resolve (callable):
                     The function to be called to resolve the Promise.
                 decode (bool):
                     True to decode the binary output to text.
+                args (list):
+                    A list of arguments to pass to `subprocess.Popen`.
             """
-            chunk = proc.stdout.read(_BUFSIZE)
-            if chunk:
-                # need to read from stdout as process won't exit if buffer
-                # is full.
-                proc.buffer += chunk
-                if len(chunk) == _BUFSIZE:
-                    # git is still busy, come here later again
-                    set_timeout(functools.partial(
-                        poll, proc, resolve, decode), 20)
-                    return
+            try:
+                proc = self.popen(args)
+            except Exception as error:
+                utils.log_message(str(error))
+                return resolve(None)
 
-            if not proc.buffer and self.settings.get('debug'):
+            chunk = proc.stdout.read()
+            if not chunk and self.settings.get('debug'):
                 proc.wait()
                 # 0 = ok, 128 = file not found
                 if proc.returncode not in (0, 128):
@@ -829,15 +805,11 @@ class GitGutterHandler(object):
                         ' '.join(args), proc.stderr.read().decode('utf-8').strip()))
 
             # return decoded ouptut using utf-8 or binary output
-            if decode and proc.buffer is not None:
-                return resolve(proc.buffer.decode('utf-8').strip())
-            return resolve(proc.buffer)
+            if decode and chunk is not None:
+                return resolve(chunk.decode('utf-8').strip())
+            return resolve(chunk)
 
-        def executor(resolve):
-            """Start polling the process to query for its finish."""
-            set_timeout(functools.partial(poll, proc, resolve, decode), 20)
-
-        return Promise(executor)
+        return execute_async(task_fn, decode, args)
 
     def popen(self, args, stdout=subprocess.PIPE):
         """Prepare the environment and spawn the subprocess.
