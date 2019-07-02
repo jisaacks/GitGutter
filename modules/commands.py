@@ -145,15 +145,38 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         self.show_diff_handler.run()
 
     def update_git_status(self):
-        """Update git repository status."""
+        """Update git repository status.
+
+        Try to reduce the amount of information to retrieve via git by
+        analysizng the variables defined in the template. Don't waste CPU time
+        if the template is quite simple.
+        """
         if self.status_bar.is_enabled():
-            self.git_handler.git_branch_status().then(
-                lambda branch_status: self.status_bar.update(
-                    repo=self.git_handler.repository_name,
-                    compare=self.git_handler.format_compare_against(),
-                    **branch_status
+            if self.status_bar.has([
+                    'remote', 'ahead', 'behind', 'added_files',
+                    'deleted_files', 'modified_files', 'staged_files']):
+                # display branch name and stats
+                self.git_handler.git_branch_status().then(
+                    lambda branch_status: self.status_bar.update(
+                        repo=self.git_handler.repository_name,
+                        compare=self.git_handler.format_compare_against(),
+                        **branch_status
+                    )
                 )
-            )
+            elif self.status_bar.has(['branch']):
+                # display the branch name in the statusbar
+                self.git_handler.git_branch_name().then(
+                    lambda branch_name: self.status_bar.update(
+                        repo=self.git_handler.repository_name,
+                        compare=self.git_handler.format_compare_against(),
+                        branch=branch_name
+                    )
+                )
+            else:
+                # no global branch information to display in the statusbar
+                self.status_bar.update(
+                    repo=self.git_handler.repository_name,
+                    compare=self.git_handler.format_compare_against())
 
 
 class GitGutterBaseCommand(sublime_plugin.TextCommand):

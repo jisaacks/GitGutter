@@ -637,6 +637,12 @@ class GitGutterHandler(object):
             'for-each-ref', '--sort=-refname', template, 'refs/tags/'
         ])
 
+    def git_branch_name(self):
+        return self.execute_async([
+            self._git_binary,
+            'rev-parse', '--abbrev-ref', 'HEAD'
+        ])
+
     def git_branch_status(self):
         """Query the current status of the file's repository."""
         def parse_output(output):
