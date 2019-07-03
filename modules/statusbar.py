@@ -117,8 +117,8 @@ class GitGutterStatusBar(object):
     def is_enabled(self):
         """Return whether status bar text is enabled in settings or not."""
         enabled = self.settings.get('show_status_bar_text', False)
-        if self.template and not enabled:
-            self.template = None
+        if self._template and not enabled:
+            self._template = None
             self.vars['repo'] = None
             self.erase()
         return enabled
