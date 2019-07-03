@@ -117,8 +117,8 @@ class GitGutterStatusBar(object):
     def is_enabled(self):
         """Return whether status bar text is enabled in settings or not."""
         enabled = self.settings.get('show_status_bar_text', False)
-        if self.template and not enabled:
-            self.template = None
+        if self._template and not enabled:
+            self._template = None
             self.vars['repo'] = None
             self.erase()
         return enabled
@@ -136,7 +136,7 @@ class GitGutterStatusBar(object):
                 False - if no variable is used by the template.
         """
         try:
-            return any(var in self.template.variables for var in variables)
+            return any(var in self._template.variables for var in variables)
         except:
             return False
 
@@ -162,4 +162,4 @@ class GitGutterStatusBar(object):
 
         if want_update:
             self.view.set_status(
-                '00_git_gutter', self.template.render(**self.vars))
+                '00_git_gutter', self._template.render(**self.vars))
