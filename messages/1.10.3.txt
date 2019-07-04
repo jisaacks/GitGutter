@@ -1,0 +1,77 @@
+1.10.3:
+=======
+
+  This release can help improving performance in some situations, if the
+  repository you work with is located on a network share.
+
+  To fix possible performance issues make sure not to use one of the following
+  variables in the `status_bar_text` setting:
+
+    - {{remote}}
+    - {{ahead}}
+    - {{behind}}
+    - {{added_files}}
+    - {{deleted_files}}
+    - {{modified_files}}
+    - {{staged_files}}
+
+  By avoiding those variables, GitGutter no longer calls `git status -b -s -u`
+  but only `git rev-parse --abbrev-ref HEAD` to read the branch name which
+  is much faster.
+
+  The following examples shows a status_bar_text template, which the expensive
+  line was removed from.
+
+    "{% if added_files + deleted_files + modified_files > 0 %}*{% endif %}, ",
+
+  Example:
+
+    "status_bar_text": [
+        "{% if repo and branch %}",
+            "{% if not st_git_status %}",
+                "{{repo}}/{{branch}}",
+
+            "{% endif %}",
+            "{% if compare not in ('HEAD', branch, None) %}Comparing against {{compare}}, {% endif %}",
+            "{% if state %}File is {{state}}{% endif %}",
+            "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
+            "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
+            "{% if modified > 0 %}, {{modified}}≠{% endif %}",
+            "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
+        "{% endif %}"
+    ]
+
+  ---------------------------------------------------------------------------
+
+   C H A N G E L O G
+
+  Enhancement:
+   - Read branch statistics on demand (#458)
+
+
+💛 Git Gutter? Want to support development?
+
+I've teamed up with Wes Bos to offer the following discounts:
+
++------------------------------------------------+
+|                                                |
+|   Use the coupon code GITGUTTER for $10 off    |
+|                                                |
++------------------------------------------------+
+
+🏅 ⭐ ES6 ⭐
+
+👉 ES6.io/friend/GITGUTTER
+
+🏅 ⭐ Sublime Text Book ⭐
+
+👉 SublimeTextBook.com/friend/GITGUTTER
+
+🏅 ⭐ React For Beginners ⭐
+
+👉 ReactForBeginners.com/friend/GITGUTTER
+
+
+Join 15,000 other developers already learning with Wes Bos.
+
+These are fantastic resources - 100% money back guarantee! 🌟
