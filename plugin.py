@@ -5,6 +5,29 @@ This module exports __all__ modules, which Sublime Text needs to know about.
 The list of __all__ exported symbols is defined in modules/__init__.py.
 """
 
+
+def clear_submodules():
+    """Force ST to reload all submodules.
+
+    This function deletes GitGutter's `modules` package from `sys.modules` in
+    order to force ST's python to import them again.
+    """
+    import sys
+
+    # not supported by ST2
+    if not __package__:
+        return
+
+    prefix = __package__ + "."  # don't clear the base package
+    for module_name in [
+            module_name for module_name in sys.modules
+            if module_name.startswith(prefix) and module_name != __name__]:
+        del sys.modules[module_name]
+
+
+clear_submodules()
+
+
 try:
     from .modules import *
 except ValueError:
@@ -16,17 +39,3 @@ except ImportError:
     sublime.message_dialog(
         "GitGutter failed to reload some of its modules.\n"
         "Please restart Sublime Text!")
-
-
-def plugin_loaded():
-    """Plugin loaded callback."""
-    try:
-        # Reload 'modules' once after upgrading to ensure GitGutter is ready
-        # for use instantly again. (Works with ST3 and python3 only!)
-        from package_control import events
-        if events.post_upgrade(__package__):
-            from .modules.reload import reload_package
-            reload_package(__package__)
-    except ImportError:
-        # Fail silently if package control isn't installed.
-        pass
