@@ -1,17 +1,8 @@
-# -*- coding: utf-8 -*-
 import codecs
 import functools
 import os
 import re
 import subprocess
-
-try:
-    from subprocess import TimeoutExpired
-    _HAVE_TIMEOUT = True
-except ImportError:
-    class TimeoutExpired(Exception):
-        pass
-    _HAVE_TIMEOUT = False
 
 import sublime
 
@@ -24,8 +15,6 @@ from .temp import TempFile
 from .utils import WIN32
 from .view import GitGutterViewCache
 
-# The view class has a method called 'change_count()'
-_HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, "change_count")
 _HAVE_MINI_DIFF = hasattr(sublime.View, "set_reference_document")
 
 # Compiled regex pattern to parse first `git status -s -b` line.
@@ -125,11 +114,10 @@ class GitGutterHandler(object):
             # Query git version synchronously
             try:
                 proc = self.popen([self._git_binary, '--version'])
-                if _HAVE_TIMEOUT:
-                    proc.wait(1.0)
+                proc.wait(1.0)
                 git_version = proc.stdout.read().decode('utf-8')
 
-            except TimeoutExpired as error:
+            except subprocess.TimeoutExpired as error:
                 proc.kill()
                 git_version = proc.stdout.read().decode('utf-8')
                 if not is_missing and self.settings.get('debug'):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Differ module.
 
 This module is inspired by difflib.Differ which creates human readable diff

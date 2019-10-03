@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """JINJA2 Template Cache Manager module.
 
 The module acts as intermediate layer to make use of jinja2 library if it is

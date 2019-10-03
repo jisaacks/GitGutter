@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 import os.path
 import sublime
-import sublime_plugin
 
 from .utils import PLATFORM
-from .utils import STVER
-from .utils import ST3
 
 
 def get(key, default=None):
@@ -67,7 +63,7 @@ class ViewSettings(object):
     """
 
     # The built in themes path
-    _PACKAGE_THEMES = ('%s/GitGutter/themes' % ('Packages' if ST3 else '..'))
+    _PACKAGE_THEMES = 'Packages/GitGutter/themes'
     # A map to translate between settings and git arguments
     _IGNORE_WHITESPACE = {
         'none': '',
@@ -114,7 +110,7 @@ class ViewSettings(object):
     @property
     def show_in_minimap(self):
         """The appropiatly limited show_in_minimap setting."""
-        width = self.get('show_in_minimap', 1) if ST3 else 0
+        width = self.get('show_in_minimap', 1)
         return width if width >= 0 else 100000
 
     @property
@@ -125,15 +121,10 @@ class ViewSettings(object):
             theme = 'Default.gitgutter-theme'
         # rebuilt path if setting changed
         if theme != os.path.basename(self._theme_path):
-            if ST3:
-                themes = sublime.find_resources(theme)
-                self._theme_path = (
-                    os.path.dirname(themes[-1])
-                    if themes else self._PACKAGE_THEMES + '/Default')
-            else:
-                # ST2 doesn't support find_resource, use built-in themes only.
-                theme, _ = os.path.splitext(theme)
-                self._theme_path = '/'.join((self._PACKAGE_THEMES, theme))
+            themes = sublime.find_resources(theme)
+            self._theme_path = (
+                os.path.dirname(themes[-1])
+                if themes else self._PACKAGE_THEMES + '/Default')
         return self._theme_path
 
     @property
@@ -175,48 +166,3 @@ class ViewSettings(object):
                 or None if setting is invalid.
         """
         return self._DIFF_ALGORITHM.get(self.get('diff_algorithm'))
-
-
-class GitGutterOpenFileCommand(sublime_plugin.ApplicationCommand):
-    """This is a wrapper class for SublimeText's `open_file` command.
-
-    The task is to hide the command in menu if `edit_settings` is available.
-    """
-
-    @staticmethod
-    def run(file):
-        """Expand variables and open the resulting file.
-
-        Note:
-            For some unknown reason the `open_file` command doesn't expand
-            ${platform} when called by `run_command`, so it is expanded here.
-        """
-        platform_name = {
-            'osx': 'OSX',
-            'windows': 'Windows',
-            'linux': 'Linux',
-        }[PLATFORM]
-        file = file.replace('${platform}', platform_name)
-        sublime.run_command('open_file', {'file': file})
-
-    @staticmethod
-    def is_visible():
-        """Return True to to show the command in command palette and menu."""
-        return STVER < 3124
-
-
-class GitGutterEditSettingsCommand(sublime_plugin.ApplicationCommand):
-    """This is a wrapper class for SublimeText's `open_file` command.
-
-    Hides the command in menu if `edit_settings` is not available.
-    """
-
-    @staticmethod
-    def run(**kwargs):
-        """Expand variables and open the resulting file."""
-        sublime.run_command('edit_settings', kwargs)
-
-    @staticmethod
-    def is_visible():
-        """Return True to to show the command in command palette and menu."""
-        return STVER >= 3124

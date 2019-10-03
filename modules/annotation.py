@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 import sublime
 
 from . import templates
 
-_HAVE_PHANTOMS = hasattr(sublime, 'Phantom')
-
 
 def erase_line_annotation(view):
-    if _HAVE_PHANTOMS:
-        view.erase_phantoms('git_gutter_line_annotation')
+    view.erase_phantoms('git_gutter_line_annotation')
 
 
 class SimpleLineAnnotationTemplate(object):
@@ -79,7 +75,7 @@ class GitGutterLineAnnotation(object):
         Returns:
             bool: True if blame phantom text is enabled, False otherwise.
         """
-        if not _HAVE_PHANTOMS or self.view.settings().get('draw_centered'):
+        if self.view.settings().get('draw_centered'):
             return False
         show_phantoms = self.settings.get('show_line_annotation', 'auto')
         if show_phantoms == 'auto':
@@ -101,7 +97,7 @@ class GitGutterLineAnnotation(object):
                 provided as variables for the message template.
         """
         # blame message is useful for committed content only
-        if not _HAVE_PHANTOMS or kwargs['line_summary'] == 'not committed yet':
+        if kwargs['line_summary'] == 'not committed yet':
             return
 
         font_style, padding = 'normal', '5rem'

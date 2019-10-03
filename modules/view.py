@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 import codecs
 
 import sublime
 
 from .temp import TempFile
 
-# The view class has a method called 'change_count()'
-_HAVE_VIEW_CHANGE_COUNT = hasattr(sublime.View, 'change_count')
 
 ENCODING_MAP = {
     'UTF-8': 'utf-8',
@@ -93,10 +90,7 @@ class GitGutterViewCache(TempFile):
 
     def is_changed(self):
         """Check whether the content of the view changed."""
-        return (
-            _HAVE_VIEW_CHANGE_COUNT and
-            self._change_count != self.view.change_count()
-        )
+        return self._change_count != self.view.change_count()
 
     def update(self):
         """Write view's content to a temporary file as source for git diff.
@@ -108,13 +102,10 @@ class GitGutterViewCache(TempFile):
             bool: True indicates updated file.
                   False is returned if file is up to date.
         """
-        # check change counter if exists
-        change_count = 0
-        if _HAVE_VIEW_CHANGE_COUNT:
-            # write view buffer to file only, if changed
-            change_count = self.view.change_count()
-            if self._change_count == change_count:
-                return False
+        # write view buffer to file only, if changed
+        change_count = self.view.change_count()
+        if self._change_count == change_count:
+            return False
 
         # invalidate internal cache
         self.invalidate()

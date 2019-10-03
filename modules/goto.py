@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 
 def next_change(git_gutter, **kwargs):

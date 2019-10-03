@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import time
 
 import sublime
@@ -17,11 +16,6 @@ MODIFIED = 32
 SELECTION_MODIFIED = 64
 ACTIVATED = 128
 DEACTIVATED = 256
-
-try:
-    set_timeout = sublime.set_timeout_async
-except AttributeError:
-    set_timeout = sublime.set_timeout
 
 
 class EventListener(sublime_plugin.EventListener):
@@ -221,7 +215,7 @@ class ViewEventListener(object):
             self.events = 0
 
         self.busy = True
-        set_timeout(worker, delay)
+        sublime.set_timeout(worker, delay)
 
     def is_view_visible(self):
         """Determine if the view is visible.

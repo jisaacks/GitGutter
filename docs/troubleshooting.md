@@ -1,5 +1,9 @@
 # Troubleshooting
 
+GitGutter requires Sublime Text 3.1.1 (build 3176) or newer.
+
+GitGutter 1.10.x is available for backward compatibility with Sublime Text 2, but will not receive updates anymore.
+
 
 ## Is git working?
 
@@ -22,9 +26,9 @@ If git was found on [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) and is
 
 Some operating systems (especially Mac OS) may not run Sublime Text within the login shell. As a result Sublime Text and all its packages don't have access to some of the user's environment variables including the [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) to git.
 
-In some cases the package providing git, simply required some user confirmation due to license changes and thus simply refuses to run git.
+In some cases the package providing git (e.g. Xcode) simply requires some user confirmation due to license changes and thus simply refuses to run git.
 
-_With [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath) package Sublime Text loads the PATH environment from the login shell. If git is working there, it will be found by GitGutter, too, then._
+_Sublime Text 2 may need the [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath) package to the PATH environment from the login shell. If git is working there, it will be found by GitGutter, too, then._
 
 _GitGutter can work with a certain binary, too. Please read the section on the [git_binary](#git-path) setting._
 

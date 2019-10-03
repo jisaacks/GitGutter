@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Support Information module.
 
 The module provides functions to gain information to be included in issues.

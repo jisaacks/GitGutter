@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sublime
 
 from .utils import line_from_kwargs

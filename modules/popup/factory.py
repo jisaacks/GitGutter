@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Diff Popup Factory Module.
 
 Contains all functions required to built the diff popup and its content.

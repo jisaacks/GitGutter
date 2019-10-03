@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
 import sublime
-
-from .utils import ST3
-
-_ICON_EXT = '.png' if ST3 else ''
 
 
 class GitGutterShowDiff(object):
@@ -321,5 +316,4 @@ class GitGutterShowDiff(object):
         else:
             arrow = ''
         return ''.join((
-            self.git_handler.settings.theme_path, '/',
-            event, arrow, _ICON_EXT))
+            self.git_handler.settings.theme_path, '/', event, arrow, '.png'))

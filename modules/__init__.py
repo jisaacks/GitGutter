@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """GitGutter modules.
 
 Define all API classes here, which need to be exported to Sublime Text.
@@ -21,6 +20,4 @@ from .commands import GitGutterPrevChangeCommand
 from .commands import GitGutterReplaceTextCommand
 from .commands import GitGutterRevertChangeCommand
 from .commands import GitGutterShowCompareCommand
-from .settings import GitGutterEditSettingsCommand
-from .settings import GitGutterOpenFileCommand
 from .support import GitGutterSupportInfoCommand
