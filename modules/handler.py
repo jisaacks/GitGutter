@@ -163,16 +163,15 @@ class GitGutterHandler(object):
             # Check if file exists
             file_name = path.realpath(self.view.file_name())
             if not file_name or not os.path.isfile(file_name):
+                self.reset_git_file()
                 self._view_file_name = None
-                self._git_tree = None
-                self._git_path = None
                 return None
             # Check if file was renamed
             is_renamed = file_name != self._view_file_name
             if is_renamed or not path.is_work_tree(self._git_tree):
+                self.reset_git_file()
                 self._view_file_name = file_name
                 self._git_tree, self._git_path = path.split_work_tree(file_name)
-                self.invalidate_git_file()
         return self._git_tree
 
     def work_tree_supported(self):
@@ -276,6 +275,16 @@ class GitGutterHandler(object):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
         self._git_env = None
+
+    def reset_git_file(self):
+        """Reset cached information of the commited file."""
+        self.git_tracked = False
+        self._git_compared_commit = None
+        self._git_diff_cache = ''
+        self._git_temp_file = None
+        self._git_tree = None
+        self._git_path = None
+        self.invalidate_git_file()
 
     def update_git_file(self):
         """Update file from git index and write it to a temporary file.
