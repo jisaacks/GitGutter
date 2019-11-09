@@ -180,7 +180,7 @@
     //   {{line_committer_tz}   -- the timezone string of commit
     //   {{line_summary}}       -- the first line of the commit message
     //   {{line_previous}}      -- the hash of the previous commit
-    "line_annotation_text": "{{line_author}} ({{line_author_age}}) · {{line_summary}}",
+    "line_annotation_text": "{% if line_commit and line_commit[:7] != '0000000' %} {{line_commit[:7]}} | {% endif %}{{line_author}} ({{line_author_age}}) · {{line_summary}}",
 
     //
     // Status Bar
@@ -234,7 +234,7 @@
             "{% if deleted > 0 %}, {{deleted}}-{% endif %}",
             "{% if inserted > 0 %}, {{inserted}}+{% endif %}",
             "{% if modified > 0 %}, {{modified}}≠{% endif %}",
-            "{% if line_author and line_author_age %}, ⟢ {{line_author}} ({{line_author_age}}){% endif %}",
+            "{% if line_commit and line_commit[:7] != '0000000' %}, ⟢ {{line_commit[:7]}} | {{line_author}} ({{line_author_age}}){% endif %}",
         "{% endif %}"
     ]
 }
