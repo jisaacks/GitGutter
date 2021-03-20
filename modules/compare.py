@@ -174,9 +174,10 @@ def set_against_origin(git_gutter, **kwargs):
             by the GitGutterCommand object.
     """
     def on_branch_name(status):
-        if not status or not status.get('remote'):
-            sublime.message_dialog('Current branch has not tracking remote!')
-        git_gutter.git_handler.set_compare_against(status.get('remote'), True)
+        remote = status.get('remote') if status else None
+        if remote:
+            git_gutter.git_handler.set_compare_against(remote, True)
+        sublime.message_dialog('Current branch has no tracking remote!')
 
     git_gutter.git_handler.git_branch_status().then(on_branch_name)
 

@@ -220,10 +220,11 @@ class GitGutterHandler(object):
                 The reference to compare the view against.
         """
         # Interactively specified compare target overrides settings.
-        if self._git_tree in self._compare_against_mapping:
-            return self._compare_against_mapping[self._git_tree]
-        # Project settings and Preferences override plugin settings if set.
-        return self.settings.get('compare_against', 'HEAD')
+        result = self._compare_against_mapping.get(self._git_tree)
+        if not result:
+            # Project settings and Preferences override plugin settings if set.
+            result = self.settings.get('compare_against', 'HEAD')
+        return result
 
     def set_compare_against(self, compare_against, refresh=False):
         """Apply a new branch/commit/tag string the view is compared to.
@@ -239,6 +240,8 @@ class GitGutterHandler(object):
                 from 'git show-ref' to compare the view against
             refresh (bool): True to force git diff and update GUI
         """
+        if not compare_against:
+            return
         self._compare_against_mapping[self._git_tree] = compare_against
         # force refresh if live_mode and focus_change_mode are disabled
         refresh |= (not self.settings.get('live_mode') and
