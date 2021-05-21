@@ -129,4 +129,4 @@ def format_ago(timestamp):
 
 def format_time(timestamp):
     """Return the human readable time of `timestamp`."""
-    return time.strftime("%b %d %Y %H:%M", time.localtime(timestamp))
+    return time.strftime("%x %H:%M", time.localtime(timestamp))
