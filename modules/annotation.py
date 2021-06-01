@@ -7,6 +7,7 @@ __all__ = [
     "GitGutterLineAnnotation"
 ]
 
+
 class SimpleLineAnnotationTemplate(object):
     """A simple template class with the same interface as jinja2's one."""
 
@@ -82,9 +83,10 @@ class GitGutterLineAnnotationST3(object):
             word_wrap = self.view.settings().get('word_wrap')
             show_phantoms = word_wrap is False or \
                 word_wrap == 'auto' and self.view.match_selector(0, 'source')
-        if not show_phantoms:
-            self.template = None
-        return show_phantoms is True
+        if show_phantoms in (True, 'true'):
+            return True
+        self.template = None
+        return False
 
     def update(self, row, **kwargs):
         """Add a git blame phantom text to the end of the current line.
@@ -195,10 +197,10 @@ class GitGutterLineAnnotationST4(object):
             bool: True if blame phantom text is enabled, False otherwise.
         """
         show_phantoms = self.settings.get('show_line_annotation', True)
-        if not show_phantoms:
-            self.template = None
-            return False
-        return True
+        if show_phantoms in (True, 'true', 'auto'):
+            return True
+        self.template = None
+        return False
 
     def update(self, row, **kwargs):
         """Add a git blame phantom text to the end of the current line.
