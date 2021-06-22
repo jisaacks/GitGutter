@@ -111,8 +111,7 @@
     //
 
     // (ST3, Build 3119+ only)
-    // Enable an hover popup, which shows an diff of the
-    // changed lines.
+    // Enable hover popup, which shows a diff of the changed lines.
     "enable_hover_diff_popup": true,
 
     // (ST3 only) The default mode to open the diff popup. This will be
