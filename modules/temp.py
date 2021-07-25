@@ -32,9 +32,24 @@ else:
         try:
             path = os.path.join(TEMP_DIR, name)
             if now - os.path.getatime(path) > max_age:
-                    os.remove(path)
+                os.remove(path)
         except OSError:
             pass
+
+
+def cleanup():
+    try:
+        files = os.listdir(TEMP_DIR)
+    except FileNotFoundError:
+        # tempfolder does not exist
+        pass
+    else:
+        for name in files:
+            try:
+                os.remove(os.path.join(TEMP_DIR, name))
+            except OSError:
+                pass
+        os.rmdir(TEMP_DIR)
 
 
 class TempFile(object):

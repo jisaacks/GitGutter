@@ -5,6 +5,7 @@ import sublime_plugin
 
 from . import settings
 from .annotation import erase_line_annotation
+from .temp import cleanup
 
 # binary representation of all ST events
 NEW = 1
@@ -30,6 +31,9 @@ class EventListener(sublime_plugin.EventListener):
     def __init__(self):
         """Initialize GitGutterEvents object."""
         self.view_events = {}
+
+    def on_exit(self):
+        cleanup()
 
     def on_load(self, view):
         """Run git_gutter after loading, if view is valid.
