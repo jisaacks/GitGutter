@@ -1,6 +1,6 @@
 # GitGutter
 
-A [Sublime Text 3.1.1+ (3176)](http://www.sublimetext.com) plug-in to show information about files in a git repository:
+A [Sublime Text](http://www.sublimetext.com) plug-in to show information about files in a git repository:
 
 1. _Gutter Icons_ indicating inserted, modified or deleted lines
 2. _Diff Popup_ with details about modified lines
