@@ -159,7 +159,7 @@ class GitGutterLineAnnotationST4(object):
     <body id="gitgutter-line-annotation">
         <style>
             html, body {{
-                background-color: transparent;
+                background-color: var(--background);
                 color: {foreground};
                 font-style: {font_style};
                 margin: 0;
