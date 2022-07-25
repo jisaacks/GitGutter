@@ -97,12 +97,6 @@ class GitGutterSupportInfoCommand(sublime_plugin.ApplicationCommand):
         }
 
         try:
-            import markdown
-            info['markdown'] = module_version(markdown, 'version')
-        except ImportError:
-            info['markdown'] = 'not installed!'
-
-        try:
             import mdpopups
             info['mdpopups'] = module_version(mdpopups, 'version')
         except ImportError:
@@ -114,12 +108,6 @@ class GitGutterSupportInfoCommand(sublime_plugin.ApplicationCommand):
         except ImportError:
             info['jinja'] = 'not installed!'
 
-        try:
-            import pygments
-            info['pygments'] = module_version(pygments, '__version__')
-        except ImportError:
-            info['pygments'] = 'not installed!'
-
         msg = textwrap.dedent(
             """\
             - Sublime Text %(st_version)s
@@ -129,8 +117,6 @@ class GitGutterSupportInfoCommand(sublime_plugin.ApplicationCommand):
             - Install via PC: %(pc_install)s
             - %(git_version)s
             - mdpopups %(mdpopups)s
-            - markdown %(markdown)s
-            - pygments %(pygments)s
             - jinja2 %(jinja)s
             """ % info
         )
