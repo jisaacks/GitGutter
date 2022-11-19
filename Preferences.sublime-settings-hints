@@ -144,8 +144,8 @@
     // Display a phantom text at the end of the active line with information
     // about who changed it using the output of `git blame`.
     //   "auto"  -- show line annotation if word wrap is disabled (default)
-    //   "true"  -- always show line annotation
-    //   "false" -- never show line annotation
+    //   true  -- always show line annotation
+    //   false -- never show line annotation
     "git_gutter_show_line_annotation": "auto",
 
     // (ST3, Build 3124+ only)
@@ -165,8 +165,8 @@
     // Whether to ignore whitespace changes when showing line annotations.
     //
     // Valid values are:
-    //   "false"  -- don't ignore whitespace changes (default)
-    //   "true"   -- ignore whitespace changes
+    //   false  -- don't ignore whitespace changes (default)
+    //   true   -- ignore whitespace changes
     "git_gutter_line_annotation_ignore_whitespace": false,
 
     // LINE ANNOTATION TEXT TEMPLATE
