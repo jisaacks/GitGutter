@@ -390,7 +390,7 @@ class GitGutterHandler(object):
             '-c', 'core.autocrlf=input',
             '-c', 'core.eol=lf',
             '-c', 'core.safecrlf=false',
-            'diff', '-U0', '--no-color', '--no-index',
+            'diff', '-U0', '--no-color', '--no-index', '--no-ext-diff',
             self.settings.ignore_whitespace,
             self.settings.diff_algorithm,
             self.translate_path_to_wsl(self._git_temp_file.name),
