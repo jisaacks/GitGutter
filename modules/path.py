@@ -1,4 +1,5 @@
 import os.path
+import re
 
 try:
     from nt import _getfinalpathname
@@ -93,6 +94,13 @@ def split_work_tree(file_path):
     return (None, None)
 
 
+def is_translatable_to_wsl(path):
+    return path and (
+        path.startswith('\\\\wsl.localhost\\')
+        or not path.startswith('\\\\')
+    )
+
+
 def translate_to_wsl(path):
     """Translate a windows path to unix path for WSL.
 
@@ -113,7 +121,10 @@ def translate_to_wsl(path):
     Raises:
         FileNotFoundError: if path is an UNC path.
     """
-    if path.startswith('\\\\'):
+    # remove UNC prefix for paths pointing to WSL environment
+    if path.startswith('\\\\wsl.localhost\\'):
+        wsl_path = re.sub(r"\\\\wsl\.localhost\\[^\\]*", "", path)
+    elif path.startswith('\\\\'):
         raise FileNotFoundError('UNC paths are not supported by WSL!')
     wsl_path = path.replace('\\', '/')
     if wsl_path[1:3] == ':/':
