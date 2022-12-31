@@ -1,0 +1,27 @@
+name: Deploy Docs to Github Pages
+
+on:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Deploy Docs to Github Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install MkDocs
+        run: pip install -r docs/requirements.txt
+      - name: Run MkDocs
+        run: mkdocs gh-deploy

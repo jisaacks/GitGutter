@@ -22,8 +22,10 @@ theme:
   palette:
     primary: indigo
     accent: red
-  logo:
-    icon: description
+
+plugins:
+  - minify:
+      minify_html: true
 
 markdown_extensions:
   - markdown.extensions.admonition:
@@ -34,7 +36,7 @@ markdown_extensions:
   - markdown.extensions.def_list:
   - markdown.extensions.tables:
   - markdown.extensions.abbr:
-  - pymdownx.extrarawhtml:
+  # - pymdownx.extrarawhtml:
   - pymdownx.superfences:
   - pymdownx.highlight:
       css_class: codehilite

@@ -2,6 +2,7 @@
 .cache/
 .mypy_cache/
 .ropeproject/
+.venv/
 __pycache__/
 site/
 var/
