@@ -50,25 +50,20 @@ class TaskQueue(Thread):
             pass
 
     def busy(self):
-        result = False
-        with self._block:
-            result = self.active_task is not None
-        return result
+        return self.active_task is not None
 
     def run(self):
         self.running = True
         while self.running:
             task = self.queue.get()
-            with self._block:
-                self.active_task = task
+            self.active_task = task
             try:
                 task.run()
             except:
                 traceback.print_exc()
             finally:
                 self.queue.task_done()
-                with self._block:
-                    self.active_task = None
+                self.active_task = None
 
 
 _tasks = TaskQueue()
