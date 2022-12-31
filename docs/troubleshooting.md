@@ -30,7 +30,7 @@ In some cases the package providing git (e.g. Xcode) simply requires some user c
 
 _Sublime Text 2 may need the [SublimeFixMacPath](https://github.com/int3h/SublimeFixMacPath) package to the PATH environment from the login shell. If git is working there, it will be found by GitGutter, too, then._
 
-_GitGutter can work with a certain binary, too. Please read the section on the [git_binary](#git-path) setting._
+_GitGutter can work with a certain binary, too. Please read the section on the [git_binary](settings.md#git-binary) setting._
 
 
 ## GitGutter no longer works after upgrade
