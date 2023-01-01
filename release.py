@@ -9,37 +9,6 @@ PACKAGE_PATH = os.path.dirname(__file__)
 MESSAGE_DIR = 'messages'
 MESSAGE_PATH = os.path.join(PACKAGE_PATH, MESSAGE_DIR)
 
-GLOBAL_MESSAGE = """
-
-
-💛 Git Gutter? Want to support development?
-
-I've teamed up with Wes Bos to offer the following discounts:
-
-+------------------------------------------------+
-|                                                |
-|   Use the coupon code GITGUTTER for $10 off    |
-|                                                |
-+------------------------------------------------+
-
-🏅 ⭐ ES6 ⭐
-
-👉 ES6.io/friend/GITGUTTER
-
-🏅 ⭐ Sublime Text Book ⭐
-
-👉 SublimeTextBook.com/friend/GITGUTTER
-
-🏅 ⭐ React For Beginners ⭐
-
-👉 ReactForBeginners.com/friend/GITGUTTER
-
-
-Join 15,000 other developers already learning with Wes Bos.
-
-These are fantastic resources - 100% money back guarantee! 🌟
-"""
-
 
 def get_message(fname):
     with open(fname, 'r', encoding='utf-8') as file:
@@ -50,30 +19,6 @@ def get_message(fname):
 def put_message(fname, text):
     with open(fname, 'w', encoding='utf-8') as file:
         file.write(text)
-
-
-def add_global_message(fname):
-    """Append the GLOBAL_MESSAGE to a file if not yet contained."""
-    text = get_message(fname)
-    if GLOBAL_MESSAGE not in text:
-        put_message(fname, text.strip() + GLOBAL_MESSAGE)
-
-
-def remove_global_message(fname):
-    """Remove the GLOBAL_MESSAGE from a file."""
-    text = get_message(fname)
-    new_text = text.replace(GLOBAL_MESSAGE, '').strip() + '\n'
-    if new_text != text:
-        put_message(fname, new_text)
-
-
-def update_global_message(version_history):
-    # remove global message from previous release
-    remove_global_message(
-        os.path.join(MESSAGE_PATH, version_history[-2] + '.txt'))
-    # add global message to current release
-    add_global_message(
-        os.path.join(MESSAGE_PATH, version_history[-1] + '.txt'))
 
 
 def built_messages_json(version_history):
@@ -134,7 +79,6 @@ def build_release():
     history = version_history()
     version = history[-1]
     put_message(os.path.join(PACKAGE_PATH, 'VERSION'), version)
-    update_global_message(history)
     built_messages_json(history)
     commit_release(version)
     print("Release %s created!" % version)
@@ -158,8 +102,6 @@ def publish_release(token):
     }
     # get message from /messages/<version>.txt
     text = get_message(os.path.join(MESSAGE_PATH, version + '.txt'))
-    # strip global message
-    text = text.replace(GLOBAL_MESSAGE, '').strip()
     # strip message header (version)
     text = text[text.find('\n') + 1:]
     # built the JSON request body
