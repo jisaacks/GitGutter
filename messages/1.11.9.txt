@@ -1,0 +1,8 @@
+1.11.9:
+-------
+
+  Fix:
+   - GitGutter not working
+
+  Other:
+   - Drop advertisement
