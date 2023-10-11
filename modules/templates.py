@@ -5,9 +5,9 @@ available but keep running smoothly if not.
 """
 try:
     # avoid exceptions if dependency is not yet satisfied
-    from jinja2 import meta
-    from jinja2 import Environment
-    from jinja2 import TemplateSyntaxError
+    from mdpopups.jinja2 import meta
+    from mdpopups.jinja2 import Environment
+    from mdpopups.jinja2 import TemplateSyntaxError
     from weakref import WeakValueDictionary
 
     from .utils import log_message

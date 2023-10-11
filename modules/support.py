@@ -103,7 +103,7 @@ class GitGutterSupportInfoCommand(sublime_plugin.ApplicationCommand):
             info['mdpopups'] = 'not installed!'
 
         try:
-            import jinja2
+            from mdpopups import jinja2
             info['jinja'] = module_version(jinja2, '__version__')
         except ImportError:
             info['jinja'] = 'not installed!'

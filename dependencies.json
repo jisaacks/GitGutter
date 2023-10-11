@@ -1,9 +1,7 @@
 {
     "*": {
         "*": [
-            "markupsafe",
-            "mdpopups",
-            "python-jinja2"
+            "mdpopups"
         ]
     }
 }
