@@ -1,0 +1,9 @@
+1.11.10:
+-------
+
+  Fix:
+   - Re-create temporary directories on demand
+
+  Other:
+   - Drop advertisement from install message
+   - Drop obsolete dependencies
