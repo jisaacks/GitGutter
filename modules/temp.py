@@ -71,13 +71,6 @@ class TempFile(object):
         # See python stdlib's tempfile.py for details.
         self._unlink = os.unlink
 
-        try:
-            # ensure cache directory exists with write permissions
-            os.makedirs(TEMP_DIR, 0o700)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-
     def __del__(self):
         """Destroy the TempFile object and remove the file from disk."""
         try:
@@ -97,6 +90,12 @@ class TempFile(object):
     def open(self):
         """Open temporary file."""
         if self._file is None:
+            try:
+                # ensure cache directory exists with write permissions
+                os.makedirs(TEMP_DIR, 0o700)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
             self._file = open(self.name, mode=self._mode)
         return self._file
 
