@@ -292,6 +292,11 @@ class GitGutterShowDiff(object):
                 flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE
             else:
                 flags = sublime.HIDDEN
+
+            if hasattr(sublime, 'NO_UNDO'):
+                # supported as of ST4160
+                flags |= sublime.NO_UNDO
+
             self.git_handler.view.add_regions(
                 region_name, regions, scope, icon, flags)
         else:

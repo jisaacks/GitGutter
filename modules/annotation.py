@@ -243,6 +243,11 @@ class GitGutterLineAnnotationST4(object):
         self.view.erase_regions('git_gutter_line_annotation')
         text = self.template.render(kwargs)
         if text:
+            flags = sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE | sublime.HIDE_ON_MINIMAP
+            if hasattr(sublime, 'NO_UNDO'):
+                # supported as of ST4160
+                flags |= sublime.NO_UNDO
+
             self.view.add_regions(
                 key='git_gutter_line_annotation',
                 regions=[sublime.Region(point, point + 1)],
@@ -254,8 +259,7 @@ class GitGutterLineAnnotationST4(object):
                         text=text)
                 ],
                 annotation_color=foreground,
-                flags=(sublime.DRAW_NO_FILL | sublime.DRAW_NO_OUTLINE |
-                       sublime.HIDE_ON_MINIMAP),
+                flags=flags
             )
 
 if int(sublime.version()) >= 4000:
