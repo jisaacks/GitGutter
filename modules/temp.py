@@ -63,7 +63,7 @@ class TempFile(object):
 
     def __init__(self, mode='r'):
         """Initialize TempFile object."""
-        self.name = tempfile.mktemp(dir=TEMP_DIR)
+        self.fd, self.name = tempfile.mkstemp(dir=TEMP_DIR)
         self._file = None
         self._mode = mode
         # Cache unlink to keep it available even though the 'os' module is
@@ -74,6 +74,7 @@ class TempFile(object):
     def __del__(self):
         """Destroy the TempFile object and remove the file from disk."""
         try:
+            os.close(self.fd)
             self.close()
             self._unlink(self.name)
         except OSError:
