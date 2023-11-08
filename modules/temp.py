@@ -2,6 +2,7 @@ import errno
 import os
 import tempfile
 import time
+import uuid
 
 # The folder to place all temporary files into.
 TEMP_DIR = os.environ.get('XDG_RUNTIME_DIR')
@@ -63,7 +64,11 @@ class TempFile(object):
 
     def __init__(self, mode='r'):
         """Initialize TempFile object."""
-        self.name = tempfile.mktemp(dir=TEMP_DIR)
+        self.name = None
+        while self.name is None:
+            candidate = os.path.join(TEMP_DIR, str(uuid.uuid1()))
+            if not os.path.exists(candidate):
+                self.name = candidate
         self._file = None
         self._mode = mode
         # Cache unlink to keep it available even though the 'os' module is
@@ -90,13 +95,13 @@ class TempFile(object):
     def open(self):
         """Open temporary file."""
         if self._file is None:
-            try:
-                # ensure cache directory exists with write permissions
-                os.makedirs(TEMP_DIR, 0o700)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-            self._file = open(self.name, mode=self._mode)
+            # ensure cache directory exists with write permissions
+            os.makedirs(TEMP_DIR, 0o700, exist_ok=True)
+            self._file = open(
+                file=self.name,
+                mode=self._mode,
+                opener=lambda file, flags: os.open(file, flags, 0o600)
+            )
         return self._file
 
     def close(self):
