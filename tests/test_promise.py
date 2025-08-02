@@ -12,7 +12,11 @@ import unittest
 
 import sublime
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+try:
+    sys.path.append(os.path.dirname(os.path.dirname(__spec__.origin)))
+except (AttributeError, NameError):
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from modules.promise import Promise
 
 

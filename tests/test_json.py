@@ -246,7 +246,12 @@ class TestSublimeResources(unittest.TestCase):
             '*.sublime-theme'
         )
         result = False
-        folder = os.path.dirname(os.path.dirname(__file__))
+
+        try:
+            folder = os.path.dirname(os.path.dirname(__spec__.origin))
+        except (AttributeError, NameError):
+            folder = os.path.dirname(os.path.dirname(__file__))
+
         for pattern in patterns:
             for file in self._get_files(pattern, folder=folder):
                 print('checking %s ... ' % file)

@@ -5,7 +5,10 @@ import json
 import os
 import subprocess
 
-PACKAGE_PATH = os.path.dirname(__file__)
+try:
+    PACKAGE_PATH = os.path.dirname(__spec__.origin)
+except (AttributeError, NameError):
+    PACKAGE_PATH = os.path.dirname(__file__)
 MESSAGE_DIR = 'messages'
 MESSAGE_PATH = os.path.join(PACKAGE_PATH, MESSAGE_DIR)
 

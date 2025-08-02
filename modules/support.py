@@ -11,7 +11,10 @@ import sublime
 import sublime_plugin
 
 # get absolute path of the package
-PACKAGE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+try:
+    PACKAGE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__spec__.origin)))
+except (AttributeError, NameError):
+    PACKAGE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if os.path.isfile(PACKAGE_PATH):
     # Package is a PACKAGE.sublime-package so get its filename
     PACKAGE, _ = os.path.splitext(os.path.basename(PACKAGE_PATH))
