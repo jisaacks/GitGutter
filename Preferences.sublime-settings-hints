@@ -229,7 +229,7 @@
     //   {{line_committer_tz}   -- the timezone string of commit
     //   {{line_summary}}       -- the first line of the commit message
     //   {{line_previous}}      -- the hash of the previous commit
-    "git_gitter_status_bar_text": [
+    "git_gutter_status_bar_text": [
         "{% if repo and branch %}",
             "{% if not st_git_status %}",
                 "{{repo}}/{{branch}}",
