@@ -33,7 +33,9 @@
     // 2. If this dictionary is defined per view or project it is used
     //    exclusively! It won't be merged with the global settings.
     "env": {
-        "GIT_OPTIONAL_LOCKS": 0
+        "GIT_OPTIONAL_LOCKS": 0,
+        "LANG": "C",
+        "LC_ALL": "C",
     },
 
     // The commit, branch, tag, or remote to compare against.
