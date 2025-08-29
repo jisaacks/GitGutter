@@ -11,7 +11,11 @@ if int(sublime.version()) < 3176:
 else:
     import sys
 
-    prefix = __package__ + '.'  # don't clear the base package
+    try:
+        prefix = __spec__.parent + '.'
+    except Exception:
+        prefix = __package__ + '.'
+
     for module_name in [
             module_name for module_name in sys.modules
             if module_name.startswith(prefix) and module_name != __name__]:
