@@ -7,20 +7,14 @@ To run this unit test install UnitTesting package and choose
 
 import sys
 import os
-import time
-import unittest
+import unittesting
 
 import sublime
-
-try:
-    sys.path.append(os.path.dirname(os.path.dirname(__spec__.origin)))
-except (AttributeError, NameError):
-    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from modules.promise import Promise
 
 
-class test_promise(unittest.TestCase):
+class test_promise(unittesting.DeferrableTestCase):
     # Tests are using private methods of Promise on purpose.
 
     def test_chain_with_resolved(self):
@@ -47,7 +41,7 @@ class test_promise(unittest.TestCase):
         promise2 = promise.then(assertResult)
         self.assertFalse(promise2._is_resolved())
         # Let promises resolve.
-        time.sleep(0.2)
+        yield 200
         self.assertTrue(promise._is_resolved())
 
     def test_promise_resolve(self):
@@ -75,7 +69,7 @@ class test_promise(unittest.TestCase):
         self.assertFalse(promise2._is_resolved())
         promise2.then(verify_async2_value)
         # Let both promises resolve.
-        time.sleep(0.500)
+        yield 500
         self.assertTrue(promise._is_resolved())
         self.assertEqual(promise._get_value(), 999)
         self.assertTrue(promise2._is_resolved())

@@ -35,7 +35,7 @@
     "env": {
         "GIT_OPTIONAL_LOCKS": 0,
         "LANG": "C",
-        "LC_ALL": "C",
+        "LC_ALL": "C"
     },
 
     // The commit, branch, tag, or remote to compare against.
