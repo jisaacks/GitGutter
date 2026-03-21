@@ -6,6 +6,11 @@ import subprocess
 
 import sublime
 
+try:
+    from charset_normalizer import from_bytes as charset_from_bytes
+except ImportError:
+    charset_from_bytes = None
+
 from . import path
 from . import utils
 from .promise import Promise
@@ -398,25 +403,30 @@ class GitGutterHandler(object):
         ))), decode=False).then(self._decode_diff)
 
     def _decode_diff(self, results):
-        encoding = self.view_cache.python_friendly_encoding()
-        try:
-            decoded_results = results.decode(encoding)
-        except AttributeError:
-            # git returned None on stdout
-            decoded_results = ''
-        except UnicodeError:
-            try:
-                decoded_results = results.decode('utf-8')
-            except UnicodeDecodeError:
-                decoded_results = ''
-        except LookupError:
-            try:
-                decoded_results = codecs.decode(results)
-            except UnicodeDecodeError:
-                decoded_results = ''
         # cache the diff result for reuse with diff_popup.
-        self._git_diff_cache = decoded_results
-        return self.process_diff(decoded_results)
+        self._git_diff_cache = self._decode_content(results) or ''
+        return self.process_diff(self._git_diff_cache)
+
+    def _decode_content(self, content):
+        if content is not None:
+            encoding = self.view_cache.python_friendly_encoding()
+            try:
+                return content.decode(encoding)
+            except Exception:
+                detected_encoding = 'utf-8'
+                if charset_from_bytes is not None:
+                    charset_match = charset_from_bytes(content).best()
+                    if charset_match:
+                        detected_encoding = charset_match.encoding
+                        if charset_match.bom and detected_encoding == "utf_8":
+                            detected_encoding += "_sig"
+
+                if encoding != detected_encoding:
+                    return content.decode(detected_encoding, 'ignore')
+
+                raise
+
+        return None
 
     @staticmethod
     def process_diff(diff_str):
@@ -804,9 +814,9 @@ class GitGutterHandler(object):
                     utils.log_message('%s failed with "%s"' % (
                         ' '.join(args), proc.stderr.read().decode('utf-8').strip()))
 
-            # return decoded ouptut using utf-8 or binary output
             if decode and chunk is not None:
-                return resolve(chunk.decode('utf-8').strip())
+                chunk = self._decode_content(chunk).strip()
+
             return resolve(chunk)
 
         return execute_async(task_fn, decode, args)

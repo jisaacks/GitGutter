@@ -5,6 +5,7 @@
             "typing"
         ],
         ">=4000": [
+            "charset_normalizer",
             "mdpopups"
         ]
     }
