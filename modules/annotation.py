@@ -49,7 +49,7 @@ class GitGutterLineAnnotationST3(object):
                 margin-left: {padding};
             }}
             a {{
-                color: color({foreground} blend(var(--foreground) 90%));
+                color: {foreground};
                 text-decoration: none;
             }}
         </style>
@@ -148,8 +148,15 @@ class GitGutterLineAnnotationST3(object):
                     font_style=font_style,
                     padding=padding,
                     text=text),
-                layout=sublime.LAYOUT_INLINE
+                layout=sublime.LAYOUT_INLINE,
+                on_navigate=self.on_navigate
             )
+
+    def on_navigate(self, href):
+        if href.startswith("copy:"):
+            commit_id = href[len("copy:"):]
+            sublime.set_clipboard(commit_id)
+            sublime.status_message(commit_id[:7] + " copied.")
 
 
 class GitGutterLineAnnotationST4(object):
@@ -169,7 +176,7 @@ class GitGutterLineAnnotationST4(object):
                 font-size: 0.85rem;
             }}
             a {{
-                color: color({foreground} blend(var(--foreground) 90%));
+                color: {foreground};
                 text-decoration: none;
             }}
         </style>
@@ -259,8 +266,16 @@ class GitGutterLineAnnotationST4(object):
                         text=text)
                 ],
                 annotation_color=foreground,
-                flags=flags
+                flags=flags,
+                on_navigate=self.on_navigate
             )
+
+    def on_navigate(self, href):
+        if href.startswith("copy:"):
+            commit_id = href[len("copy:"):]
+            sublime.set_clipboard(commit_id)
+            sublime.status_message(commit_id[:7] + " copied.")
+
 
 if int(sublime.version()) >= 4000:
     def erase_line_annotation(view):
