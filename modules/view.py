@@ -145,7 +145,7 @@ class GitGutterViewCache(TempFile):
         encoding = self.view.settings().get('origin_encoding')
         if not encoding:
             encoding = self.view.encoding()
-            if encoding == 'Undefined':
-                encoding = self.view.settings().get('default_encoding', '')
-            return ENCODING_MAP.get(encoding, 'utf-8')
+            if not encoding or encoding == 'Undefined':
+                encoding = self.view.settings().get('fallback_encoding') or 'Western (Windows 1252)'
+            return ENCODING_MAP.get(encoding, self.view.settings().get('default_encoding') or 'utf-8')
         return encoding.replace(' ', '')
