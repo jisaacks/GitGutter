@@ -171,8 +171,13 @@ class GitGutterHandler(object):
                 self.reset_git_file()
                 self._view_file_name = None
                 return None
-            # Check if file was renamed
-            is_renamed = file_name != self._view_file_name
+
+            # Check if file was renamed safely across operating systems.
+            if self._view_file_name:
+                is_renamed = os.path.normcase(file_name) != os.path.normcase(self._view_file_name)
+            else:
+                is_renamed = file_name != self._view_file_name
+
             if is_renamed or not path.is_work_tree(self._git_tree):
                 self.reset_git_file()
                 self._view_file_name = file_name
@@ -248,6 +253,10 @@ class GitGutterHandler(object):
         if not compare_against:
             return
         self._compare_against_mapping[self._git_tree] = compare_against
+
+        # Invalidate the cached git file to force a re-read of the new target commit.
+        self.invalidate_git_file()
+
         # force refresh if live_mode and focus_change_mode are disabled
         refresh |= (not self.settings.get('live_mode') and
                     not self.settings.get('focus_change_mode'))
@@ -282,6 +291,7 @@ class GitGutterHandler(object):
     def invalidate_git_file(self):
         """Invalidate all cached results of recent git commands."""
         self._git_temp_file_valid = False
+        self._git_compared_commit = None
         self._git_env = None
 
     def reset_git_file(self):
@@ -704,6 +714,9 @@ class GitGutterHandler(object):
         else:
             ignore_ws = []
 
+        # Retrieve the current compare target so blame is evaluated correctly.
+        commit_target = self.get_compare_against()
+
         return self.execute_async([
             self._git_binary,
             '-c', 'core.autocrlf=input',
@@ -711,6 +724,7 @@ class GitGutterHandler(object):
             '-c', 'core.safecrlf=false',
             'blame', '-p', '-L%d,%d' % (row + 1, row + 1)
         ] + ignore_ws + [
+            commit_target,
             '--contents', self.translate_path_to_wsl(self.view_cache.name),
             '--', self._git_path
         ])

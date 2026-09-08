@@ -138,7 +138,7 @@ class GitGutterCommand(sublime_plugin.TextCommand):
         queued_events = kwargs.get('events', events.ACTIVATED)
         if queued_events & (events.ACTIVATED | events.LOAD):
             self.update_git_status()
-        if queued_events & events.ACTIVATED:
+        if queued_events & (events.ACTIVATED | events.POST_SAVE):
             self.git_handler.invalidate_git_file()
 
         self.show_diff_handler.run()
